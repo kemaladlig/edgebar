@@ -1,0 +1,709 @@
+/* ==========================================================================
+   EdgeBar - Minimalist Web Panels (Arc / Vivaldi Inspired)
+   Isolated inside Shadow DOM - Enhanced Aesthetics & Seamless Docking
+   ========================================================================== */
+
+:host {
+  all: initial;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #e4e4e7;
+  color-scheme: dark;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ==========================================================================
+   TIER 1: TRIGGER PILL (Minimalist, Elite Floating Pill at Bottom-Left)
+   ========================================================================== */
+
+.eb-trigger-pill {
+  position: fixed;
+  bottom: 24px;
+  left: 0;
+  width: 32px;
+  height: 38px;
+  background: rgba(18, 19, 24, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-left: none;
+  border-radius: 0 12px 12px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2147483646;
+  box-shadow: 2px 4px 18px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  transition: all 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+  color: #9ca3af;
+}
+
+.eb-trigger-pill:hover {
+  width: 38px;
+  background: rgba(28, 30, 38, 0.98);
+  color: #f9fafb;
+  border-color: rgba(129, 140, 248, 0.5);
+  box-shadow: 4px 6px 24px rgba(0, 0, 0, 0.7), 0 0 14px rgba(129, 140, 248, 0.35);
+}
+
+.eb-trigger-pill svg {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.2s ease;
+}
+
+.eb-trigger-pill:hover svg {
+  transform: translateX(2px);
+}
+
+.eb-trigger-pill.eb-hidden {
+  opacity: 0;
+  transform: translateX(-100%);
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   TIER 2: VERTICAL STRIP DOCK (Bottom-Anchored or Floating Dock)
+   ========================================================================== */
+
+.eb-strip {
+  position: fixed;
+  bottom: 18px;
+  left: 0;
+  width: 44px;
+  max-height: calc(100vh - 36px);
+  background: rgba(15, 16, 20, 0.94);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-left: none;
+  border-radius: 0 14px 14px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 0 6px 0;
+  z-index: 2147483646;
+  box-shadow: 4px 10px 36px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transform: translateX(-110%);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+}
+
+.eb-strip.eb-visible {
+  transform: translateX(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Scrollable items list in strip */
+.eb-items-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  max-height: calc(100vh - 120px);
+  padding: 0 4px;
+}
+
+.eb-items-list::-webkit-scrollbar {
+  display: none;
+}
+
+.eb-divider {
+  width: 24px;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 6px 0;
+  flex-shrink: 0;
+}
+
+/* Individual Icon Button */
+.eb-item-btn {
+  position: relative;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  flex-shrink: 0;
+}
+
+.eb-item-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.06);
+  transform: scale(1.04);
+}
+
+.eb-item-btn.eb-active {
+  background: rgba(99, 102, 241, 0.18);
+  border-color: rgba(129, 140, 248, 0.4);
+  box-shadow: 0 0 12px rgba(99, 102, 241, 0.3);
+}
+
+.eb-item-btn.eb-active::after {
+  content: "";
+  position: absolute;
+  right: -3px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 16px;
+  background: #818cf8;
+  border-radius: 2px;
+  box-shadow: 0 0 6px #818cf8;
+}
+
+.eb-item-icon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  pointer-events: none;
+}
+
+.eb-item-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.eb-item-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.eb-letter-avatar {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-transform: uppercase;
+}
+
+/* Subtle remove badge for any shortcut on hover */
+.eb-item-del-btn {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #ef4444;
+  color: white;
+  border: 1px solid rgba(0, 0, 0, 0.6);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  line-height: 1;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+  z-index: 10;
+  transition: transform 0.15s ease;
+}
+
+.eb-item-del-btn:hover {
+  transform: scale(1.15);
+  background: #dc2626;
+}
+
+.eb-item-btn:hover .eb-item-del-btn {
+  display: flex;
+}
+
+/* Add custom button */
+.eb-add-btn {
+  width: 32px;
+  height: 32px;
+  margin: 4px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px dashed rgba(255, 255, 255, 0.18);
+  border-radius: 9px;
+  color: #9ca3af;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  flex-shrink: 0;
+}
+
+.eb-add-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(129, 140, 248, 0.4);
+  color: #ffffff;
+  transform: scale(1.06);
+}
+
+.eb-add-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Strip collapse button at bottom */
+.eb-collapse-btn {
+  width: 32px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: #6b7280;
+  cursor: pointer;
+  margin-top: 2px;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.eb-collapse-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #f3f4f6;
+}
+
+.eb-collapse-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Tooltips */
+.eb-tooltip {
+  position: fixed;
+  left: 54px;
+  background: #181920;
+  color: #f3f4f6;
+  font-size: 11.5px;
+  font-weight: 500;
+  padding: 4px 9px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity 0.14s ease, transform 0.14s ease;
+  z-index: 2147483647;
+}
+
+.eb-tooltip.eb-tooltip-show {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* ==========================================================================
+   TIER 3: SLIDE-OUT WEB PANEL DRAWER (Seamless Docking with ZERO GAP)
+   ========================================================================== */
+
+.eb-drawer {
+  position: fixed;
+  top: 0;
+  left: 44px; /* Exact match with strip width: 44px -> ZERO GAP */
+  height: 100vh;
+  width: 440px;
+  min-width: 320px;
+  max-width: 85vw;
+  background: #0f1013;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 8px 0 36px rgba(0, 0, 0, 0.7);
+  z-index: 2147483645;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(-110%);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.26s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.18s ease;
+}
+
+.eb-drawer.eb-open {
+  transform: translateX(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Panel Header - Ultra-Refined & Compact */
+.eb-drawer-header {
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  background: rgba(18, 19, 24, 0.94);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+}
+
+.eb-drawer-title-area {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+  max-width: 250px;
+}
+
+.eb-drawer-favicon {
+  width: 15px;
+  height: 15px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.eb-drawer-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #e5e7eb;
+  letter-spacing: -0.01em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Header Action Controls - Sleek 14px Micro-Buttons */
+.eb-drawer-actions {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.eb-action-btn {
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: #9ca3af;
+  cursor: pointer;
+  transition: all 0.14s ease;
+}
+
+.eb-action-btn svg {
+  width: 14px;
+  height: 14px;
+  stroke-width: 1.6px;
+}
+
+.eb-action-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #f9fafb;
+}
+
+.eb-action-btn.eb-close:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+}
+
+/* Body / Iframe Multi-Pool Area */
+.eb-drawer-body {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  height: calc(100vh - 38px);
+  background: #121318;
+  overflow: hidden;
+}
+
+.eb-iframe-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.eb-iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: #ffffff;
+  display: none;
+}
+
+.eb-iframe.eb-active-frame {
+  display: block;
+}
+
+/* Loading spinner */
+.eb-loader-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: #111216;
+  color: #6b7280;
+  font-size: 12px;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 0.2s ease;
+  z-index: 50;
+}
+
+.eb-loader-overlay.eb-hidden {
+  opacity: 0;
+  display: none;
+}
+
+.eb-spinner {
+  width: 22px;
+  height: 22px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-top-color: #818cf8;
+  border-radius: 50%;
+  animation: eb-spin 0.75s linear infinite;
+}
+
+@keyframes eb-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Resizer Handle */
+.eb-resizer {
+  position: absolute;
+  top: 0;
+  right: -2px;
+  width: 5px;
+  height: 100%;
+  cursor: col-resize;
+  background: transparent;
+  z-index: 100;
+  transition: background 0.15s ease;
+}
+
+.eb-resizer:hover, .eb-resizer.eb-resizing {
+  background: rgba(129, 140, 248, 0.6);
+}
+
+.eb-drag-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 2147483647;
+  cursor: col-resize;
+  display: none;
+}
+
+.eb-drag-overlay.eb-active {
+  display: block;
+}
+
+/* ==========================================================================
+   CONTEXT MENU (Right-Click to Remove / Edit)
+   ========================================================================== */
+
+.eb-context-menu {
+  position: fixed;
+  left: 54px;
+  background: #1a1b22;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  padding: 4px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+  z-index: 2147483647;
+  display: none;
+  min-width: 140px;
+}
+
+.eb-context-menu.eb-show {
+  display: block;
+}
+
+.eb-context-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: #e5e7eb;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+
+.eb-context-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.eb-context-item.eb-danger {
+  color: #f87171;
+}
+
+.eb-context-item.eb-danger:hover {
+  background: rgba(239, 68, 68, 0.18);
+}
+
+/* ==========================================================================
+   MODAL: ADD CUSTOM SHORTCUT
+   ========================================================================== */
+
+.eb-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2147483647;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.eb-modal-backdrop.eb-modal-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.eb-modal-card {
+  width: 320px;
+  background: #16171e;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+  transform: scale(0.94);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.eb-modal-backdrop.eb-modal-open .eb-modal-card {
+  transform: scale(1);
+}
+
+.eb-modal-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #f9fafb;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.eb-form-group {
+  margin-bottom: 12px;
+}
+
+.eb-form-label {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: #9ca3af;
+  margin-bottom: 5px;
+}
+
+.eb-form-input {
+  width: 100%;
+  background: #20222a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 8px 10px;
+  color: #f9fafb;
+  font-size: 12.5px;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.eb-form-input:focus {
+  border-color: #818cf8;
+  box-shadow: 0 0 0 2px rgba(129, 140, 248, 0.25);
+}
+
+.eb-modal-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 18px;
+}
+
+.eb-btn-link {
+  background: transparent;
+  border: none;
+  color: #818cf8;
+  font-size: 11px;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+}
+
+.eb-btn-link:hover {
+  color: #a5b4fc;
+}
+
+.eb-modal-btns-right {
+  display: flex;
+  gap: 8px;
+}
+
+.eb-btn {
+  padding: 6px 13px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: all 0.14s ease;
+}
+
+.eb-btn-secondary {
+  background: rgba(255, 255, 255, 0.08);
+  color: #d1d5db;
+}
+
+.eb-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+}
+
+.eb-btn-primary {
+  background: #6366f1;
+  color: #ffffff;
+}
+
+.eb-btn-primary:hover {
+  background: #4f46e5;
+}
