@@ -98,6 +98,43 @@
   pointer-events: auto;
 }
 
+/* Strip-Only Mode (When drawer is closed, but shortcuts remain visible on left edge) */
+.eb-drawer.eb-strip-only {
+  width: 46px !important;
+  transform: translateX(0) !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  box-shadow: 2px 0 16px rgba(0, 0, 0, 0.4);
+  border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.eb-drawer.eb-strip-only .eb-dock-rail {
+  border-right: none !important;
+}
+
+.eb-drawer.eb-strip-only .eb-panel-main {
+  display: none !important;
+}
+
+.eb-drawer.eb-strip-only .eb-resizer,
+.eb-drawer.eb-strip-only .eb-resizer-top {
+  display: none !important;
+}
+
+.eb-drawer.eb-strip-only .eb-collapse-btn svg {
+  transform: rotate(180deg);
+}
+
+.eb-drawer.eb-strip-only .eb-item-btn.eb-active {
+  background: transparent;
+  color: #a1a1aa;
+}
+
+.eb-drawer.eb-strip-only .eb-item-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
 /* --- Height Mode 1: Full (100% Height) --- */
 .eb-drawer.eb-height-full {
   top: 0;
@@ -656,8 +693,8 @@
 }
 
 /* ==========================================================================
-   MODAL: SETTINGS & SHORTCUTS MANAGEMENT
-   ========================================================================= */
+   MODAL: SETTINGS & SHORTCUTS MANAGEMENT (Minimalist Apple / Linear Aesthetic)
+   ========================================================================== */
 
 .eb-modal-backdrop {
   position: fixed;
@@ -666,8 +703,8 @@
   width: 100vw;
   height: 100vh;
   background: rgba(0, 0, 0, 0.65);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -683,13 +720,13 @@
 }
 
 .eb-modal-card {
-  width: 350px;
+  width: 330px;
   max-width: 90vw;
-  background: #16171e;
+  background: #13141a;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+  padding: 16px 18px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85);
   transform: scale(0.96);
   transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -698,49 +735,63 @@
   transform: scale(1);
 }
 
-.eb-modal-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: #f4f4f5;
-  margin-bottom: 14px;
+.eb-modal-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-}
-
-.eb-form-group {
   margin-bottom: 12px;
 }
 
-.eb-form-label {
-  display: block;
-  font-size: 11.5px;
-  font-weight: 500;
-  color: #a1a1aa;
-  margin-bottom: 5px;
+.eb-modal-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #f4f4f5;
+  letter-spacing: -0.01em;
 }
 
-.eb-form-input {
-  width: 100%;
-  background: #20222a;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 7px;
-  padding: 8px 10px;
+.eb-modal-close {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: #71717a;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.eb-modal-close svg {
+  width: 14px;
+  height: 14px;
+}
+
+.eb-modal-close:hover {
+  background: rgba(255, 255, 255, 0.08);
   color: #ffffff;
-  font-size: 12.5px;
-  outline: none;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.eb-form-input:focus {
-  border-color: rgba(255, 255, 255, 0.4);
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
+.eb-setting-row {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+
+.eb-setting-label {
+  font-size: 10.5px;
+  font-weight: 500;
+  color: #71717a;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 /* Segmented Controls in Modal */
 .eb-segmented-control {
   display: flex;
-  background: #20222a;
+  background: #1b1c24;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 7px;
   padding: 2px;
@@ -749,7 +800,7 @@
 
 .eb-segmented-btn {
   flex: 1;
-  padding: 6px 8px;
+  padding: 5px 6px;
   border: none;
   border-radius: 5px;
   background: transparent;
@@ -774,22 +825,59 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
-/* Manage existing shortcuts list inside modal */
-.eb-modal-manage-section {
-  margin-top: 14px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  padding-top: 12px;
+/* Quick Add Single Line */
+.eb-quick-add-row {
+  display: flex;
+  gap: 6px;
 }
 
-.eb-manage-title {
-  font-size: 11px;
-  font-weight: 600;
-  color: #a1a1aa;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  margin-bottom: 8px;
+.eb-quick-add-input {
+  flex: 1;
+  background: #1b1c24;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 7px;
+  padding: 6px 10px;
+  color: #f4f4f5;
+  font-size: 12px;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
+.eb-quick-add-input:focus {
+  border-color: rgba(255, 255, 255, 0.35);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.08);
+}
+
+.eb-quick-add-btn {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  color: #09090b;
+  border: none;
+  border-radius: 7px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.14s ease;
+}
+
+.eb-quick-add-btn svg {
+  width: 15px;
+  height: 15px;
+  stroke-width: 2px;
+}
+
+.eb-quick-add-btn:hover {
+  background: #e4e4e7;
+}
+
+.eb-quick-add-btn:active {
+  transform: scale(0.96);
+}
+
+/* Manage registered shortcuts list */
 .eb-manage-list {
   display: flex;
   flex-direction: column;
@@ -805,78 +893,90 @@
   justify-content: space-between;
   padding: 5px 8px;
   background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 6px;
   font-size: 12px;
   color: #d4d4d8;
 }
 
+.eb-manage-item-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.eb-manage-item-icon {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  color: #d4d4d8;
+}
+
+.eb-manage-item-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.eb-manage-item-icon img {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+.eb-manage-item-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .eb-manage-item-del {
-  color: #f87171;
+  color: #71717a;
   background: transparent;
   border: none;
   cursor: pointer;
-  font-size: 11px;
-  padding: 2px 6px;
+  padding: 3px;
   border-radius: 4px;
-  transition: background 0.12s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.12s ease;
+}
+
+.eb-manage-item-del svg {
+  width: 13px;
+  height: 13px;
 }
 
 .eb-manage-item-del:hover {
-  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  background: rgba(239, 68, 68, 0.18);
 }
 
-.eb-modal-actions {
+.eb-modal-footer {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 16px;
+  justify-content: flex-end;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .eb-btn-link {
   background: transparent;
   border: none;
-  color: #a1a1aa;
+  color: #71717a;
   font-size: 11px;
   cursor: pointer;
   text-decoration: underline;
   padding: 0;
+  transition: color 0.14s ease;
 }
 
 .eb-btn-link:hover {
-  color: #ffffff;
-}
-
-.eb-modal-btns-right {
-  display: flex;
-  gap: 8px;
-}
-
-.eb-btn {
-  padding: 6px 13px;
-  border-radius: 7px;
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  border: none;
-  transition: all 0.14s ease;
-}
-
-.eb-btn-secondary {
-  background: rgba(255, 255, 255, 0.08);
   color: #d4d4d8;
-}
-
-.eb-btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.14);
-  color: #ffffff;
-}
-
-.eb-btn-primary {
-  background: #ffffff;
-  color: #09090b;
-  font-weight: 600;
-}
-
-.eb-btn-primary:hover {
-  background: #e4e4e7;
 }

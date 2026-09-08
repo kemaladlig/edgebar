@@ -30,18 +30,6 @@
       name: 'Gemini',
       url: 'https://gemini.google.com',
       svgKey: 'gemini'
-    },
-    {
-      id: 'chatgpt',
-      name: 'ChatGPT',
-      url: 'https://chatgpt.com',
-      svgKey: 'chatgpt'
-    },
-    {
-      id: 'x',
-      name: 'X (Twitter)',
-      url: 'https://x.com',
-      svgKey: 'x'
     }
   ];
 
@@ -53,6 +41,7 @@
   let currentActiveUrl = '';
   let viewMode = 'mobile';
   let heightMode = 'full';
+  let collapsedStyle = 'strip'; // 'strip' (shortcuts visible on left rail) or 'pill' (only icon)
   let zoomLevel = 1.0;
 
   // Persistent Iframe Cache (Multi-Session Pool)
@@ -235,67 +224,80 @@
     }
   });
 
-  // 5. Modal: Settings & Shortcuts Management
+  // 5. Modal: Settings & Shortcuts Management (Minimalist Apple/Linear Aesthetic)
   const modalBackdrop = document.createElement('div');
   modalBackdrop.className = 'eb-modal-backdrop';
   modalBackdrop.innerHTML = `
     <div class="eb-modal-card">
-      <div class="eb-modal-title">
-        <span>Ayarlar ve Kısayollar</span>
+      <div class="eb-modal-header">
+        <span class="eb-modal-title">Ayarlar</span>
+        <button type="button" class="eb-modal-close" title="Kapat">
+          ${ICONS.close}
+        </button>
       </div>
 
-      <!-- View Mode Selector -->
-      <div class="eb-form-group">
-        <label class="eb-form-label">Görünüm Modu</label>
+      <!-- Segment 1: Görünüm Modu -->
+      <div class="eb-setting-row">
+        <div class="eb-setting-label">Görünüm</div>
         <div class="eb-segmented-control eb-mode-segmented">
-          <button type="button" class="eb-segmented-btn eb-segment-mobile" data-mode="mobile">📱 Mobil (Kompakt)</button>
-          <button type="button" class="eb-segmented-btn eb-segment-desktop" data-mode="desktop">💻 Masaüstü / Web</button>
+          <button type="button" class="eb-segmented-btn eb-segment-mobile" data-mode="mobile">📱 Mobil</button>
+          <button type="button" class="eb-segmented-btn eb-segment-desktop" data-mode="desktop">💻 Masaüstü</button>
         </div>
       </div>
 
-      <!-- Height Mode Selector -->
-      <div class="eb-form-group">
-        <label class="eb-form-label">Panel Yüksekliği</label>
+      <!-- Segment 2: Yükseklik -->
+      <div class="eb-setting-row">
+        <div class="eb-setting-label">Yükseklik</div>
         <div class="eb-segmented-control eb-height-segmented">
-          <button type="button" class="eb-segmented-btn eb-h-full" data-height="full">Tam Boy (%100)</button>
-          <button type="button" class="eb-segmented-btn eb-h-floating" data-height="floating">Yüzen Ada</button>
-          <button type="button" class="eb-segmented-btn eb-h-custom" data-height="custom">Ayarlanabilir</button>
+          <button type="button" class="eb-segmented-btn eb-h-full" data-height="full">↕ Tam</button>
+          <button type="button" class="eb-segmented-btn eb-h-floating" data-height="floating">🏝 Ada</button>
+          <button type="button" class="eb-segmented-btn eb-h-custom" data-height="custom">🎛 Serbest</button>
         </div>
       </div>
 
-      <!-- Add New Shortcut Form -->
-      <div class="eb-form-group" style="margin-top: 14px;">
-        <label class="eb-form-label">Yeni Site Ekle</label>
-        <input class="eb-form-input eb-input-name" type="text" placeholder="Site Adı (Örn: Notion, DevDocs...)" style="margin-bottom: 6px;" />
-        <input class="eb-form-input eb-input-url" type="text" placeholder="URL (Örn: devdocs.io veya https://...)" />
-      </div>
-
-      <div class="eb-modal-actions">
-        <button class="eb-btn-link eb-reset-defaults" title="Varsayılan kısayolları (Gemini, ChatGPT, X) geri getir">Varsayılanları Sıfırla</button>
-        <div class="eb-modal-btns-right">
-          <button class="eb-btn eb-btn-secondary eb-modal-cancel">Kapat</button>
-          <button class="eb-btn eb-btn-primary eb-modal-save">Ekle</button>
+      <!-- Segment 3: Kapalı Hal -->
+      <div class="eb-setting-row">
+        <div class="eb-setting-label">Kapalıyken</div>
+        <div class="eb-segmented-control eb-collapsed-segmented">
+          <button type="button" class="eb-segmented-btn eb-c-strip" data-collapsed="strip">📑 Kısayollar</button>
+          <button type="button" class="eb-segmented-btn eb-c-pill" data-collapsed="pill">✦ İkon</button>
         </div>
       </div>
 
-      <!-- Existing Shortcuts Manager List -->
-      <div class="eb-modal-manage-section">
-        <div class="eb-manage-title">Kayıtlı Siteler (Sıralamak için dock'ta sürükleyin)</div>
+      <!-- Quick Add Row -->
+      <div class="eb-setting-row" style="margin-top: 10px;">
+        <div class="eb-setting-label">Site Ekle</div>
+        <div class="eb-quick-add-row">
+          <input class="eb-quick-add-input" type="text" placeholder="URL veya site (örn: notion.so)" />
+          <button type="button" class="eb-quick-add-btn" title="Kısayolu Ekle">
+            ${ICONS.plus}
+          </button>
+        </div>
+      </div>
+
+      <!-- Existing Shortcuts List -->
+      <div class="eb-setting-row">
+        <div class="eb-setting-label">Kayıtlı Siteler</div>
         <div class="eb-manage-list"></div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="eb-modal-footer">
+        <button type="button" class="eb-btn-link eb-reset-defaults">Varsayılana Sıfırla (Gemini)</button>
       </div>
     </div>
   `;
   container.appendChild(modalBackdrop);
 
-  const inputName = modalBackdrop.querySelector('.eb-input-name');
-  const inputUrl = modalBackdrop.querySelector('.eb-input-url');
-  const modalCancelBtn = modalBackdrop.querySelector('.eb-modal-cancel');
-  const modalSaveBtn = modalBackdrop.querySelector('.eb-modal-save');
+  const modalCloseBtn = modalBackdrop.querySelector('.eb-modal-close');
+  const quickAddInput = modalBackdrop.querySelector('.eb-quick-add-input');
+  const quickAddBtn = modalBackdrop.querySelector('.eb-quick-add-btn');
   const resetDefaultsBtn = modalBackdrop.querySelector('.eb-reset-defaults');
   const manageList = modalBackdrop.querySelector('.eb-manage-list');
   const segMobile = modalBackdrop.querySelector('.eb-segment-mobile');
   const segDesktop = modalBackdrop.querySelector('.eb-segment-desktop');
   const heightBtns = modalBackdrop.querySelectorAll('.eb-height-segmented .eb-segmented-btn');
+  const collapsedBtns = modalBackdrop.querySelectorAll('.eb-collapsed-segmented .eb-segmented-btn');
 
   // ==========================================================================
   // ZOOM LOGIC
@@ -348,6 +350,24 @@
       const newHeightMode = btn.dataset.height;
       applyHeightMode(newHeightMode);
       chrome.storage.local.set({ edgebar_height_mode: newHeightMode });
+    });
+  });
+
+  function applyCollapsedStyle(style) {
+    collapsedStyle = style;
+    collapsedBtns.forEach((btn) => {
+      btn.classList.toggle('eb-active-segment', btn.dataset.collapsed === style);
+    });
+    if (!drawer.classList.contains('eb-open')) {
+      closeDrawer();
+    }
+  }
+
+  collapsedBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const newStyle = btn.dataset.collapsed;
+      applyCollapsedStyle(newStyle);
+      chrome.storage.local.set({ edgebar_collapsed_style: newStyle });
     });
   });
 
@@ -467,16 +487,36 @@
 
   function renderManageList() {
     manageList.innerHTML = '';
+    if (shortcuts.length === 0) {
+      manageList.innerHTML = `<div style="color:#71717a; font-size:11.5px; padding: 6px 4px;">Henüz site eklenmedi.</div>`;
+      return;
+    }
     shortcuts.forEach((sc) => {
       const item = document.createElement('div');
       item.className = 'eb-manage-item';
+
+      let iconHtml = '';
+      if (sc.svgKey && ICONS[sc.svgKey]) {
+        iconHtml = `<div class="eb-manage-item-icon">${ICONS[sc.svgKey]}</div>`;
+      } else if (sc.favicon) {
+        iconHtml = `<div class="eb-manage-item-icon"><img src="${sc.favicon}" alt="" onerror="this.parentElement.innerHTML='${sc.name.charAt(0)}'" /></div>`;
+      } else {
+        iconHtml = `<div class="eb-manage-item-icon">${sc.name.charAt(0)}</div>`;
+      }
+
       item.innerHTML = `
-        <span>${sc.name}</span>
-        <button class="eb-manage-item-del" title="Kısayolu Kaldır">Kaldır</button>
+        <div class="eb-manage-item-left">
+          ${iconHtml}
+          <span class="eb-manage-item-name" title="${sc.name} (${sc.url})">${sc.name}</span>
+        </div>
+        <button type="button" class="eb-manage-item-del" title="Kaldır">${ICONS.close}</button>
       `;
-      item.querySelector('.eb-manage-item-del').addEventListener('click', () => {
+
+      item.querySelector('.eb-manage-item-del').addEventListener('click', (e) => {
+        e.stopPropagation();
         deleteShortcut(sc.id);
       });
+
       manageList.appendChild(item);
     });
   }
@@ -492,16 +532,31 @@
         'edgebar_drawer_width',
         'edgebar_drawer_height',
         'edgebar_height_mode',
+        'edgebar_collapsed_style',
         'edgebar_last_active',
         'edgebar_drawer_open',
         'edgebar_view_mode',
         'edgebar_zoom'
       ],
       (result) => {
-        if (result.edgebar_shortcuts && Array.isArray(result.edgebar_shortcuts) && result.edgebar_shortcuts.length > 0) {
-          shortcuts = result.edgebar_shortcuts;
-        } else {
+        const isOldDefault =
+          result.edgebar_shortcuts &&
+          Array.isArray(result.edgebar_shortcuts) &&
+          result.edgebar_shortcuts.length === 3 &&
+          result.edgebar_shortcuts[0].id === 'gemini' &&
+          result.edgebar_shortcuts[1].id === 'chatgpt' &&
+          result.edgebar_shortcuts[2].id === 'x';
+
+        if (
+          !result.edgebar_shortcuts ||
+          !Array.isArray(result.edgebar_shortcuts) ||
+          result.edgebar_shortcuts.length === 0 ||
+          isOldDefault
+        ) {
           shortcuts = [...DEFAULT_SHORTCUTS];
+          chrome.storage.local.set({ edgebar_shortcuts: shortcuts });
+        } else {
+          shortcuts = result.edgebar_shortcuts;
         }
 
         if (result.edgebar_drawer_width) {
@@ -528,6 +583,13 @@
         }
         applyHeightMode(heightMode);
 
+        if (result.edgebar_collapsed_style) {
+          collapsedStyle = result.edgebar_collapsed_style;
+        } else {
+          collapsedStyle = 'strip';
+        }
+        applyCollapsedStyle(collapsedStyle);
+
         renderShortcuts();
 
         // Default open on page load: stays open unless explicitly closed
@@ -535,6 +597,8 @@
         if (shouldOpen) {
           const targetShortcut = shortcuts.find((s) => s.id === result.edgebar_last_active) || shortcuts[0];
           openDrawer(targetShortcut);
+        } else {
+          closeDrawer();
         }
       }
     );
@@ -595,15 +659,28 @@
       loader.classList.add('eb-hidden');
     }
 
-    // Hide trigger pill and slide open drawer flush
+    // Hide trigger pill, remove strip-only and open full drawer
     triggerPill.classList.add('eb-hidden');
+    drawer.classList.remove('eb-strip-only');
     drawer.classList.add('eb-open');
+    drawer.style.width = `${drawerWidth}px`;
+    collapseBtn.title = 'Paneli Daralt (Esc)';
+
     chrome.storage.local.set({ edgebar_drawer_open: true, edgebar_last_active: sc.id });
   }
 
   function closeDrawer() {
     drawer.classList.remove('eb-open');
-    triggerPill.classList.remove('eb-hidden');
+
+    if (collapsedStyle === 'strip') {
+      drawer.classList.add('eb-strip-only');
+      triggerPill.classList.add('eb-hidden');
+      collapseBtn.title = 'Paneli Genişlet';
+    } else {
+      drawer.classList.remove('eb-strip-only');
+      triggerPill.classList.remove('eb-hidden');
+    }
+
     hideTooltip();
     hideContextMenu();
     chrome.storage.local.set({ edgebar_drawer_open: false });
@@ -615,7 +692,15 @@
     openDrawer(current);
   });
 
-  collapseBtn.addEventListener('click', closeDrawer);
+  collapseBtn.addEventListener('click', () => {
+    if (drawer.classList.contains('eb-open')) {
+      closeDrawer();
+    } else {
+      const current = shortcuts.find((s) => s.id === activeShortcutId) || shortcuts[0];
+      openDrawer(current);
+    }
+  });
+
   closeBtn.addEventListener('click', closeDrawer);
 
   // Header Actions
@@ -701,11 +786,10 @@
 
   // --- Modal: Add & Manage Custom Shortcuts ---
   function openAddModal() {
-    inputName.value = '';
-    inputUrl.value = '';
+    quickAddInput.value = '';
     renderManageList();
     modalBackdrop.classList.add('eb-modal-open');
-    setTimeout(() => inputName.focus(), 50);
+    setTimeout(() => quickAddInput.focus(), 50);
   }
 
   function closeAddModal() {
@@ -713,19 +797,33 @@
   }
 
   addBtn.addEventListener('click', openAddModal);
-  modalCancelBtn.addEventListener('click', closeAddModal);
+  modalCloseBtn.addEventListener('click', closeAddModal);
 
   modalBackdrop.addEventListener('click', (e) => {
     if (e.target === modalBackdrop) closeAddModal();
   });
 
   function handleSaveCustomShortcut() {
-    let name = inputName.value.trim();
-    let url = inputUrl.value.trim();
+    let raw = quickAddInput.value.trim();
+    if (!raw) {
+      quickAddInput.focus();
+      return;
+    }
+
+    let name = '';
+    let url = '';
+
+    if (raw.includes(' ') && (raw.includes('http') || raw.includes('.'))) {
+      const parts = raw.split(/\s+/);
+      const urlPart = parts.find((p) => p.includes('.') || p.startsWith('http'));
+      if (urlPart) {
+        url = urlPart;
+        name = parts.filter((p) => p !== urlPart).join(' ');
+      }
+    }
 
     if (!url) {
-      inputUrl.focus();
-      return;
+      url = raw;
     }
 
     if (!/^https?:\/\//i.test(url)) {
@@ -735,7 +833,9 @@
     try {
       const parsedUrl = new URL(url);
       if (!name) {
-        name = parsedUrl.hostname.replace(/^www\./, '');
+        let host = parsedUrl.hostname.replace(/^www\./, '');
+        let base = host.split('.')[0];
+        name = base.charAt(0).toUpperCase() + base.slice(1);
       }
 
       const favicon = `https://www.google.com/s2/favicons?domain=${parsedUrl.hostname}&sz=64`;
@@ -755,16 +855,14 @@
 
       openDrawer(newShortcut);
     } catch (err) {
-      alert('Geçerli bir URL giriniz.');
-      inputUrl.focus();
+      alert('Geçerli bir web adresi giriniz.');
+      quickAddInput.focus();
     }
   }
 
-  modalSaveBtn.addEventListener('click', handleSaveCustomShortcut);
-  [inputName, inputUrl].forEach((inp) => {
-    inp.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') handleSaveCustomShortcut();
-    });
+  quickAddBtn.addEventListener('click', handleSaveCustomShortcut);
+  quickAddInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') handleSaveCustomShortcut();
   });
 
   resetDefaultsBtn.addEventListener('click', () => {
@@ -772,6 +870,7 @@
     saveShortcuts();
     renderShortcuts();
     closeAddModal();
+    openDrawer(DEFAULT_SHORTCUTS[0]);
   });
 
   function deleteShortcut(id) {
