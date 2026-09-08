@@ -26,11 +26,11 @@
 
 .eb-trigger-pill {
   position: fixed;
-  bottom: 24px;
+  top: 14px;
   left: 0;
-  width: 34px;
-  height: 38px;
-  background: #121318;
+  width: 36px;
+  height: 40px;
+  background: #111216;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-left: none;
   border-radius: 0 10px 10px 0;
@@ -45,21 +45,21 @@
 }
 
 .eb-trigger-pill:hover {
-  width: 40px;
-  background: #1a1b22;
+  width: 42px;
+  background: #181920;
   color: #ffffff;
   border-color: rgba(255, 255, 255, 0.25);
   box-shadow: 4px 6px 20px rgba(0, 0, 0, 0.7);
 }
 
 .eb-trigger-pill svg {
-  width: 16px;
-  height: 16px;
+  width: 17px;
+  height: 17px;
   transition: transform 0.2s ease;
 }
 
 .eb-trigger-pill:hover svg {
-  transform: translateX(2px);
+  transform: translateX(1px);
 }
 
 .eb-trigger-pill.eb-hidden {
@@ -80,9 +80,9 @@
   width: 486px;
   min-width: 360px;
   max-width: 85vw;
-  background: #0f1014;
+  background: #111216;
   border-right: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 8px 0 36px rgba(0, 0, 0, 0.65);
+  box-shadow: 12px 0 40px rgba(0, 0, 0, 0.65);
   z-index: 2147483646;
   display: flex;
   flex-direction: row;
@@ -121,17 +121,13 @@
   display: none !important;
 }
 
-.eb-drawer.eb-strip-only .eb-collapse-btn svg {
-  transform: rotate(180deg);
-}
-
 .eb-drawer.eb-strip-only .eb-item-btn.eb-active {
   background: transparent;
   color: #a1a1aa;
 }
 
 .eb-drawer.eb-strip-only .eb-item-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
   color: #ffffff;
 }
 
@@ -156,14 +152,9 @@
   box-shadow: 0 16px 48px rgba(0, 0, 0, 0.75);
 }
 
-.eb-drawer.eb-height-floating .eb-dock-rail {
-  height: calc(100vh - 28px);
-  border-radius: 12px 0 0 12px;
-}
-
+.eb-drawer.eb-height-floating .eb-dock-rail,
 .eb-drawer.eb-height-floating .eb-panel-main {
-  height: calc(100vh - 28px);
-  border-radius: 0 12px 12px 0;
+  height: 100%;
 }
 
 /* --- Height Mode 3: Custom Resizable Height --- */
@@ -173,6 +164,7 @@
   left: 0;
   border-radius: 12px 12px 0 0;
   border-top: 1px solid rgba(255, 255, 255, 0.12);
+  overflow: hidden;
 }
 
 .eb-drawer.eb-height-custom .eb-dock-rail,
@@ -238,14 +230,14 @@
 
 .eb-dock-rail {
   width: 46px;
-  height: 100vh;
-  background: #0d0e12;
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  height: 100%;
+  background: #111216;
+  border-right: 1px solid rgba(255, 255, 255, 0.07);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 0;
+  padding: 6px 0;
   flex-shrink: 0;
 }
 
@@ -253,6 +245,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 4px;
   width: 100%;
 }
 
@@ -363,57 +356,33 @@
   text-transform: uppercase;
 }
 
-/* Add Button at top of dock */
+/* Top Dock Buttons (Toggle & Add) */
+.eb-toggle-btn,
 .eb-add-btn {
-  width: 34px;
-  height: 34px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  color: #a1a1aa;
-  cursor: pointer;
-  transition: all 0.16s ease;
-  flex-shrink: 0;
-}
-
-.eb-add-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.25);
-  color: #ffffff;
-}
-
-.eb-add-btn svg {
-  width: 15px;
-  height: 15px;
-}
-
-/* Collapse Button at bottom of dock */
-.eb-collapse-btn {
-  width: 34px;
+  width: 32px;
   height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: transparent;
   border: none;
-  border-radius: 8px;
-  color: #71717a;
+  border-radius: 7px;
+  color: #9ca3af;
   cursor: pointer;
-  transition: all 0.16s ease;
+  transition: all 0.14s ease;
   flex-shrink: 0;
 }
 
-.eb-collapse-btn:hover {
+.eb-toggle-btn:hover,
+.eb-add-btn:hover {
   background: rgba(255, 255, 255, 0.08);
   color: #ffffff;
 }
 
-.eb-collapse-btn svg {
-  width: 15px;
-  height: 15px;
+.eb-toggle-btn svg,
+.eb-add-btn svg {
+  width: 16px;
+  height: 16px;
 }
 
 /* ==========================================================================
@@ -424,7 +393,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 100%;
   position: relative;
   overflow: hidden;
   background: #111216;
@@ -432,13 +401,13 @@
 
 /* Unified, comfortable header */
 .eb-drawer-header {
-  height: 42px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 12px;
-  background: #14151b;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: #111216;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
   flex-shrink: 0;
 }
 
@@ -558,7 +527,7 @@
   position: relative;
   flex: 1;
   width: 100%;
-  height: calc(100vh - 42px);
+  height: calc(100% - 44px);
   background: #111216;
   overflow: hidden;
 }

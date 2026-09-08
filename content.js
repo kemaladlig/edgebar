@@ -13,8 +13,9 @@
 
   // --- Refined SVGs (1.8px fine strokes, sleek modern aesthetics) ---
   const ICONS = {
-    trigger: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="16" x="2" y="2" rx="3"/><path d="M7 2v16"/><circle cx="12" cy="10" r="1.2" fill="currentColor"/></svg>`,
-    collapse: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m13 15-5-5 5-5"/></svg>`,
+    sidebarClosed: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="16" x="2" y="2" rx="3.5"/><path d="M7 2v16"/><circle cx="12" cy="10" r="1.3" fill="currentColor"/></svg>`,
+    sidebarOpen: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="16" x="2" y="2" rx="3.5"/><path d="M7 2v16"/><path d="m13.5 8-2 2 2 2"/></svg>`,
+    trigger: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="16" x="2" y="2" rx="3.5"/><path d="M7 2v16"/><circle cx="12" cy="10" r="1.3" fill="currentColor"/></svg>`,
     plus: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4v12M4 10h12"/></svg>`,
     reload: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10a6.5 6.5 0 1 1 1.9 4.6L2 18"/><path d="M2 13.5V18h4.5"/></svg>`,
     external: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 11v5a1.5 1.5 0 0 1-1.5 1.5H4.5A1.5 1.5 0 0 1 3 16V7.5A1.5 1.5 0 0 1 4.5 6H9.5"/><path d="M11.5 3.5h5v5M8 12 16.5 3.5"/></svg>`,
@@ -85,11 +86,11 @@
     tooltip.classList.remove('eb-tooltip-show');
   }
 
-  // 2. Bottom-Left Trigger Pill
+  // 2. Top-Left Trigger Pill (Positioned at top-left to seamlessly align with drawer toggle)
   const triggerPill = document.createElement('button');
   triggerPill.className = 'eb-trigger-pill';
   triggerPill.title = 'EdgeBar Aç';
-  triggerPill.innerHTML = ICONS.trigger;
+  triggerPill.innerHTML = ICONS.sidebarClosed;
   container.appendChild(triggerPill);
 
   // 3. Unified Drawer
@@ -102,16 +103,15 @@
     <!-- Left Rail: Integrated Dock Icons -->
     <div class="eb-dock-rail">
       <div class="eb-dock-top">
-        <button class="eb-add-btn" title="Kısayolları Yönet / Ayarlar (+)">
+        <button type="button" class="eb-toggle-btn" title="Paneli Daralt (Esc)">
+          ${ICONS.sidebarOpen}
+        </button>
+        <button type="button" class="eb-add-btn" title="Site Ekle / Ayarlar (+)">
           ${ICONS.plus}
         </button>
       </div>
       <div class="eb-dock-bottom">
         <div class="eb-items-list"></div>
-        <div class="eb-divider"></div>
-        <button class="eb-collapse-btn" title="Paneli Gizle (Esc)">
-          ${ICONS.collapse}
-        </button>
       </div>
     </div>
 
@@ -154,8 +154,8 @@
   container.appendChild(drawer);
 
   const itemsList = drawer.querySelector('.eb-items-list');
+  const toggleBtn = drawer.querySelector('.eb-toggle-btn');
   const addBtn = drawer.querySelector('.eb-add-btn');
-  const collapseBtn = drawer.querySelector('.eb-collapse-btn');
 
   const drawerFavicon = drawer.querySelector('.eb-drawer-favicon');
   const drawerTitle = drawer.querySelector('.eb-drawer-title');
@@ -664,7 +664,8 @@
     drawer.classList.remove('eb-strip-only');
     drawer.classList.add('eb-open');
     drawer.style.width = `${drawerWidth}px`;
-    collapseBtn.title = 'Paneli Daralt (Esc)';
+    toggleBtn.innerHTML = ICONS.sidebarOpen;
+    toggleBtn.title = 'Paneli Daralt (Esc)';
 
     chrome.storage.local.set({ edgebar_drawer_open: true, edgebar_last_active: sc.id });
   }
@@ -672,10 +673,12 @@
   function closeDrawer() {
     drawer.classList.remove('eb-open');
 
+    toggleBtn.innerHTML = ICONS.sidebarClosed;
+    toggleBtn.title = 'Paneli Genişlet';
+
     if (collapsedStyle === 'strip') {
       drawer.classList.add('eb-strip-only');
       triggerPill.classList.add('eb-hidden');
-      collapseBtn.title = 'Paneli Genişlet';
     } else {
       drawer.classList.remove('eb-strip-only');
       triggerPill.classList.remove('eb-hidden');
@@ -692,7 +695,8 @@
     openDrawer(current);
   });
 
-  collapseBtn.addEventListener('click', () => {
+  // Toggle from Primary Anchor (Top-Left Dock Button)
+  toggleBtn.addEventListener('click', () => {
     if (drawer.classList.contains('eb-open')) {
       closeDrawer();
     } else {
