@@ -26,7 +26,7 @@
 
 .eb-trigger-pill {
   position: fixed;
-  top: 14px;
+  bottom: 24px;
   left: 0;
   width: 32px;
   height: 38px;
@@ -71,13 +71,13 @@
 }
 
 /* ==========================================================================
-   UNIFIED DRAWER (Attached directly to left: 0, ZERO GAP)
+   UNIFIED DRAWER & HEIGHT MODES
    ========================================================================== */
 
 .eb-drawer {
   position: fixed;
   top: 0;
-  left: 0; /* Flush to left edge */
+  left: 0;
   height: 100vh;
   width: 484px; /* 44px rail + 440px content */
   min-width: 364px;
@@ -87,7 +87,7 @@
   box-shadow: 10px 0 45px rgba(0, 0, 0, 0.75);
   z-index: 2147483646;
   display: flex;
-  flex-direction: row; /* Left rail + Right web content */
+  flex-direction: row;
   transform: translateX(-100%);
   opacity: 0;
   pointer-events: none;
@@ -100,8 +100,75 @@
   pointer-events: auto;
 }
 
+/* Height Mode 1: Full (100% Height - Default) */
+.eb-drawer.eb-height-full {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  height: 100vh;
+  border-radius: 0;
+}
+
+/* Height Mode 2: Floating Island (macOS / Arc Style) */
+.eb-drawer.eb-height-floating {
+  top: 16px;
+  bottom: 16px;
+  left: 14px;
+  height: calc(100vh - 32px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  overflow: hidden;
+  box-shadow: 0 16px 50px rgba(0, 0, 0, 0.85);
+}
+
+.eb-drawer.eb-height-floating .eb-dock-rail {
+  height: calc(100vh - 32px);
+  border-radius: 16px 0 0 16px;
+}
+
+.eb-drawer.eb-height-floating .eb-panel-main {
+  height: calc(100vh - 32px);
+  border-radius: 0 16px 16px 0;
+}
+
+/* Height Mode 3: Custom Resizable Height */
+.eb-drawer.eb-height-custom {
+  top: auto;
+  bottom: 0;
+  left: 0;
+  border-radius: 14px 14px 0 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.eb-drawer.eb-height-custom .eb-dock-rail,
+.eb-drawer.eb-height-custom .eb-panel-main {
+  height: 100%;
+}
+
+/* Top resizer for custom height */
+.eb-resizer-top {
+  position: absolute;
+  top: -4px;
+  left: 0;
+  width: 100%;
+  height: 8px;
+  cursor: ns-resize;
+  background: transparent;
+  z-index: 101;
+  display: none;
+  transition: background 0.15s ease;
+}
+
+.eb-drawer.eb-height-custom .eb-resizer-top {
+  display: block;
+}
+
+.eb-resizer-top:hover, .eb-resizer-top.eb-resizing {
+  background: rgba(255, 255, 255, 0.35);
+}
+
 /* --------------------------------------------------------------------------
-   LEFT RAIL: Dock Icons (Integrated seamlessly at the left border)
+   LEFT RAIL: Dock Icons
    -------------------------------------------------------------------------- */
 
 .eb-dock-rail {
@@ -182,19 +249,6 @@
 .eb-item-btn.eb-active {
   background: rgba(255, 255, 255, 0.14);
   border-color: rgba(255, 255, 255, 0.24);
-  box-shadow: none;
-}
-
-.eb-item-btn.eb-active::after {
-  content: "";
-  position: absolute;
-  right: -5px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 2.5px;
-  height: 16px;
-  background: #ffffff;
-  border-radius: 2px;
   box-shadow: none;
 }
 

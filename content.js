@@ -49,8 +49,10 @@
   let shortcuts = [];
   let activeShortcutId = null;
   let drawerWidth = 484; // 44px dock + 440px content
+  let drawerHeight = 600;
   let currentActiveUrl = '';
   let viewMode = 'mobile';
+  let heightMode = 'full';
 
   // Persistent Iframe Cache (Multi-Session Pool)
   const iframePool = new Map();
@@ -102,17 +104,20 @@
 
   // 3. Unified Drawer (Starts at left: 0, ZERO GAP)
   const drawer = document.createElement('div');
-  drawer.className = 'eb-drawer';
+  drawer.className = 'eb-drawer eb-height-full';
   drawer.innerHTML = `
+    <!-- Top Resizer for Custom Height Mode -->
+    <div class="eb-resizer-top" title="Yüksekliği ayarlamak için yukarı/aşağı sürükleyin"></div>
+
     <!-- Left Rail: Integrated Dock Icons -->
     <div class="eb-dock-rail">
       <div class="eb-dock-top">
-        <div class="eb-items-list"></div>
-      </div>
-      <div class="eb-dock-bottom">
         <button class="eb-add-btn" title="Kısayolları Yönet / Ekle (+)">
           ${ICONS.plus}
         </button>
+      </div>
+      <div class="eb-dock-bottom">
+        <div class="eb-items-list"></div>
         <div class="eb-divider"></div>
         <button class="eb-collapse-btn" title="Paneli Gizle (Esc)">
           ${ICONS.collapse}
@@ -163,6 +168,7 @@
   const iframeContainer = drawer.querySelector('.eb-iframe-container');
   const loader = drawer.querySelector('.eb-loader-overlay');
   const resizer = drawer.querySelector('.eb-resizer');
+  const resizerTop = drawer.querySelector('.eb-resizer-top');
 
   // Drag Overlay for resizing
   const dragOverlay = document.createElement('div');
@@ -242,6 +248,16 @@
         </div>
       </div>
 
+      <!-- Height Mode Selector in Modal -->
+      <div class="eb-form-group">
+        <label class="eb-form-label">Panel Yüksekliği</label>
+        <div class="eb-segmented-control eb-height-segmented">
+          <button type="button" class="eb-segmented-btn eb-h-full" data-height="full">Tam Boy (%100)</button>
+          <button type="button" class="eb-segmented-btn eb-h-floating" data-height="floating">Yüzen Ada</button>
+          <button type="button" class="eb-segmented-btn eb-h-custom" data-height="custom">Ayarlanabilir</button>
+        </div>
+      </div>
+
       <div class="eb-modal-actions">
         <button class="eb-btn-link eb-reset-defaults" title="Varsayılan kısayolları (Gemini, ChatGPT, X) geri getir">Varsayılanları Sıfırla</button>
         <div class="eb-modal-btns-right">
@@ -267,6 +283,7 @@
   const manageList = modalBackdrop.querySelector('.eb-manage-list');
   const segMobile = modalBackdrop.querySelector('.eb-segment-mobile');
   const segDesktop = modalBackdrop.querySelector('.eb-segment-desktop');
+  const heightBtns = modalBackdrop.querySelectorAll('.eb-height-segmented .eb-segmented-btn');
 
   // ==========================================================================
   // STATE MANAGEMENT & LOGIC
@@ -278,6 +295,28 @@
       segDesktop.classList.toggle('eb-active-segment', viewMode === 'desktop');
     }
   }
+
+  function applyHeightMode(mode) {
+    heightMode = mode;
+    drawer.classList.remove('eb-height-full', 'eb-height-floating', 'eb-height-custom');
+    drawer.classList.add(`eb-height-${mode}`);
+    if (mode === 'custom') {
+      drawer.style.height = `${drawerHeight}px`;
+    } else {
+      drawer.style.height = '';
+    }
+    heightBtns.forEach((btn) => {
+      btn.classList.toggle('eb-active-segment', btn.dataset.height === mode);
+    });
+  }
+
+  heightBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const newHeightMode = btn.dataset.height;
+      applyHeightMode(newHeightMode);
+      chrome.storage.local.set({ edgebar_height_mode: newHeightMode });
+    });
+  });
 
   [segMobile, segDesktop].forEach((btn) => {
     btn.addEventListener('click', () => {
@@ -297,7 +336,15 @@
 
   function loadState() {
     chrome.storage.local.get(
-      ['edgebar_shortcuts', 'edgebar_drawer_width', 'edgebar_last_active', 'edgebar_drawer_open', 'edgebar_view_mode'],
+      [
+        'edgebar_shortcuts',
+        'edgebar_drawer_width',
+        'edgebar_drawer_height',
+        'edgebar_height_mode',
+        'edgebar_last_active',
+        'edgebar_drawer_open',
+        'edgebar_view_mode'
+      ],
       (result) => {
         if (result.edgebar_shortcuts && Array.isArray(result.edgebar_shortcuts) && result.edgebar_shortcuts.length > 0) {
           shortcuts = result.edgebar_shortcuts;
@@ -310,10 +357,20 @@
           drawer.style.width = `${drawerWidth}px`;
         }
 
+        if (result.edgebar_drawer_height) {
+          drawerHeight = Math.max(300, Math.min(result.edgebar_drawer_height, window.innerHeight - 20));
+        }
+
         if (result.edgebar_view_mode) {
           viewMode = result.edgebar_view_mode;
         }
         updateModeUI();
+
+        if (result.edgebar_height_mode) {
+          heightMode = result.edgebar_height_mode;
+        }
+        applyHeightMode(heightMode);
+
         renderShortcuts();
 
         // Default open: stays open on page load unless user explicitly closed it
@@ -491,33 +548,68 @@
     }
   });
 
-  // --- Resizer Handle ---
+  // --- Resizer Handles (Width & Height) ---
   let isResizing = false;
+  let isResizingHeight = false;
   let startX = 0;
+  let startY = 0;
   let startWidth = 0;
+  let startHeight = 0;
 
+  // Right Border Resizer (Width)
   resizer.addEventListener('mousedown', (e) => {
     isResizing = true;
     startX = e.clientX;
     startWidth = drawer.getBoundingClientRect().width;
     resizer.classList.add('eb-resizing');
     dragOverlay.classList.add('eb-active');
+    dragOverlay.style.cursor = 'col-resize';
+    e.preventDefault();
+  });
+
+  // Top Border Resizer (Height in Custom Mode)
+  resizerTop.addEventListener('mousedown', (e) => {
+    if (heightMode !== 'custom') return;
+    isResizingHeight = true;
+    startY = e.clientY;
+    startHeight = drawer.getBoundingClientRect().height;
+    resizerTop.classList.add('eb-resizing');
+    dragOverlay.classList.add('eb-active');
+    dragOverlay.style.cursor = 'ns-resize';
     e.preventDefault();
   });
 
   window.addEventListener('mousemove', (e) => {
-    if (!isResizing) return;
-    const deltaX = e.clientX - startX;
-    const newWidth = Math.max(364, Math.min(startWidth + deltaX, window.innerWidth * 0.85));
-    drawerWidth = newWidth;
-    drawer.style.width = `${newWidth}px`;
+    if (isResizingHeight) {
+      const deltaY = startY - e.clientY;
+      const newHeight = Math.max(300, Math.min(startHeight + deltaY, window.innerHeight - 20));
+      drawerHeight = newHeight;
+      drawer.style.height = `${newHeight}px`;
+      return;
+    }
+
+    if (isResizing) {
+      const deltaX = e.clientX - startX;
+      const newWidth = Math.max(364, Math.min(startWidth + deltaX, window.innerWidth * 0.85));
+      drawerWidth = newWidth;
+      drawer.style.width = `${newWidth}px`;
+    }
   });
 
   window.addEventListener('mouseup', () => {
+    if (isResizingHeight) {
+      isResizingHeight = false;
+      resizerTop.classList.remove('eb-resizing');
+      dragOverlay.classList.remove('eb-active');
+      dragOverlay.style.cursor = '';
+      chrome.storage.local.set({ edgebar_drawer_height: drawerHeight });
+    }
+
     if (isResizing) {
       isResizing = false;
       resizer.classList.remove('eb-resizing');
       dragOverlay.classList.remove('eb-active');
+      dragOverlay.style.cursor = '';
       chrome.storage.local.set({ edgebar_drawer_width: drawerWidth });
     }
   });
