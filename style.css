@@ -1,6 +1,6 @@
 /* ==========================================================================
-   EdgeBar - Minimalist Web Panels (Arc / Vivaldi Inspired)
-   Unified Seamless Architecture (Zero Gap, Flush to Left Edge)
+   EdgeBar Design System (Raycast / Linear / Arc Inspired)
+   Strict Consistency, Standardized Radii & Professional Dark Aesthetic
    ========================================================================== */
 
 :host {
@@ -21,37 +21,35 @@
 }
 
 /* ==========================================================================
-   TIER 1: TRIGGER PILL (Minimalist, Elite Floating Capsule at Bottom-Left)
+   TRIGGER PILL (Closed State)
    ========================================================================== */
 
 .eb-trigger-pill {
   position: fixed;
   bottom: 24px;
   left: 0;
-  width: 32px;
+  width: 34px;
   height: 38px;
-  background: rgba(18, 19, 24, 0.88);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: #121318;
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-left: none;
-  border-radius: 0 12px 12px 0;
+  border-radius: 0 10px 10px 0;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   z-index: 2147483646;
-  box-shadow: 2px 4px 18px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.12);
-  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 2px 4px 16px rgba(0, 0, 0, 0.5);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   color: #9ca3af;
 }
 
 .eb-trigger-pill:hover {
-  width: 38px;
-  background: rgba(28, 30, 38, 0.98);
-  color: #f9fafb;
-  border-color: rgba(255, 255, 255, 0.35);
-  box-shadow: 4px 6px 24px rgba(0, 0, 0, 0.7);
+  width: 40px;
+  background: #1a1b22;
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow: 4px 6px 20px rgba(0, 0, 0, 0.7);
 }
 
 .eb-trigger-pill svg {
@@ -71,7 +69,7 @@
 }
 
 /* ==========================================================================
-   UNIFIED DRAWER & HEIGHT MODES
+   DRAWER CONTAINER & HEIGHT MODES
    ========================================================================== */
 
 .eb-drawer {
@@ -79,19 +77,19 @@
   top: 0;
   left: 0;
   height: 100vh;
-  width: 484px; /* 44px rail + 440px content */
-  min-width: 364px;
+  width: 486px;
+  min-width: 360px;
   max-width: 85vw;
-  background: #0d0e12;
-  border-right: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 10px 0 45px rgba(0, 0, 0, 0.75);
+  background: #0f1014;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 8px 0 36px rgba(0, 0, 0, 0.65);
   z-index: 2147483646;
   display: flex;
   flex-direction: row;
   transform: translateX(-100%);
   opacity: 0;
   pointer-events: none;
-  transition: transform 0.26s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.18s ease;
+  transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.18s ease;
 }
 
 .eb-drawer.eb-open {
@@ -100,7 +98,7 @@
   pointer-events: auto;
 }
 
-/* Height Mode 1: Full (100% Height - Default) */
+/* --- Height Mode 1: Full (100% Height) --- */
 .eb-drawer.eb-height-full {
   top: 0;
   bottom: 0;
@@ -109,35 +107,35 @@
   border-radius: 0;
 }
 
-/* Height Mode 2: Floating Island (macOS / Arc Style) */
+/* --- Height Mode 2: Floating Island --- */
 .eb-drawer.eb-height-floating {
-  top: 16px;
-  bottom: 16px;
+  top: 14px;
+  bottom: 14px;
   left: 14px;
-  height: calc(100vh - 32px);
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  height: calc(100vh - 28px);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
   overflow: hidden;
-  box-shadow: 0 16px 50px rgba(0, 0, 0, 0.85);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.75);
 }
 
 .eb-drawer.eb-height-floating .eb-dock-rail {
-  height: calc(100vh - 32px);
-  border-radius: 16px 0 0 16px;
+  height: calc(100vh - 28px);
+  border-radius: 12px 0 0 12px;
 }
 
 .eb-drawer.eb-height-floating .eb-panel-main {
-  height: calc(100vh - 32px);
-  border-radius: 0 16px 16px 0;
+  height: calc(100vh - 28px);
+  border-radius: 0 12px 12px 0;
 }
 
-/* Height Mode 3: Custom Resizable Height */
+/* --- Height Mode 3: Custom Resizable Height --- */
 .eb-drawer.eb-height-custom {
   top: auto;
   bottom: 0;
   left: 0;
-  border-radius: 14px 14px 0 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 12px 12px 0 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .eb-drawer.eb-height-custom .eb-dock-rail,
@@ -145,7 +143,7 @@
   height: 100%;
 }
 
-/* Top resizer for custom height */
+/* Resizers */
 .eb-resizer-top {
   position: absolute;
   top: -4px;
@@ -164,23 +162,53 @@
 }
 
 .eb-resizer-top:hover, .eb-resizer-top.eb-resizing {
-  background: rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.3);
 }
 
-/* --------------------------------------------------------------------------
-   LEFT RAIL: Dock Icons
-   -------------------------------------------------------------------------- */
+.eb-resizer {
+  position: absolute;
+  top: 0;
+  right: -2px;
+  width: 5px;
+  height: 100%;
+  cursor: col-resize;
+  background: transparent;
+  z-index: 100;
+  transition: background 0.15s ease;
+}
+
+.eb-resizer:hover, .eb-resizer.eb-resizing {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.eb-drag-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 2147483647;
+  display: none;
+}
+
+.eb-drag-overlay.eb-active {
+  display: block;
+}
+
+/* ==========================================================================
+   LEFT DOCK RAIL
+   ========================================================================== */
 
 .eb-dock-rail {
-  width: 44px;
+  width: 46px;
   height: 100vh;
-  background: #111217;
+  background: #0d0e12;
   border-right: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 0;
+  padding: 8px 0;
   flex-shrink: 0;
 }
 
@@ -189,6 +217,14 @@
   flex-direction: column;
   align-items: center;
   width: 100%;
+}
+
+.eb-dock-bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  gap: 6px;
 }
 
 .eb-items-list {
@@ -208,23 +244,15 @@
   display: none;
 }
 
-.eb-dock-bottom {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  width: 100%;
-}
-
 .eb-divider {
-  width: 24px;
+  width: 22px;
   height: 1px;
-  background: rgba(255, 255, 255, 0.1);
-  margin: 6px 0;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 2px 0;
   flex-shrink: 0;
 }
 
-/* Individual Icon Button */
+/* Standardized Buttons in Rail */
 .eb-item-btn {
   position: relative;
   width: 34px;
@@ -234,22 +262,32 @@
   justify-content: center;
   background: transparent;
   border: 1px solid transparent;
-  border-radius: 9px;
-  cursor: pointer;
-  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 8px;
+  cursor: grab;
+  transition: all 0.16s ease;
   flex-shrink: 0;
 }
 
 .eb-item-btn:hover {
   background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.1);
-  transform: scale(1.04);
+  border-color: rgba(255, 255, 255, 0.08);
 }
 
 .eb-item-btn.eb-active {
   background: rgba(255, 255, 255, 0.14);
-  border-color: rgba(255, 255, 255, 0.24);
-  box-shadow: none;
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Dragging visual cues */
+.eb-item-btn.eb-dragging {
+  opacity: 0.35;
+  transform: scale(0.95);
+}
+
+.eb-item-btn.eb-drag-over {
+  border-color: #ffffff;
+  background: rgba(255, 255, 255, 0.16);
 }
 
 .eb-item-icon {
@@ -258,7 +296,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 5px;
+  border-radius: 4px;
   pointer-events: none;
 }
 
@@ -277,10 +315,10 @@
 .eb-letter-avatar {
   width: 20px;
   height: 20px;
-  border-radius: 6px;
-  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  border-radius: 4px;
+  background: #27272a;
   color: #ffffff;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 11px;
   display: flex;
   align-items: center;
@@ -288,63 +326,62 @@
   text-transform: uppercase;
 }
 
-/* Add custom shortcut button */
+/* Add Button at top of dock */
 .eb-add-btn {
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px dashed rgba(255, 255, 255, 0.18);
-  border-radius: 9px;
-  color: #9ca3af;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: #a1a1aa;
   cursor: pointer;
-  transition: all 0.18s ease;
+  transition: all 0.16s ease;
   flex-shrink: 0;
 }
 
 .eb-add-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(129, 140, 248, 0.4);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.25);
   color: #ffffff;
-  transform: scale(1.06);
 }
 
 .eb-add-btn svg {
-  width: 14px;
-  height: 14px;
+  width: 15px;
+  height: 15px;
 }
 
-/* Collapse button at bottom */
+/* Collapse Button at bottom of dock */
 .eb-collapse-btn {
-  width: 32px;
-  height: 28px;
+  width: 34px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: transparent;
   border: none;
   border-radius: 8px;
-  color: #6b7280;
+  color: #71717a;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.16s ease;
   flex-shrink: 0;
 }
 
 .eb-collapse-btn:hover {
   background: rgba(255, 255, 255, 0.08);
-  color: #f3f4f6;
+  color: #ffffff;
 }
 
 .eb-collapse-btn svg {
-  width: 14px;
-  height: 14px;
+  width: 15px;
+  height: 15px;
 }
 
-/* --------------------------------------------------------------------------
-   RIGHT CONTENT: Web View, Header, Iframe, Resizer
-   -------------------------------------------------------------------------- */
+/* ==========================================================================
+   RIGHT CONTENT: HEADER & IFRAME
+   ========================================================================== */
 
 .eb-panel-main {
   flex: 1;
@@ -356,14 +393,14 @@
   background: #111216;
 }
 
-/* Header */
+/* Unified, comfortable header */
 .eb-drawer-header {
-  height: 38px;
+  height: 42px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 12px;
-  background: rgba(18, 19, 24, 0.96);
+  background: #14151b;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   flex-shrink: 0;
 }
@@ -373,56 +410,105 @@
   align-items: center;
   gap: 8px;
   overflow: hidden;
-  max-width: 250px;
+  max-width: 200px;
 }
 
 .eb-drawer-favicon {
-  width: 15px;
-  height: 15px;
+  width: 16px;
+  height: 16px;
   border-radius: 3px;
   flex-shrink: 0;
 }
 
 .eb-drawer-title {
-  font-size: 12px;
+  font-size: 12.5px;
   font-weight: 600;
-  color: #e5e7eb;
+  color: #f4f4f5;
   letter-spacing: -0.01em;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-/* Action Controls (Micro-Buttons) */
+/* Header Action Controls */
 .eb-drawer-actions {
   display: flex;
   align-items: center;
-  gap: 3px;
+  gap: 4px;
 }
 
-.eb-action-btn {
-  width: 26px;
-  height: 26px;
+/* Zoom Controls Pill */
+.eb-zoom-group {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 7px;
+  padding: 1px 3px;
+  gap: 2px;
+  margin-right: 4px;
+}
+
+.eb-zoom-btn {
+  width: 22px;
+  height: 22px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: transparent;
   border: none;
-  border-radius: 6px;
-  color: #9ca3af;
+  border-radius: 5px;
+  color: #a1a1aa;
   cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
   transition: all 0.14s ease;
 }
 
+.eb-zoom-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.eb-zoom-label {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #d4d4d8;
+  padding: 0 4px;
+  cursor: pointer;
+  letter-spacing: -0.02em;
+}
+
+.eb-zoom-label:hover {
+  color: #ffffff;
+  text-decoration: underline;
+}
+
+/* Standard Header Buttons (Comfortable hit area) */
+.eb-action-btn {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: 7px;
+  color: #a1a1aa;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
 .eb-action-btn svg {
-  width: 14px;
-  height: 14px;
-  stroke-width: 1.6px;
+  width: 16px;
+  height: 16px;
+  stroke-width: 1.8px;
 }
 
 .eb-action-btn:hover {
   background: rgba(255, 255, 255, 0.08);
-  color: #f9fafb;
+  color: #ffffff;
 }
 
 .eb-action-btn.eb-close:hover {
@@ -430,12 +516,12 @@
   color: #f87171;
 }
 
-/* Multi-Iframe Session Pool Area */
+/* Body / Iframe Area */
 .eb-drawer-body {
   position: relative;
   flex: 1;
   width: 100%;
-  height: calc(100vh - 38px);
+  height: calc(100vh - 42px);
   background: #111216;
   overflow: hidden;
 }
@@ -444,6 +530,7 @@
   width: 100%;
   height: 100%;
   position: relative;
+  overflow: hidden;
 }
 
 .eb-iframe {
@@ -461,7 +548,7 @@
   display: block;
 }
 
-/* Loading spinner */
+/* Loading Spinner */
 .eb-loader-overlay {
   position: absolute;
   top: 0;
@@ -474,7 +561,7 @@
   justify-content: center;
   gap: 10px;
   background: #111216;
-  color: #6b7280;
+  color: #71717a;
   font-size: 12px;
   pointer-events: none;
   opacity: 1;
@@ -500,44 +587,12 @@
   to { transform: rotate(360deg); }
 }
 
-/* Resizer Handle on right */
-.eb-resizer {
-  position: absolute;
-  top: 0;
-  right: -2px;
-  width: 5px;
-  height: 100%;
-  cursor: col-resize;
-  background: transparent;
-  z-index: 100;
-  transition: background 0.15s ease;
-}
-
-.eb-resizer:hover, .eb-resizer.eb-resizing {
-  background: rgba(129, 140, 248, 0.6);
-}
-
-.eb-drag-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 2147483647;
-  cursor: col-resize;
-  display: none;
-}
-
-.eb-drag-overlay.eb-active {
-  display: block;
-}
-
 /* Tooltip */
 .eb-tooltip {
   position: fixed;
-  left: 54px;
+  left: 56px;
   background: #181920;
-  color: #f3f4f6;
+  color: #f4f4f5;
   font-size: 11.5px;
   font-weight: 500;
   padding: 4px 9px;
@@ -557,18 +612,15 @@
   transform: translateX(0);
 }
 
-/* ==========================================================================
-   SAFE CONTEXT MENU (Right Click on Any Shortcut)
-   ========================================================================== */
-
+/* Context Menu */
 .eb-context-menu {
   position: fixed;
-  left: 54px;
-  background: #1a1b22;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  left: 56px;
+  background: #181920;
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 8px;
   padding: 4px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.65);
   z-index: 2147483647;
   display: none;
   min-width: 140px;
@@ -583,10 +635,10 @@
   align-items: center;
   gap: 8px;
   padding: 6px 10px;
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 500;
-  color: #e5e7eb;
-  border-radius: 5px;
+  color: #e4e4e7;
+  border-radius: 6px;
   cursor: pointer;
   transition: background 0.12s ease;
 }
@@ -604,8 +656,8 @@
 }
 
 /* ==========================================================================
-   MODAL: ADD & MANAGE SHORTCUTS
-   ========================================================================== */
+   MODAL: SETTINGS & SHORTCUTS MANAGEMENT
+   ========================================================================= */
 
 .eb-modal-backdrop {
   position: fixed;
@@ -631,14 +683,14 @@
 }
 
 .eb-modal-card {
-  width: 340px;
+  width: 350px;
   max-width: 90vw;
   background: #16171e;
   border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 14px;
+  border-radius: 12px;
   padding: 20px;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
-  transform: scale(0.94);
+  transform: scale(0.96);
   transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -649,7 +701,7 @@
 .eb-modal-title {
   font-size: 14px;
   font-weight: 600;
-  color: #f9fafb;
+  color: #f4f4f5;
   margin-bottom: 14px;
   display: flex;
   align-items: center;
@@ -664,7 +716,7 @@
   display: block;
   font-size: 11.5px;
   font-weight: 500;
-  color: #9ca3af;
+  color: #a1a1aa;
   margin-bottom: 5px;
 }
 
@@ -672,9 +724,9 @@
   width: 100%;
   background: #20222a;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
+  border-radius: 7px;
   padding: 8px 10px;
-  color: #f9fafb;
+  color: #ffffff;
   font-size: 12.5px;
   outline: none;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
@@ -685,32 +737,31 @@
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
 }
 
-/* Segmented Control for Mobile / Web in Modal */
+/* Segmented Controls in Modal */
 .eb-segmented-control {
   display: flex;
   background: #20222a;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  padding: 3px;
-  gap: 3px;
-  margin-top: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 7px;
+  padding: 2px;
+  gap: 2px;
 }
 
 .eb-segmented-btn {
   flex: 1;
-  padding: 6px 10px;
+  padding: 6px 8px;
   border: none;
-  border-radius: 6px;
+  border-radius: 5px;
   background: transparent;
-  color: #9ca3af;
-  font-size: 12px;
+  color: #a1a1aa;
+  font-size: 11.5px;
   font-weight: 500;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
-  transition: all 0.15s ease;
+  gap: 4px;
+  transition: all 0.14s ease;
 }
 
 .eb-segmented-btn:hover {
@@ -720,7 +771,7 @@
 .eb-segmented-btn.eb-active-segment {
   background: rgba(255, 255, 255, 0.14);
   color: #ffffff;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 /* Manage existing shortcuts list inside modal */
@@ -733,7 +784,7 @@
 .eb-manage-title {
   font-size: 11px;
   font-weight: 600;
-  color: #9ca3af;
+  color: #a1a1aa;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   margin-bottom: 8px;
@@ -756,7 +807,7 @@
   background: rgba(255, 255, 255, 0.03);
   border-radius: 6px;
   font-size: 12px;
-  color: #d1d5db;
+  color: #d4d4d8;
 }
 
 .eb-manage-item-del {
@@ -778,13 +829,13 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 18px;
+  margin-top: 16px;
 }
 
 .eb-btn-link {
   background: transparent;
   border: none;
-  color: #9ca3af;
+  color: #a1a1aa;
   font-size: 11px;
   cursor: pointer;
   text-decoration: underline;
@@ -812,7 +863,7 @@
 
 .eb-btn-secondary {
   background: rgba(255, 255, 255, 0.08);
-  color: #d1d5db;
+  color: #d4d4d8;
 }
 
 .eb-btn-secondary:hover {
