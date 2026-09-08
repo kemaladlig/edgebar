@@ -1,6 +1,6 @@
 /* ==========================================================================
    EdgeBar - Minimalist Web Panels (Arc / Vivaldi Inspired)
-   Isolated inside Shadow DOM - Enhanced Aesthetics & Seamless Docking
+   Unified Seamless Architecture (Zero Gap, Flush to Left Edge)
    ========================================================================== */
 
 :host {
@@ -21,7 +21,7 @@
 }
 
 /* ==========================================================================
-   TIER 1: TRIGGER PILL (Minimalist, Elite Floating Pill at Bottom-Left)
+   TIER 1: TRIGGER PILL (Minimalist, Elite Floating Capsule at Bottom-Left)
    ========================================================================== */
 
 .eb-trigger-pill {
@@ -42,7 +42,7 @@
   cursor: pointer;
   z-index: 2147483646;
   box-shadow: 2px 4px 18px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.12);
-  transition: all 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
   color: #9ca3af;
 }
 
@@ -71,40 +71,59 @@
 }
 
 /* ==========================================================================
-   TIER 2: VERTICAL STRIP DOCK (Bottom-Anchored or Floating Dock)
+   UNIFIED DRAWER (Attached directly to left: 0, ZERO GAP)
    ========================================================================== */
 
-.eb-strip {
+.eb-drawer {
   position: fixed;
-  bottom: 18px;
-  left: 0;
-  width: 44px;
-  max-height: calc(100vh - 36px);
-  background: rgba(15, 16, 20, 0.94);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-left: none;
-  border-radius: 0 14px 14px 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 8px 0 6px 0;
+  top: 0;
+  left: 0; /* Flush to left edge */
+  height: 100vh;
+  width: 484px; /* 44px rail + 440px content */
+  min-width: 364px;
+  max-width: 85vw;
+  background: #0d0e12;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 10px 0 45px rgba(0, 0, 0, 0.75);
   z-index: 2147483646;
-  box-shadow: 4px 10px 36px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  transform: translateX(-110%);
+  display: flex;
+  flex-direction: row; /* Left rail + Right web content */
+  transform: translateX(-100%);
   opacity: 0;
   pointer-events: none;
-  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+  transition: transform 0.26s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.18s ease;
 }
 
-.eb-strip.eb-visible {
+.eb-drawer.eb-open {
   transform: translateX(0);
   opacity: 1;
   pointer-events: auto;
 }
 
-/* Scrollable items list in strip */
+/* --------------------------------------------------------------------------
+   LEFT RAIL: Dock Icons (Integrated seamlessly at the left border)
+   -------------------------------------------------------------------------- */
+
+.eb-dock-rail {
+  width: 44px;
+  height: 100vh;
+  background: #111217;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  flex-shrink: 0;
+}
+
+.eb-dock-top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
 .eb-items-list {
   display: flex;
   flex-direction: column;
@@ -120,6 +139,14 @@
 
 .eb-items-list::-webkit-scrollbar {
   display: none;
+}
+
+.eb-dock-bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
 }
 
 .eb-divider {
@@ -140,7 +167,7 @@
   justify-content: center;
   background: transparent;
   border: 1px solid transparent;
-  border-radius: 10px;
+  border-radius: 9px;
   cursor: pointer;
   transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
   flex-shrink: 0;
@@ -149,19 +176,19 @@
 .eb-item-btn:hover {
   background: rgba(255, 255, 255, 0.08);
   border-color: rgba(255, 255, 255, 0.06);
-  transform: scale(1.04);
+  transform: scale(1.05);
 }
 
 .eb-item-btn.eb-active {
-  background: rgba(99, 102, 241, 0.18);
-  border-color: rgba(129, 140, 248, 0.4);
+  background: rgba(99, 102, 241, 0.2);
+  border-color: rgba(129, 140, 248, 0.45);
   box-shadow: 0 0 12px rgba(99, 102, 241, 0.3);
 }
 
 .eb-item-btn.eb-active::after {
   content: "";
   position: absolute;
-  right: -3px;
+  right: -5px;
   top: 50%;
   transform: translateY(-50%);
   width: 3px;
@@ -207,43 +234,10 @@
   text-transform: uppercase;
 }
 
-/* Subtle remove badge for any shortcut on hover */
-.eb-item-del-btn {
-  position: absolute;
-  top: -2px;
-  right: -2px;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: #ef4444;
-  color: white;
-  border: 1px solid rgba(0, 0, 0, 0.6);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  font-size: 8px;
-  line-height: 1;
-  font-weight: 800;
-  cursor: pointer;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
-  z-index: 10;
-  transition: transform 0.15s ease;
-}
-
-.eb-item-del-btn:hover {
-  transform: scale(1.15);
-  background: #dc2626;
-}
-
-.eb-item-btn:hover .eb-item-del-btn {
-  display: flex;
-}
-
-/* Add custom button */
+/* Add custom shortcut button */
 .eb-add-btn {
   width: 32px;
   height: 32px;
-  margin: 4px 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -268,7 +262,7 @@
   height: 14px;
 }
 
-/* Strip collapse button at bottom */
+/* Collapse button at bottom */
 .eb-collapse-btn {
   width: 32px;
   height: 28px;
@@ -280,7 +274,6 @@
   border-radius: 8px;
   color: #6b7280;
   cursor: pointer;
-  margin-top: 2px;
   transition: all 0.15s ease;
   flex-shrink: 0;
 }
@@ -295,69 +288,28 @@
   height: 14px;
 }
 
-/* Tooltips */
-.eb-tooltip {
-  position: fixed;
-  left: 54px;
-  background: #181920;
-  color: #f3f4f6;
-  font-size: 11.5px;
-  font-weight: 500;
-  padding: 4px 9px;
-  border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
-  white-space: nowrap;
-  pointer-events: none;
-  opacity: 0;
-  transform: translateX(-4px);
-  transition: opacity 0.14s ease, transform 0.14s ease;
-  z-index: 2147483647;
-}
+/* --------------------------------------------------------------------------
+   RIGHT CONTENT: Web View, Header, Iframe, Resizer
+   -------------------------------------------------------------------------- */
 
-.eb-tooltip.eb-tooltip-show {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-/* ==========================================================================
-   TIER 3: SLIDE-OUT WEB PANEL DRAWER (Seamless Docking with ZERO GAP)
-   ========================================================================== */
-
-.eb-drawer {
-  position: fixed;
-  top: 0;
-  left: 44px; /* Exact match with strip width: 44px -> ZERO GAP */
-  height: 100vh;
-  width: 440px;
-  min-width: 320px;
-  max-width: 85vw;
-  background: #0f1013;
-  border-right: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 8px 0 36px rgba(0, 0, 0, 0.7);
-  z-index: 2147483645;
+.eb-panel-main {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  transform: translateX(-110%);
-  opacity: 0;
-  pointer-events: none;
-  transition: transform 0.26s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.18s ease;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+  background: #111216;
 }
 
-.eb-drawer.eb-open {
-  transform: translateX(0);
-  opacity: 1;
-  pointer-events: auto;
-}
-
-/* Panel Header - Ultra-Refined & Compact */
+/* Header */
 .eb-drawer-header {
   height: 38px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 12px;
-  background: rgba(18, 19, 24, 0.94);
+  background: rgba(18, 19, 24, 0.96);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   flex-shrink: 0;
 }
@@ -387,7 +339,7 @@
   white-space: nowrap;
 }
 
-/* Header Action Controls - Sleek 14px Micro-Buttons */
+/* Action Controls (Micro-Icons) */
 .eb-drawer-actions {
   display: flex;
   align-items: center;
@@ -424,13 +376,13 @@
   color: #f87171;
 }
 
-/* Body / Iframe Multi-Pool Area */
+/* Multi-Iframe Session Pool Area */
 .eb-drawer-body {
   position: relative;
   flex: 1;
   width: 100%;
   height: calc(100vh - 38px);
-  background: #121318;
+  background: #111216;
   overflow: hidden;
 }
 
@@ -494,7 +446,7 @@
   to { transform: rotate(360deg); }
 }
 
-/* Resizer Handle */
+/* Resizer Handle on right */
 .eb-resizer {
   position: absolute;
   top: 0;
@@ -526,8 +478,33 @@
   display: block;
 }
 
+/* Tooltip */
+.eb-tooltip {
+  position: fixed;
+  left: 54px;
+  background: #181920;
+  color: #f3f4f6;
+  font-size: 11.5px;
+  font-weight: 500;
+  padding: 4px 9px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity 0.14s ease, transform 0.14s ease;
+  z-index: 2147483647;
+}
+
+.eb-tooltip.eb-tooltip-show {
+  opacity: 1;
+  transform: translateX(0);
+}
+
 /* ==========================================================================
-   CONTEXT MENU (Right-Click to Remove / Edit)
+   SAFE CONTEXT MENU (Right Click on Any Shortcut)
    ========================================================================== */
 
 .eb-context-menu {
@@ -573,7 +550,7 @@
 }
 
 /* ==========================================================================
-   MODAL: ADD CUSTOM SHORTCUT
+   MODAL: ADD & MANAGE SHORTCUTS
    ========================================================================== */
 
 .eb-modal-backdrop {
@@ -600,7 +577,8 @@
 }
 
 .eb-modal-card {
-  width: 320px;
+  width: 340px;
+  max-width: 90vw;
   background: #16171e;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 14px;
@@ -651,6 +629,57 @@
 .eb-form-input:focus {
   border-color: #818cf8;
   box-shadow: 0 0 0 2px rgba(129, 140, 248, 0.25);
+}
+
+/* Manage existing shortcuts list inside modal */
+.eb-modal-manage-section {
+  margin-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 12px;
+}
+
+.eb-manage-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 8px;
+}
+
+.eb-manage-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 120px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.eb-manage-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 6px;
+  font-size: 12px;
+  color: #d1d5db;
+}
+
+.eb-manage-item-del {
+  color: #f87171;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: background 0.12s ease;
+}
+
+.eb-manage-item-del:hover {
+  background: rgba(239, 68, 68, 0.2);
 }
 
 .eb-modal-actions {

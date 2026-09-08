@@ -1,20 +1,18 @@
 // ============================================================================
 // EdgeBar - Minimalist Web Panels (Content Script)
-// 3-Tier Architecture: 1. Bottom Trigger -> 2. Bottom Strip Dock -> 3. Persistent Drawer
+// Unified Architecture: Left: 0 Seamless Docking + Safe Shortcut Management
 // ============================================================================
 
 (function () {
   'use strict';
 
-  // Prevent subframe injection or double execution
   if (window.top !== window || window.__edgebar_initialized) {
     return;
   }
   window.__edgebar_initialized = true;
 
-  // --- Refined SVGs (Fine strokes, modern minimalist aesthetic) ---
+  // --- Refined SVGs (1.6px fine strokes, sleek modern aesthetics) ---
   const ICONS = {
-    // Elite dual-line dock icon for bottom-left trigger
     trigger: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="16" x="2" y="2" rx="3.5"/><path d="M7 2v16"/><circle cx="12" cy="10" r="1.2" fill="currentColor"/></svg>`,
     collapse: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m13 15-5-5 5-5"/></svg>`,
     plus: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4v12M4 10h12"/></svg>`,
@@ -47,15 +45,13 @@
     }
   ];
 
-  // --- State Variables ---
+  // --- State ---
   let shortcuts = [];
-  let isStripExpanded = false;
   let activeShortcutId = null;
-  let drawerWidth = 440;
+  let drawerWidth = 484; // 44px dock + 440px content
   let currentActiveUrl = '';
 
   // Persistent Iframe Cache (Multi-Session Pool)
-  // Keeps active sessions alive in memory so Gemini/ChatGPT chats never reset on close or tab switch
   const iframePool = new Map();
 
   // --- Initialize Shadow DOM ---
@@ -63,7 +59,7 @@
   host.id = 'v-edgebar-host';
   const shadow = host.attachShadow({ mode: 'open' });
 
-  // Inject Stylesheet
+  // Stylesheet
   const styleLink = document.createElement('link');
   styleLink.rel = 'stylesheet';
   styleLink.href = chrome.runtime.getURL('style.css');
@@ -96,63 +92,67 @@
     tooltip.classList.remove('eb-tooltip-show');
   }
 
-  // 2. Tier 1: Bottom-Left Elite Trigger Pill
+  // 2. Bottom-Left Trigger Pill
   const triggerPill = document.createElement('button');
   triggerPill.className = 'eb-trigger-pill';
-  triggerPill.title = 'EdgeBar Paneli Aç';
+  triggerPill.title = 'EdgeBar Aç';
   triggerPill.innerHTML = ICONS.trigger;
   container.appendChild(triggerPill);
 
-  // 3. Tier 2: Vertical Strip Dock (Bottom Anchored)
-  const strip = document.createElement('div');
-  strip.className = 'eb-strip';
-  strip.innerHTML = `
-    <div class="eb-items-list"></div>
-    <div class="eb-divider"></div>
-    <button class="eb-add-btn" title="Yeni Kısayol Ekle (+)">
-      ${ICONS.plus}
-    </button>
-    <button class="eb-collapse-btn" title="Şeridi Gizle">
-      ${ICONS.collapse}
-    </button>
-  `;
-  container.appendChild(strip);
-
-  const itemsList = strip.querySelector('.eb-items-list');
-  const addBtn = strip.querySelector('.eb-add-btn');
-  const collapseBtn = strip.querySelector('.eb-collapse-btn');
-
-  // 4. Tier 3: Slide-out Web Panel Drawer (Docked with ZERO GAP at left: 44px)
+  // 3. Unified Drawer (Starts at left: 0, ZERO GAP)
   const drawer = document.createElement('div');
   drawer.className = 'eb-drawer';
   drawer.innerHTML = `
-    <div class="eb-drawer-header">
-      <div class="eb-drawer-title-area">
-        <img class="eb-drawer-favicon" src="" alt="" style="display:none;" />
-        <span class="eb-drawer-title">Web Panel</span>
+    <!-- Left Rail: Integrated Dock Icons -->
+    <div class="eb-dock-rail">
+      <div class="eb-dock-top">
+        <div class="eb-items-list"></div>
       </div>
-      <div class="eb-drawer-actions">
-        <button class="eb-action-btn eb-reload" title="Yenile">
-          ${ICONS.reload}
+      <div class="eb-dock-bottom">
+        <button class="eb-add-btn" title="Kısayolları Yönet / Ekle (+)">
+          ${ICONS.plus}
         </button>
-        <button class="eb-action-btn eb-external" title="Yeni Sekmede Aç">
-          ${ICONS.external}
-        </button>
-        <button class="eb-action-btn eb-close" title="Paneli Kapat (Esc)">
-          ${ICONS.close}
+        <div class="eb-divider"></div>
+        <button class="eb-collapse-btn" title="Paneli Gizle (Esc)">
+          ${ICONS.collapse}
         </button>
       </div>
     </div>
-    <div class="eb-drawer-body">
-      <div class="eb-loader-overlay eb-hidden">
-        <div class="eb-spinner"></div>
-        <span>Yükleniyor...</span>
+
+    <!-- Right Area: Header, Web Content & Resizer -->
+    <div class="eb-panel-main">
+      <div class="eb-drawer-header">
+        <div class="eb-drawer-title-area">
+          <img class="eb-drawer-favicon" src="" alt="" style="display:none;" />
+          <span class="eb-drawer-title">Web Panel</span>
+        </div>
+        <div class="eb-drawer-actions">
+          <button class="eb-action-btn eb-reload" title="Yenile">
+            ${ICONS.reload}
+          </button>
+          <button class="eb-action-btn eb-external" title="Yeni Sekmede Aç">
+            ${ICONS.external}
+          </button>
+          <button class="eb-action-btn eb-close" title="Kapat (Esc)">
+            ${ICONS.close}
+          </button>
+        </div>
       </div>
-      <div class="eb-iframe-container"></div>
-      <div class="eb-resizer" title="Genişletmek için sürükleyin"></div>
+      <div class="eb-drawer-body">
+        <div class="eb-loader-overlay eb-hidden">
+          <div class="eb-spinner"></div>
+          <span>Yükleniyor...</span>
+        </div>
+        <div class="eb-iframe-container"></div>
+        <div class="eb-resizer" title="Genişletmek için sürükleyin"></div>
+      </div>
     </div>
   `;
   container.appendChild(drawer);
+
+  const itemsList = drawer.querySelector('.eb-items-list');
+  const addBtn = drawer.querySelector('.eb-add-btn');
+  const collapseBtn = drawer.querySelector('.eb-collapse-btn');
 
   const drawerFavicon = drawer.querySelector('.eb-drawer-favicon');
   const drawerTitle = drawer.querySelector('.eb-drawer-title');
@@ -163,12 +163,12 @@
   const loader = drawer.querySelector('.eb-loader-overlay');
   const resizer = drawer.querySelector('.eb-resizer');
 
-  // Drag Overlay for smooth resizing over iframes
+  // Drag Overlay for resizing
   const dragOverlay = document.createElement('div');
   dragOverlay.className = 'eb-drag-overlay';
   container.appendChild(dragOverlay);
 
-  // 5. Context Menu (Right Click on Any Shortcut to Remove / Copy)
+  // 4. Safe Right-Click Context Menu
   const contextMenu = document.createElement('div');
   contextMenu.className = 'eb-context-menu';
   contextMenu.innerHTML = `
@@ -183,7 +183,7 @@
   function showContextMenu(e, sc) {
     e.preventDefault();
     contextTargetShortcut = sc;
-    contextMenu.style.top = `${e.clientY - 20}px`;
+    contextMenu.style.top = `${Math.min(e.clientY - 20, window.innerHeight - 100)}px`;
     contextMenu.classList.add('eb-show');
   }
 
@@ -215,13 +215,13 @@
     }
   });
 
-  // 6. Modal: Add Custom Shortcut
+  // 5. Modal: Add & Manage Shortcuts Safely
   const modalBackdrop = document.createElement('div');
   modalBackdrop.className = 'eb-modal-backdrop';
   modalBackdrop.innerHTML = `
     <div class="eb-modal-card">
       <div class="eb-modal-title">
-        <span>Yeni Kısayol Ekle</span>
+        <span>Kısayolları Yönet</span>
       </div>
       <div class="eb-form-group">
         <label class="eb-form-label">Site Adı</label>
@@ -238,6 +238,12 @@
           <button class="eb-btn eb-btn-primary eb-modal-save">Ekle</button>
         </div>
       </div>
+
+      <!-- Existing Shortcuts Manager List -->
+      <div class="eb-modal-manage-section">
+        <div class="eb-manage-title">Mevcut Kısayollar</div>
+        <div class="eb-manage-list"></div>
+      </div>
     </div>
   `;
   container.appendChild(modalBackdrop);
@@ -247,13 +253,14 @@
   const modalCancelBtn = modalBackdrop.querySelector('.eb-modal-cancel');
   const modalSaveBtn = modalBackdrop.querySelector('.eb-modal-save');
   const resetDefaultsBtn = modalBackdrop.querySelector('.eb-reset-defaults');
+  const manageList = modalBackdrop.querySelector('.eb-manage-list');
 
   // ==========================================================================
   // STATE MANAGEMENT & LOGIC
   // ==========================================================================
 
   function loadState() {
-    chrome.storage.local.get(['edgebar_shortcuts', 'edgebar_drawer_width'], (result) => {
+    chrome.storage.local.get(['edgebar_shortcuts', 'edgebar_drawer_width', 'edgebar_last_active'], (result) => {
       if (result.edgebar_shortcuts && Array.isArray(result.edgebar_shortcuts) && result.edgebar_shortcuts.length > 0) {
         shortcuts = result.edgebar_shortcuts;
       } else {
@@ -261,7 +268,7 @@
       }
 
       if (result.edgebar_drawer_width) {
-        drawerWidth = Math.max(320, Math.min(result.edgebar_drawer_width, window.innerWidth * 0.85));
+        drawerWidth = Math.max(364, Math.min(result.edgebar_drawer_width, window.innerWidth * 0.85));
         drawer.style.width = `${drawerWidth}px`;
       }
 
@@ -273,7 +280,7 @@
     chrome.storage.local.set({ edgebar_shortcuts: shortcuts });
   }
 
-  // Render Shortcuts in Vertical Strip
+  // Render Shortcuts in Dock Rail (NO ACCIDENTAL DELETE HOVER BADGE)
   function renderShortcuts() {
     itemsList.innerHTML = '';
 
@@ -285,7 +292,7 @@
       }
       btn.dataset.id = sc.id;
 
-      // Icon element
+      // Icon wrapper
       const iconWrap = document.createElement('div');
       iconWrap.className = 'eb-item-icon';
 
@@ -308,64 +315,55 @@
       btn.addEventListener('mouseenter', () => showTooltip(sc.name, btn));
       btn.addEventListener('mouseleave', hideTooltip);
 
-      // Left click: Toggle/Open drawer
-      btn.addEventListener('click', (e) => {
-        if (e.target.closest('.eb-item-del-btn')) return;
-        toggleShortcut(sc);
+      // Left Click: Switch or Toggle
+      btn.addEventListener('click', () => {
+        if (activeShortcutId === sc.id && drawer.classList.contains('eb-open')) {
+          closeDrawer();
+        } else {
+          openDrawer(sc);
+        }
       });
 
-      // Right click: Open Context Menu to delete / copy URL
+      // Right Click: Safe Context Menu (Delete / Open new tab)
       btn.addEventListener('contextmenu', (e) => {
         showContextMenu(e, sc);
       });
 
-      // Hover remove mini badge (now available for ALL shortcuts)
-      const delBtn = document.createElement('div');
-      delBtn.className = 'eb-item-del-btn';
-      delBtn.title = 'Kısayolu Sil';
-      delBtn.textContent = '✕';
-      delBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
+      itemsList.appendChild(btn);
+    });
+
+    renderManageList();
+  }
+
+  // Render Shortcuts inside the Management Modal
+  function renderManageList() {
+    manageList.innerHTML = '';
+    shortcuts.forEach((sc) => {
+      const item = document.createElement('div');
+      item.className = 'eb-manage-item';
+      item.innerHTML = `
+        <span>${sc.name}</span>
+        <button class="eb-manage-item-del" title="Kısayolu Kaldır">Kaldır</button>
+      `;
+      item.querySelector('.eb-manage-item-del').addEventListener('click', () => {
         deleteShortcut(sc.id);
       });
-      btn.appendChild(delBtn);
-
-      itemsList.appendChild(btn);
+      manageList.appendChild(item);
     });
   }
 
-  // --- Tier 1 & Tier 2: Strip Expansion / Collapse ---
-  function expandStrip() {
-    isStripExpanded = true;
-    triggerPill.classList.add('eb-hidden');
-    strip.classList.add('eb-visible');
-  }
-
-  function collapseStrip() {
-    isStripExpanded = false;
-    strip.classList.remove('eb-visible');
-    triggerPill.classList.remove('eb-hidden');
-    closeDrawer();
-  }
-
-  triggerPill.addEventListener('click', expandStrip);
-  collapseBtn.addEventListener('click', collapseStrip);
-
-  // --- Tier 3: Drawer & Multi-Iframe Session Pool ---
-  function toggleShortcut(sc) {
-    if (activeShortcutId === sc.id && drawer.classList.contains('eb-open')) {
-      closeDrawer();
-    } else {
-      openDrawer(sc);
-    }
-  }
-
+  // --- Open & Close Drawer (Smooth Left-Edge Flush Slide) ---
   function openDrawer(sc) {
+    if (!sc) {
+      // Default to first shortcut (Gemini)
+      sc = shortcuts[0] || DEFAULT_SHORTCUTS[0];
+    }
+
     activeShortcutId = sc.id;
     currentActiveUrl = sc.url;
 
-    // Highlight active button in dock
-    strip.querySelectorAll('.eb-item-btn').forEach((b) => {
+    // Update active highlight in dock rail
+    drawer.querySelectorAll('.eb-item-btn').forEach((b) => {
       b.classList.toggle('eb-active', b.dataset.id === sc.id);
     });
 
@@ -378,17 +376,14 @@
       drawerFavicon.style.display = 'none';
     }
 
-    // MULTI-IFRAME SESSION POOL:
-    // Check if iframe already exists for this shortcut
+    // MULTI-IFRAME SESSION POOL: Keep sessions alive
     let activeFrame = iframePool.get(sc.id);
 
-    // Hide all currently loaded iframes
     iframePool.forEach((frame) => {
       frame.classList.remove('eb-active-frame');
     });
 
     if (!activeFrame) {
-      // First time opening this shortcut -> Create iframe
       loader.classList.remove('eb-hidden');
 
       activeFrame = document.createElement('iframe');
@@ -403,22 +398,31 @@
       iframeContainer.appendChild(activeFrame);
       iframePool.set(sc.id, activeFrame);
     } else {
-      // Re-activating an existing iframe: Keep active session intact! (No reload!)
       activeFrame.classList.add('eb-active-frame');
       loader.classList.add('eb-hidden');
     }
 
-    // Open Drawer
+    // Hide trigger pill and slide open drawer flush from left: 0
+    triggerPill.classList.add('eb-hidden');
     drawer.classList.add('eb-open');
   }
 
   function closeDrawer() {
-    activeShortcutId = null;
-    strip.querySelectorAll('.eb-item-btn').forEach((b) => b.classList.remove('eb-active'));
     drawer.classList.remove('eb-open');
+    triggerPill.classList.remove('eb-hidden');
     hideTooltip();
     hideContextMenu();
   }
+
+  // Toggle from Trigger Pill
+  triggerPill.addEventListener('click', () => {
+    // Open currently active shortcut or first shortcut
+    const current = shortcuts.find((s) => s.id === activeShortcutId) || shortcuts[0];
+    openDrawer(current);
+  });
+
+  collapseBtn.addEventListener('click', closeDrawer);
+  closeBtn.addEventListener('click', closeDrawer);
 
   // Header Actions
   reloadBtn.addEventListener('click', () => {
@@ -435,9 +439,7 @@
     }
   });
 
-  closeBtn.addEventListener('click', closeDrawer);
-
-  // --- Resizer Handle Logic ---
+  // --- Resizer Handle ---
   let isResizing = false;
   let startX = 0;
   let startWidth = 0;
@@ -454,7 +456,7 @@
   window.addEventListener('mousemove', (e) => {
     if (!isResizing) return;
     const deltaX = e.clientX - startX;
-    const newWidth = Math.max(320, Math.min(startWidth + deltaX, window.innerWidth * 0.85));
+    const newWidth = Math.max(364, Math.min(startWidth + deltaX, window.innerWidth * 0.85));
     drawerWidth = newWidth;
     drawer.style.width = `${newWidth}px`;
   });
@@ -468,10 +470,11 @@
     }
   });
 
-  // --- Add Custom Shortcut Modal ---
+  // --- Modal: Add & Manage Custom Shortcuts ---
   function openAddModal() {
     inputName.value = '';
     inputUrl.value = '';
+    renderManageList();
     modalBackdrop.classList.add('eb-modal-open');
     setTimeout(() => inputName.focus(), 50);
   }
@@ -534,7 +537,6 @@
     });
   });
 
-  // Reset to Defaults (Gemini, ChatGPT, X)
   resetDefaultsBtn.addEventListener('click', () => {
     shortcuts = [...DEFAULT_SHORTCUTS];
     saveShortcuts();
@@ -542,16 +544,18 @@
     closeAddModal();
   });
 
-  // Delete Shortcut & Destroy Cached Iframe
   function deleteShortcut(id) {
     shortcuts = shortcuts.filter((s) => s.id !== id);
 
-    // If deleting active one, close drawer
     if (activeShortcutId === id) {
-      closeDrawer();
+      const nextShortcut = shortcuts[0];
+      if (nextShortcut) {
+        openDrawer(nextShortcut);
+      } else {
+        closeDrawer();
+      }
     }
 
-    // Clean up cached iframe to release memory
     if (iframePool.has(id)) {
       const frame = iframePool.get(id);
       frame.remove();
