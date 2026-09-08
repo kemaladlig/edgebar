@@ -50,6 +50,7 @@
   let activeShortcutId = null;
   let drawerWidth = 484; // 44px dock + 440px content
   let currentActiveUrl = '';
+  let viewMode = 'mobile';
 
   // Persistent Iframe Cache (Multi-Session Pool)
   const iframePool = new Map();
@@ -127,6 +128,10 @@
           <span class="eb-drawer-title">Web Panel</span>
         </div>
         <div class="eb-drawer-actions">
+          <button class="eb-mode-toggle" title="Mobil / Web Görünümü Değiştir">
+            <span class="eb-mode-icon">📱</span>
+            <span class="eb-mode-label">Mobil</span>
+          </button>
           <button class="eb-action-btn eb-reload" title="Yenile">
             ${ICONS.reload}
           </button>
@@ -156,6 +161,9 @@
 
   const drawerFavicon = drawer.querySelector('.eb-drawer-favicon');
   const drawerTitle = drawer.querySelector('.eb-drawer-title');
+  const modeToggleBtn = drawer.querySelector('.eb-mode-toggle');
+  const modeIcon = drawer.querySelector('.eb-mode-icon');
+  const modeLabel = drawer.querySelector('.eb-mode-label');
   const reloadBtn = drawer.querySelector('.eb-reload');
   const externalBtn = drawer.querySelector('.eb-external');
   const closeBtn = drawer.querySelector('.eb-close');
@@ -259,21 +267,47 @@
   // STATE MANAGEMENT & LOGIC
   // ==========================================================================
 
+  function updateModeUI() {
+    if (viewMode === 'mobile') {
+      modeIcon.textContent = '📱';
+      modeLabel.textContent = 'Mobil';
+      modeToggleBtn.title = 'Şu an: Mobil Görünüm (Web görünümüne geçmek için tıklayın)';
+    } else {
+      modeIcon.textContent = '💻';
+      modeLabel.textContent = 'Web';
+      modeToggleBtn.title = 'Şu an: Web Görünümü (Mobil görünüme geçmek için tıklayın)';
+    }
+  }
+
   function loadState() {
-    chrome.storage.local.get(['edgebar_shortcuts', 'edgebar_drawer_width', 'edgebar_last_active'], (result) => {
-      if (result.edgebar_shortcuts && Array.isArray(result.edgebar_shortcuts) && result.edgebar_shortcuts.length > 0) {
-        shortcuts = result.edgebar_shortcuts;
-      } else {
-        shortcuts = [...DEFAULT_SHORTCUTS];
-      }
+    chrome.storage.local.get(
+      ['edgebar_shortcuts', 'edgebar_drawer_width', 'edgebar_last_active', 'edgebar_drawer_open', 'edgebar_view_mode'],
+      (result) => {
+        if (result.edgebar_shortcuts && Array.isArray(result.edgebar_shortcuts) && result.edgebar_shortcuts.length > 0) {
+          shortcuts = result.edgebar_shortcuts;
+        } else {
+          shortcuts = [...DEFAULT_SHORTCUTS];
+        }
 
-      if (result.edgebar_drawer_width) {
-        drawerWidth = Math.max(364, Math.min(result.edgebar_drawer_width, window.innerWidth * 0.85));
-        drawer.style.width = `${drawerWidth}px`;
-      }
+        if (result.edgebar_drawer_width) {
+          drawerWidth = Math.max(364, Math.min(result.edgebar_drawer_width, window.innerWidth * 0.85));
+          drawer.style.width = `${drawerWidth}px`;
+        }
 
-      renderShortcuts();
-    });
+        if (result.edgebar_view_mode) {
+          viewMode = result.edgebar_view_mode;
+        }
+        updateModeUI();
+        renderShortcuts();
+
+        // Default open: stays open on page load unless user explicitly closed it
+        const shouldOpen = result.edgebar_drawer_open !== false;
+        if (shouldOpen) {
+          const targetShortcut = shortcuts.find((s) => s.id === result.edgebar_last_active) || shortcuts[0];
+          openDrawer(targetShortcut);
+        }
+      }
+    );
   }
 
   function saveShortcuts() {
@@ -405,6 +439,7 @@
     // Hide trigger pill and slide open drawer flush from left: 0
     triggerPill.classList.add('eb-hidden');
     drawer.classList.add('eb-open');
+    chrome.storage.local.set({ edgebar_drawer_open: true, edgebar_last_active: sc.id });
   }
 
   function closeDrawer() {
@@ -412,6 +447,7 @@
     triggerPill.classList.remove('eb-hidden');
     hideTooltip();
     hideContextMenu();
+    chrome.storage.local.set({ edgebar_drawer_open: false });
   }
 
   // Toggle from Trigger Pill
@@ -423,6 +459,22 @@
 
   collapseBtn.addEventListener('click', closeDrawer);
   closeBtn.addEventListener('click', closeDrawer);
+
+  // Header: Mode Toggle (Mobile / Desktop View)
+  modeToggleBtn.addEventListener('click', () => {
+    const nextMode = viewMode === 'mobile' ? 'desktop' : 'mobile';
+    chrome.runtime.sendMessage({ type: 'SET_VIEW_MODE', mode: nextMode }, (res) => {
+      viewMode = nextMode;
+      updateModeUI();
+
+      // Reload active iframe to fetch with updated User-Agent
+      if (activeShortcutId && iframePool.has(activeShortcutId)) {
+        loader.classList.remove('eb-hidden');
+        const activeFrame = iframePool.get(activeShortcutId);
+        activeFrame.src = activeFrame.src;
+      }
+    });
+  });
 
   // Header Actions
   reloadBtn.addEventListener('click', () => {

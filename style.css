@@ -339,11 +339,37 @@
   white-space: nowrap;
 }
 
-/* Action Controls (Micro-Icons) */
+/* Action Controls (Micro-Buttons & Mode Toggle) */
 .eb-drawer-actions {
   display: flex;
   align-items: center;
-  gap: 3px;
+  gap: 4px;
+}
+
+.eb-mode-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 3px 7px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #d1d5db;
+  cursor: pointer;
+  transition: all 0.14s ease;
+}
+
+.eb-mode-toggle:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  border-color: rgba(129, 140, 248, 0.4);
+}
+
+.eb-mode-toggle svg {
+  width: 12px;
+  height: 12px;
 }
 
 .eb-action-btn {
