@@ -65,6 +65,23 @@ chrome.runtime.onInstalled.addListener(() => {
   });
 });
 
+// Action Click (Extension icon in Chrome top toolbar next to address bar)
+chrome.action.onClicked.addListener(async (tab) => {
+  if (tab.id) {
+    chrome.tabs.sendMessage(tab.id, { type: 'TOGGLE_DRAWER' }).catch(() => {});
+  }
+});
+
+// Global keyboard command (Alt+S)
+chrome.commands.onCommand.addListener(async (command) => {
+  if (command === 'toggle-edgebar') {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (tab && tab.id) {
+      chrome.tabs.sendMessage(tab.id, { type: 'TOGGLE_DRAWER' }).catch(() => {});
+    }
+  }
+});
+
 // Message listener from content script
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'SET_VIEW_MODE') {

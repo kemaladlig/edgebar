@@ -19,7 +19,7 @@
     reload: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10a6.5 6.5 0 1 1 1.9 4.6L2 18"/><path d="M2 13.5V18h4.5"/></svg>`,
     external: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 11v5a1.5 1.5 0 0 1-1.5 1.5H4.5A1.5 1.5 0 0 1 3 16V7.5A1.5 1.5 0 0 1 4.5 6H9.5"/><path d="M11.5 3.5h5v5M8 12 16.5 3.5"/></svg>`,
     close: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-10 10M5 5l10 10"/></svg>`,
-    gemini: `<svg viewBox="0 0 24 24" fill="none"><path d="M12 2C12 7.52 7.52 12 2 12C7.52 12 12 16.48 12 22C12 16.48 16.48 12 22 12C16.48 12 12 7.52 12 2Z" fill="url(#gemini-grad)"/><defs><linearGradient id="gemini-grad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse"><stop stop-color="#4E95FF"/><stop offset="0.5" stop-color="#9A72F8"/><stop offset="1" stop-color="#F277B5"/></linearGradient></defs></svg>`,
+    gemini: `<svg viewBox="0 0 24 24" fill="currentColor" color="#f4f4f5"><path d="M12 2C12 7.52 7.52 12 2 12C7.52 12 12 16.48 12 22C12 16.48 16.48 12 22 12C16.48 12 12 7.52 12 2Z"/></svg>`,
     chatgpt: `<svg viewBox="0 0 24 24" fill="currentColor" color="#10a37f"><path d="M22.28 10.74c-.16-1.52-.89-2.92-2.07-3.92a7.35 7.35 0 0 0-4.08-1.55c-.4-.95-1.07-1.78-1.92-2.39a6.6 6.6 0 0 0-4.9-.76 6.8 6.8 0 0 0-4.07 2.62 7.2 7.2 0 0 0-2.38 4.49 7.33 7.33 0 0 0-1.14 4.31c.25 1.54 1.05 2.94 2.29 3.96a7.22 7.22 0 0 0 4.23 1.53c.4.95 1.07 1.78 1.93 2.39a6.65 6.65 0 0 0 4.88.75 6.82 6.82 0 0 0 4.08-2.62 7.23 7.23 0 0 0 2.38-4.49 7.34 7.34 0 0 0 1.15-4.32c-.17-1.54-.92-2.97-2.17-4.02l-.5-.48.5-.49Zm-9.17 11.23c-1.1 0-2.18-.3-3.13-.88l.15-.09 3.93-2.27c.2-.12.33-.33.35-.57v-5.55l1.67.96v4.61c0 2.09-1.7 3.79-3.79 3.79l-.18-.01v.01Zm-8.4-4.5c-.7-.95-1.09-2.1-1.09-3.3 0-1.05.3-2.07.87-2.95l.15.26 2.27 3.93c.12.2.33.33.57.35h5.55v1.93H7.5c-2.09 0-3.79-1.7-3.79-3.79v-.43Zm-1.03-9.5c.38-1.12 1.13-2.08 2.12-2.73a5.55 5.55 0 0 1 3.42-.58l-.16.27-2.27 3.93a.62.62 0 0 0 0 .66l2.77 4.8-1.67.96-4-6.93a3.78 3.78 0 0 1-.21-.38Zm14.28 4.58-2.77-4.8 1.67-.96 4 6.93c.3.5.47 1.07.5 1.66.08 1.18-.32 2.34-1.1 3.23a5.55 5.55 0 0 1-3.41 1.91l.15-.26 2.27-3.93a.62.62 0 0 0 0-.66l-1.31-2.12Zm3.12-2.58c0 1.05-.3 2.07-.87 2.95l-.15-.26-2.27-3.93a.62.62 0 0 0-.57-.35h-5.55v-1.93h5.45c2.09 0 3.79 1.7 3.79 3.79l.17.33Zm-10.37-4.4a3.79 3.79 0 0 1 3.79 3.79v5.55l-1.67-.96V7.07c0-2.09-1.7-3.79-3.79-3.79-.4 0-.8.06-1.19.19l.27.15 2.59 1.45Z"/></svg>`,
     x: `<svg viewBox="0 0 24 24" fill="currentColor" color="#ffffff"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>`
   };
@@ -128,10 +128,6 @@
           <span class="eb-drawer-title">Web Panel</span>
         </div>
         <div class="eb-drawer-actions">
-          <button class="eb-mode-toggle" title="Mobil / Web Görünümü Değiştir">
-            <span class="eb-mode-icon">📱</span>
-            <span class="eb-mode-label">Mobil</span>
-          </button>
           <button class="eb-action-btn eb-reload" title="Yenile">
             ${ICONS.reload}
           </button>
@@ -161,9 +157,6 @@
 
   const drawerFavicon = drawer.querySelector('.eb-drawer-favicon');
   const drawerTitle = drawer.querySelector('.eb-drawer-title');
-  const modeToggleBtn = drawer.querySelector('.eb-mode-toggle');
-  const modeIcon = drawer.querySelector('.eb-mode-icon');
-  const modeLabel = drawer.querySelector('.eb-mode-label');
   const reloadBtn = drawer.querySelector('.eb-reload');
   const externalBtn = drawer.querySelector('.eb-external');
   const closeBtn = drawer.querySelector('.eb-close');
@@ -239,6 +232,16 @@
         <label class="eb-form-label">Site URL'si</label>
         <input class="eb-form-input eb-input-url" type="text" placeholder="Örn: devdocs.io veya https://..." />
       </div>
+
+      <!-- View Mode Selector in Modal -->
+      <div class="eb-form-group">
+        <label class="eb-form-label">Görünüm Modu</label>
+        <div class="eb-segmented-control">
+          <button type="button" class="eb-segmented-btn eb-segment-mobile" data-mode="mobile">📱 Mobil (Kompakt)</button>
+          <button type="button" class="eb-segmented-btn eb-segment-desktop" data-mode="desktop">💻 Masaüstü / Web</button>
+        </div>
+      </div>
+
       <div class="eb-modal-actions">
         <button class="eb-btn-link eb-reset-defaults" title="Varsayılan kısayolları (Gemini, ChatGPT, X) geri getir">Varsayılanları Sıfırla</button>
         <div class="eb-modal-btns-right">
@@ -262,22 +265,35 @@
   const modalSaveBtn = modalBackdrop.querySelector('.eb-modal-save');
   const resetDefaultsBtn = modalBackdrop.querySelector('.eb-reset-defaults');
   const manageList = modalBackdrop.querySelector('.eb-manage-list');
+  const segMobile = modalBackdrop.querySelector('.eb-segment-mobile');
+  const segDesktop = modalBackdrop.querySelector('.eb-segment-desktop');
 
   // ==========================================================================
   // STATE MANAGEMENT & LOGIC
   // ==========================================================================
 
   function updateModeUI() {
-    if (viewMode === 'mobile') {
-      modeIcon.textContent = '📱';
-      modeLabel.textContent = 'Mobil';
-      modeToggleBtn.title = 'Şu an: Mobil Görünüm (Web görünümüne geçmek için tıklayın)';
-    } else {
-      modeIcon.textContent = '💻';
-      modeLabel.textContent = 'Web';
-      modeToggleBtn.title = 'Şu an: Web Görünümü (Mobil görünüme geçmek için tıklayın)';
+    if (segMobile && segDesktop) {
+      segMobile.classList.toggle('eb-active-segment', viewMode === 'mobile');
+      segDesktop.classList.toggle('eb-active-segment', viewMode === 'desktop');
     }
   }
+
+  [segMobile, segDesktop].forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const newMode = btn.dataset.mode;
+      if (newMode === viewMode) return;
+      chrome.runtime.sendMessage({ type: 'SET_VIEW_MODE', mode: newMode }, () => {
+        viewMode = newMode;
+        updateModeUI();
+        if (activeShortcutId && iframePool.has(activeShortcutId)) {
+          loader.classList.remove('eb-hidden');
+          const activeFrame = iframePool.get(activeShortcutId);
+          activeFrame.src = activeFrame.src;
+        }
+      });
+    });
+  });
 
   function loadState() {
     chrome.storage.local.get(
@@ -460,22 +476,6 @@
   collapseBtn.addEventListener('click', closeDrawer);
   closeBtn.addEventListener('click', closeDrawer);
 
-  // Header: Mode Toggle (Mobile / Desktop View)
-  modeToggleBtn.addEventListener('click', () => {
-    const nextMode = viewMode === 'mobile' ? 'desktop' : 'mobile';
-    chrome.runtime.sendMessage({ type: 'SET_VIEW_MODE', mode: nextMode }, (res) => {
-      viewMode = nextMode;
-      updateModeUI();
-
-      // Reload active iframe to fetch with updated User-Agent
-      if (activeShortcutId && iframePool.has(activeShortcutId)) {
-        loader.classList.remove('eb-hidden');
-        const activeFrame = iframePool.get(activeShortcutId);
-        activeFrame.src = activeFrame.src;
-      }
-    });
-  });
-
   // Header Actions
   reloadBtn.addEventListener('click', () => {
     if (activeShortcutId && iframePool.has(activeShortcutId)) {
@@ -627,6 +627,18 @@
         closeAddModal();
       } else if (drawer.classList.contains('eb-open')) {
         closeDrawer();
+      }
+    }
+  });
+
+  // --- Extension Action / Toolbar & Global Shortcut Listener ---
+  chrome.runtime.onMessage.addListener((message) => {
+    if (message.type === 'TOGGLE_DRAWER') {
+      if (drawer.classList.contains('eb-open')) {
+        closeDrawer();
+      } else {
+        const current = shortcuts.find((s) => s.id === activeShortcutId) || shortcuts[0];
+        openDrawer(current);
       }
     }
   });

@@ -13,6 +13,17 @@
   "background": {
     "service_worker": "background.js"
   },
+  "action": {
+    "default_title": "EdgeBar'ı Aç / Kapat"
+  },
+  "commands": {
+    "toggle-edgebar": {
+      "suggested_key": {
+        "default": "Alt+S"
+      },
+      "description": "EdgeBar'ı Aç / Kapat"
+    }
+  },
   "declarative_net_request": {
     "rule_resources": [
       {
