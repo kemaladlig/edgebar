@@ -664,6 +664,11 @@
     drawer.classList.remove('eb-strip-only');
     drawer.classList.add('eb-open');
     drawer.style.width = `${drawerWidth}px`;
+    if (heightMode === 'custom') {
+      drawer.style.height = `${drawerHeight}px`;
+    } else {
+      drawer.style.height = '';
+    }
     toggleBtn.innerHTML = ICONS.sidebarOpen;
     toggleBtn.title = 'Paneli Daralt (Esc)';
 
@@ -679,10 +684,12 @@
     if (collapsedStyle === 'strip') {
       drawer.classList.add('eb-strip-only');
       drawer.style.width = '46px';
+      drawer.style.height = '';
       triggerPill.classList.add('eb-hidden');
     } else {
       drawer.classList.remove('eb-strip-only');
       drawer.style.width = '';
+      drawer.style.height = '';
       triggerPill.classList.remove('eb-hidden');
     }
 
