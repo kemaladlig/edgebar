@@ -678,9 +678,11 @@
 
     if (collapsedStyle === 'strip') {
       drawer.classList.add('eb-strip-only');
+      drawer.style.width = '46px';
       triggerPill.classList.add('eb-hidden');
     } else {
       drawer.classList.remove('eb-strip-only');
+      drawer.style.width = '';
       triggerPill.classList.remove('eb-hidden');
     }
 

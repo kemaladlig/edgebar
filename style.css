@@ -101,6 +101,8 @@
 /* Strip-Only Mode (When drawer is closed, but shortcuts remain visible on left edge) */
 .eb-drawer.eb-strip-only {
   width: 46px !important;
+  min-width: 46px !important;
+  max-width: 46px !important;
   transform: translateX(0) !important;
   opacity: 1 !important;
   pointer-events: auto !important;
@@ -109,6 +111,7 @@
 }
 
 .eb-drawer.eb-strip-only .eb-dock-rail {
+  width: 46px !important;
   border-right: none !important;
 }
 
