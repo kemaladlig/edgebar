@@ -4,7 +4,7 @@
 // ============================================================================
 
 const MOBILE_USER_AGENT =
-  'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1';
+  'Mozilla/5.0 (Linux; Android 14; Pixel 8 Pro) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Mobile Safari/537.36';
 
 const MOBILE_RULE_ID = 100;
 
@@ -97,7 +97,7 @@ function ensureBypassRules() {
 chrome.runtime.onInstalled.addListener(() => {
   ensureBypassRules();
   chrome.storage.local.get(['edgebar_view_mode'], (result) => {
-    const mode = result.edgebar_view_mode || 'mobile';
+    const mode = result.edgebar_view_mode || 'desktop';
     chrome.storage.local.set({ edgebar_view_mode: mode });
     setMobileMode(mode === 'mobile');
   });

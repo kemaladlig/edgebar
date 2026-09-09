@@ -555,11 +555,9 @@
     setViewMode: (newMode) => {
       chrome.runtime.sendMessage({ type: 'SET_VIEW_MODE', mode: newMode }, () => {
         viewMode = newMode;
-        if (activeShortcutId && iframePool.has(activeShortcutId)) {
-          loader.classList.remove('eb-hidden');
-          const f = iframePool.get(activeShortcutId);
-          f.src = f.src;
-        }
+        iframePool.forEach((f) => {
+          try { f.src = f.src; } catch (_) {}
+        });
       });
     },
     getHeightMode: () => heightMode,
@@ -840,6 +838,11 @@
       btn.addEventListener('mouseleave', hideTooltip);
       btn.addEventListener('click', () => {
         if (preventNextClick) return;
+        if (isSettingsViewActive) {
+          closeSettingsView(false);
+          openDrawer(sc);
+          return;
+        }
         if (activeShortcutId === sc.id && drawer.classList.contains('eb-open')) {
           if (currentActiveUrl !== sc.url) {
             openDrawer(sc);

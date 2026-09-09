@@ -53,6 +53,10 @@
   pointer-events: none !important;
 }
 
+.eb-hidden {
+  display: none !important;
+}
+
 /* ==========================================================================
    2. TRIGGER PILL (COLLAPSED FLOATING BUTTON)
    ========================================================================== */
@@ -1247,6 +1251,10 @@
   flex-direction: column;
   overflow: hidden;
   animation: ebFadeIn 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.eb-settings-view.eb-hidden {
+  display: none !important;
 }
 
 @keyframes ebFadeIn {
