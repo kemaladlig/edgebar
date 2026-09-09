@@ -251,7 +251,7 @@
 }
 
 /* Height Mode 1: Full Viewport */
-.eb-drawer.eb-height-full {
+.eb-drawer.eb-open.eb-height-full {
   top: 0;
   bottom: 0;
   left: 0;
@@ -260,7 +260,7 @@
 }
 
 /* Height Mode 2: Floating Island */
-.eb-drawer.eb-height-floating {
+.eb-drawer.eb-open.eb-height-floating {
   top: 14px;
   bottom: 14px;
   left: 14px;
@@ -271,13 +271,13 @@
   box-shadow: 0 16px 48px rgba(0, 0, 0, 0.75);
 }
 
-.eb-drawer.eb-height-floating .eb-dock-rail,
-.eb-drawer.eb-height-floating .eb-panel-main {
+.eb-drawer.eb-open.eb-height-floating .eb-dock-rail,
+.eb-drawer.eb-open.eb-height-floating .eb-panel-main {
   height: 100%;
 }
 
 /* Height Mode 3: Custom Resizable Height */
-.eb-drawer.eb-height-custom {
+.eb-drawer.eb-open.eb-height-custom {
   top: auto;
   bottom: 24px;
   left: 0;
@@ -288,21 +288,21 @@
   box-shadow: 8px 12px 36px rgba(0, 0, 0, 0.7);
 }
 
-.eb-drawer.eb-height-custom .eb-drawer-header {
+.eb-drawer.eb-open.eb-height-custom .eb-drawer-header {
   cursor: grab;
 }
 
-.eb-drawer.eb-height-custom.eb-dragging-drawer,
-.eb-drawer.eb-resizing-active {
+.eb-drawer.eb-open.eb-height-custom.eb-dragging-drawer,
+.eb-drawer.eb-open.eb-resizing-active {
   transition: none !important;
 }
 
-.eb-drawer.eb-height-custom.eb-dragging-drawer .eb-drawer-header {
+.eb-drawer.eb-open.eb-height-custom.eb-dragging-drawer .eb-drawer-header {
   cursor: grabbing !important;
 }
 
-.eb-drawer.eb-height-custom .eb-dock-rail,
-.eb-drawer.eb-height-custom .eb-panel-main {
+.eb-drawer.eb-open.eb-height-custom .eb-dock-rail,
+.eb-drawer.eb-open.eb-height-custom .eb-panel-main {
   height: 100%;
 }
 
@@ -323,7 +323,7 @@
   transition: background 0.15s ease;
 }
 
-.eb-drawer.eb-height-custom .eb-resizer-top {
+.eb-drawer.eb-open.eb-height-custom .eb-resizer-top {
   display: block;
 }
 

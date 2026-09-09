@@ -472,7 +472,7 @@
 
   // --- Drawer ---
   const drawer = document.createElement('div');
-  drawer.className = 'eb-drawer eb-height-full';
+  drawer.className = 'eb-drawer eb-height-full eb-strip-only';
   drawer.innerHTML = TEMPLATES.getDrawerHtml(ICONS);
   container.appendChild(drawer);
 
@@ -753,6 +753,10 @@
     // 3. In floating open mode, CSS handles positioning (top:14px, bottom:14px)
     if (isOpen && heightMode === 'floating') return;
 
+    if (!(isOpen && heightMode === 'custom')) {
+      drawer.style.removeProperty('height');
+    }
+
     // 4. If no custom position, default is bottom: 24px
     if (panelY === null) {
       drawer.style.top = 'auto';
@@ -763,13 +767,13 @@
     }
 
     // 5. Clamp to safe viewport bounds based on actual element height
-    let el, maxY;
+    let el;
     if (!isOpen && collapsedStyle === 'pill') {
       el = triggerPill;
     } else {
       el = drawer;
     }
-    maxY = getMaxY(el);
+    const maxY = getMaxY(el);
     const y = Math.max(8, Math.min(panelY, maxY));
 
     // 6. Apply position — always override CSS bottom to prevent stretching
@@ -805,7 +809,15 @@
   }
 
   // Attach drag to: drag handle, trigger pill, drawer header
-  if (dockDragHandle) dockDragHandle.addEventListener('mousedown', onDragStart);
+  if (dockDragHandle) {
+    dockDragHandle.addEventListener('mousedown', onDragStart);
+    dockDragHandle.addEventListener('dblclick', (e) => {
+      e.stopPropagation();
+      panelY = null;
+      chrome.storage.local.remove('edgebar_panel_y');
+      applyPosition();
+    });
+  }
   triggerPill.addEventListener('mousedown', onDragStart);
   drawerHeader.addEventListener('mousedown', (e) => {
     if (e.target.closest('.eb-drawer-actions, .eb-action-btn, .eb-zoom-group, .eb-zoom-btn, .eb-header-new-tab, .eb-url-bar-wrap, .eb-url-input')) return;
@@ -1107,8 +1119,17 @@
       }
       if (result.edgebar_view_mode) viewMode = result.edgebar_view_mode;
 
-      // Position
-      panelY = (result.edgebar_panel_y !== undefined && result.edgebar_panel_y !== null) ? result.edgebar_panel_y : null;
+      // Position (clean up any legacy artifact where previous bug clamped position to top <= 24)
+      if (result.edgebar_panel_y !== undefined && result.edgebar_panel_y !== null) {
+        if (result.edgebar_panel_y <= 24) {
+          panelY = null;
+          chrome.storage.local.remove('edgebar_panel_y');
+        } else {
+          panelY = result.edgebar_panel_y;
+        }
+      } else {
+        panelY = null;
+      }
 
       // Height mode
       if (result.edgebar_height_mode) heightMode = result.edgebar_height_mode;
