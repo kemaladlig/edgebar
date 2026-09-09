@@ -43,6 +43,7 @@
   let viewMode = 'mobile';
   let heightMode = 'full';
   let collapsedStyle = 'strip'; // 'strip' (shortcuts visible on left rail) or 'pill' (only icon)
+  let pushPage = true; // true: push page content (side-by-side tab), false: overlay
   let zoomLevel = 1.0;
 
   // Persistent Iframe Cache (Multi-Session Pool)
@@ -255,7 +256,16 @@
         </div>
       </div>
 
-      <!-- Segment 3: Kapalı Hal -->
+      <!-- Segment 3: Sayfa Düzeni (Yan Sekme / Üstüne Bin) -->
+      <div class="eb-setting-row">
+        <div class="eb-setting-label">Sayfa Düzeni</div>
+        <div class="eb-segmented-control eb-push-segmented">
+          <button type="button" class="eb-segmented-btn eb-push-on" data-push="true">⫸ Yan Sekme (İt)</button>
+          <button type="button" class="eb-segmented-btn eb-push-off" data-push="false">❐ Üstüne Bin</button>
+        </div>
+      </div>
+
+      <!-- Segment 4: Kapalı Hal -->
       <div class="eb-setting-row">
         <div class="eb-setting-label">Kapalıyken</div>
         <div class="eb-segmented-control eb-collapsed-segmented">
@@ -298,6 +308,7 @@
   const segDesktop = modalBackdrop.querySelector('.eb-segment-desktop');
   const heightBtns = modalBackdrop.querySelectorAll('.eb-height-segmented .eb-segmented-btn');
   const collapsedBtns = modalBackdrop.querySelectorAll('.eb-collapsed-segmented .eb-segmented-btn');
+  const pushBtns = modalBackdrop.querySelectorAll('.eb-push-segmented .eb-segmented-btn');
 
   // ==========================================================================
   // ZOOM LOGIC
@@ -368,6 +379,81 @@
       const newStyle = btn.dataset.collapsed;
       applyCollapsedStyle(newStyle);
       chrome.storage.local.set({ edgebar_collapsed_style: newStyle });
+    });
+  });
+
+  let pushTimer = null;
+
+  function setPagePush(width) {
+    const html = document.documentElement;
+    const body = document.body;
+    if (!html) return;
+
+    if (pushTimer) {
+      clearTimeout(pushTimer);
+      pushTimer = null;
+    }
+
+    if (pushPage && width > 0) {
+      const transitionStr = isResizing
+        ? 'none'
+        : 'margin-left 0.22s cubic-bezier(0.16, 1, 0.3, 1), width 0.22s cubic-bezier(0.16, 1, 0.3, 1)';
+
+      html.style.setProperty('transition', transitionStr, 'important');
+      html.style.setProperty('margin-left', `${width}px`, 'important');
+      html.style.setProperty('width', `calc(100vw - ${width}px)`, 'important');
+      html.style.setProperty('box-sizing', 'border-box', 'important');
+
+      if (body) {
+        body.style.setProperty('transition', isResizing ? 'none' : 'width 0.22s cubic-bezier(0.16, 1, 0.3, 1)', 'important');
+        body.style.setProperty('width', `calc(100vw - ${width}px)`, 'important');
+        body.style.setProperty('box-sizing', 'border-box', 'important');
+      }
+    } else {
+      const transitionStr = 'margin-left 0.22s cubic-bezier(0.16, 1, 0.3, 1), width 0.22s cubic-bezier(0.16, 1, 0.3, 1)';
+      html.style.setProperty('transition', transitionStr, 'important');
+      html.style.setProperty('margin-left', '0px', 'important');
+      html.style.setProperty('width', '100vw', 'important');
+      if (body) {
+        body.style.setProperty('transition', 'width 0.22s cubic-bezier(0.16, 1, 0.3, 1)', 'important');
+        body.style.setProperty('width', '100vw', 'important');
+      }
+
+      pushTimer = setTimeout(() => {
+        html.style.removeProperty('margin-left');
+        html.style.removeProperty('width');
+        html.style.removeProperty('box-sizing');
+        html.style.removeProperty('transition');
+        if (body) {
+          body.style.removeProperty('width');
+          body.style.removeProperty('box-sizing');
+          body.style.removeProperty('transition');
+        }
+        pushTimer = null;
+      }, 230);
+    }
+
+    window.dispatchEvent(new Event('resize'));
+    setTimeout(() => window.dispatchEvent(new Event('resize')), 240);
+  }
+
+  function applyPushPage(enabled) {
+    pushPage = enabled;
+    pushBtns.forEach((btn) => {
+      btn.classList.toggle('eb-active-segment', (btn.dataset.push === 'true') === enabled);
+    });
+    if (drawer.classList.contains('eb-open')) {
+      setPagePush(drawerWidth);
+    } else {
+      setPagePush(0);
+    }
+  }
+
+  pushBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const enabled = btn.dataset.push === 'true';
+      applyPushPage(enabled);
+      chrome.storage.local.set({ edgebar_push_page: enabled });
     });
   });
 
@@ -533,6 +619,7 @@
         'edgebar_drawer_height',
         'edgebar_height_mode',
         'edgebar_collapsed_style',
+        'edgebar_push_page',
         'edgebar_last_active',
         'edgebar_drawer_open',
         'edgebar_view_mode',
@@ -589,6 +676,13 @@
           collapsedStyle = 'strip';
         }
         applyCollapsedStyle(collapsedStyle);
+
+        if (result.edgebar_push_page !== undefined) {
+          pushPage = result.edgebar_push_page;
+        } else {
+          pushPage = true;
+        }
+        applyPushPage(pushPage);
 
         renderShortcuts();
 
@@ -672,6 +766,10 @@
     toggleBtn.innerHTML = ICONS.sidebarOpen;
     toggleBtn.title = 'Paneli Daralt (Esc)';
 
+    if (pushPage) {
+      setPagePush(drawerWidth);
+    }
+
     chrome.storage.local.set({ edgebar_drawer_open: true, edgebar_last_active: sc.id });
   }
 
@@ -692,6 +790,8 @@
       drawer.style.height = '';
       triggerPill.classList.remove('eb-hidden');
     }
+
+    setPagePush(0);
 
     hideTooltip();
     hideContextMenu();
@@ -776,6 +876,9 @@
       const newWidth = Math.max(360, Math.min(startWidth + deltaX, window.innerWidth * 0.85));
       drawerWidth = newWidth;
       drawer.style.width = `${newWidth}px`;
+      if (pushPage) {
+        setPagePush(newWidth);
+      }
     }
   });
 
@@ -793,6 +896,9 @@
       resizer.classList.remove('eb-resizing');
       dragOverlay.classList.remove('eb-active');
       dragOverlay.style.cursor = '';
+      if (pushPage) {
+        setPagePush(drawerWidth);
+      }
       chrome.storage.local.set({ edgebar_drawer_width: drawerWidth });
     }
   });
