@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "EdgeBar - Minimal Web Panels",
-  "version": "1.0.0",
-  "description": "Ultra-minimal, collapsible side dock & slide-out web panels for Gemini, ChatGPT, X, and your custom shortcuts.",
+  "name": "EdgeBar - In-Browser Workspace & AI Companion",
+  "version": "1.1.0",
+  "description": "Arc & Raycast inspired vertical dock, closable tabs, address bar and slide-out workspace for Gemini, ChatGPT, and your custom web apps.",
   "permissions": [
     "declarativeNetRequest",
     "declarativeNetRequestWithHostAccess",
