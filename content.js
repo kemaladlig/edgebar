@@ -407,37 +407,39 @@
   // ==========================================================================
 
   function applyDockPosition(topPx) {
-    if (topPx === null || topPx === undefined) return;
-
     const isOpen = drawer.classList.contains('eb-open');
-    let targetHeight = 40;
-    if (isOpen) {
-      targetHeight = heightMode === 'custom' ? drawerHeight : window.innerHeight;
-    } else if (collapsedStyle === 'strip') {
-      targetHeight = drawer.offsetHeight || 110;
+
+    if (!isOpen) {
+      drawer.style.setProperty('top', 'auto', 'important');
+      drawer.style.setProperty('bottom', '24px', 'important');
+      triggerPill.style.setProperty('top', 'auto', 'important');
+      triggerPill.style.setProperty('bottom', '24px', 'important');
+      return;
     }
 
+    if (topPx === null || topPx === undefined) {
+      if (heightMode === 'custom') {
+        drawer.style.setProperty('top', 'auto', 'important');
+        drawer.style.setProperty('bottom', '0px', 'important');
+      } else {
+        drawer.style.top = '';
+        drawer.style.bottom = '';
+      }
+      return;
+    }
+
+    let targetHeight = heightMode === 'custom' ? drawerHeight : window.innerHeight;
     const minTop = 10;
     const maxTop = Math.max(minTop, window.innerHeight - targetHeight - 10);
     const clampedTop = Math.max(minTop, Math.min(topPx, maxTop));
     dockTop = clampedTop;
 
-    if (!isOpen) {
-      if (collapsedStyle === 'strip') {
-        drawer.style.setProperty('top', `${clampedTop}px`, 'important');
-        drawer.style.setProperty('bottom', 'auto', 'important');
-      } else {
-        triggerPill.style.setProperty('top', `${clampedTop}px`, 'important');
-        triggerPill.style.setProperty('bottom', 'auto', 'important');
-      }
+    if (heightMode === 'custom') {
+      drawer.style.setProperty('top', `${clampedTop}px`, 'important');
+      drawer.style.setProperty('bottom', 'auto', 'important');
     } else {
-      if (heightMode === 'custom') {
-        drawer.style.setProperty('top', `${clampedTop}px`, 'important');
-        drawer.style.setProperty('bottom', 'auto', 'important');
-      } else {
-        drawer.style.top = '';
-        drawer.style.bottom = '';
-      }
+      drawer.style.top = '';
+      drawer.style.bottom = '';
     }
   }
 
@@ -492,7 +494,7 @@
       }
       btn.dataset.id = sc.id;
       btn.dataset.index = index;
-      btn.draggable = true;
+      btn.draggable = drawer.classList.contains('eb-open');
 
       // Icon wrapper
       const iconWrap = document.createElement('div');
@@ -532,8 +534,12 @@
         showContextMenu(e, sc);
       });
 
-      // HTML5 Drag & Drop Listeners
+      // HTML5 Drag & Drop Listeners (only active when drawer is open)
       btn.addEventListener('dragstart', (e) => {
+        if (!drawer.classList.contains('eb-open')) {
+          e.preventDefault();
+          return false;
+        }
         draggedItemIndex = index;
         btn.classList.add('eb-dragging');
         hideTooltip();
@@ -668,12 +674,10 @@
         }
         updateModeUI();
 
-        if (result.edgebar_dock_top !== undefined && result.edgebar_dock_top !== null) {
-          dockTop = result.edgebar_dock_top;
-        } else {
-          dockTop = Math.max(20, Math.round(window.innerHeight * 0.55));
-        }
-        applyDockPosition(dockTop);
+        // Default dock position is bottom (null). Clear any stale dockTop.
+        chrome.storage.local.remove('edgebar_dock_top');
+        dockTop = null;
+        applyDockPosition(null);
 
         if (result.edgebar_height_mode) {
           heightMode = result.edgebar_height_mode;
@@ -772,6 +776,11 @@
     toggleBtn.innerHTML = ICONS.sidebarOpen;
     toggleBtn.title = 'Paneli Daralt (Esc)';
 
+    // Allow reordering when drawer is open
+    itemsList.querySelectorAll('.eb-item-btn').forEach((b) => {
+      b.draggable = true;
+    });
+
     chrome.storage.local.set({ edgebar_drawer_open: true, edgebar_last_active: sc.id });
   }
 
@@ -793,7 +802,16 @@
       triggerPill.classList.remove('eb-hidden');
     }
 
-    applyDockPosition(dockTop);
+    // Always ensure closed dock is firmly anchored to bottom-left
+    drawer.style.setProperty('top', 'auto', 'important');
+    drawer.style.setProperty('bottom', '24px', 'important');
+    triggerPill.style.setProperty('top', 'auto', 'important');
+    triggerPill.style.setProperty('bottom', '24px', 'important');
+
+    // Disable draggable on shortcuts so clicking them is 100% normal and instant
+    itemsList.querySelectorAll('.eb-item-btn').forEach((b) => {
+      b.draggable = false;
+    });
 
     hideTooltip();
     hideContextMenu();
@@ -820,16 +838,7 @@
 
   closeBtn.addEventListener('click', closeDrawer);
 
-  // Dragging Listeners for Vertical Placement
-  if (dockDragHandle) {
-    dockDragHandle.addEventListener('mousedown', startDockDrag);
-  }
-  triggerPill.addEventListener('mousedown', startDockDrag);
-  dockRail.addEventListener('mousedown', (e) => {
-    if (drawer.classList.contains('eb-strip-only') && !e.target.closest('.eb-item-btn') && !e.target.closest('.eb-toggle-btn')) {
-      startDockDrag(e);
-    }
-  });
+  // Dragging Listeners for Custom Height Header
   drawerHeader.addEventListener('mousedown', (e) => {
     if (heightMode === 'custom') {
       startDockDrag(e);
