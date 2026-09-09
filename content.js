@@ -82,13 +82,15 @@
           </div>
           <div class="eb-blank-page eb-hidden">
             <div class="eb-blank-card">
-              <div class="eb-blank-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="10"/><path d="m10 15 5-3-5-3v6Z"/>
-                </svg>
+              <div class="eb-google-brand">
+                <span class="eb-g-blue">G</span><span class="eb-g-red">o</span><span class="eb-g-yellow">o</span><span class="eb-g-blue">g</span><span class="eb-g-green">l</span><span class="eb-g-red">e</span>
               </div>
-              <div class="eb-blank-title">Yeni Sekme</div>
-              <div class="eb-blank-subtitle">Adres çubuğuna bir URL yazın veya hızlıca seçin:</div>
+              <form class="eb-blank-search-form" onsubmit="return false;">
+                <div class="eb-blank-search-box">
+                  <svg class="eb-blank-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                  <input type="text" class="eb-blank-search-input" placeholder="Google'da arayın veya URL yazın..." spellcheck="false" autocomplete="off" />
+                </div>
+              </form>
               <div class="eb-blank-chips">
                 <button type="button" class="eb-blank-chip" data-url="https://www.google.com">🔍 Google</button>
                 <button type="button" class="eb-blank-chip" data-url="https://gemini.google.com">✨ Gemini</button>
@@ -446,6 +448,7 @@
   const iframeContainer = drawer.querySelector('.eb-iframe-container');
   const loader = drawer.querySelector('.eb-loader-overlay');
   const blankPage = drawer.querySelector('.eb-blank-page');
+  const blankSearchInput = drawer.querySelector('.eb-blank-search-input');
   const resizer = drawer.querySelector('.eb-resizer');
   const resizerTop = drawer.querySelector('.eb-resizer-top');
   const zoomInBtn = drawer.querySelector('.eb-zoom-in');
@@ -858,7 +861,14 @@
       urlInput.dataset.fullUrl = '';
       urlInput.placeholder = "URL girin veya Google'da arayın...";
       drawerFavicon.style.display = 'none';
-      setTimeout(() => urlInput.focus(), 60);
+      if (blankSearchInput) blankSearchInput.value = '';
+      setTimeout(() => {
+        if (blankSearchInput) {
+          blankSearchInput.focus();
+        } else {
+          urlInput.focus();
+        }
+      }, 60);
     }
 
     if (!drawer.classList.contains('eb-open')) {
@@ -1150,6 +1160,28 @@
       }
     });
   });
+
+  if (blankSearchInput) {
+    blankSearchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        handleNavigateUrl(blankSearchInput.value);
+        blankSearchInput.blur();
+      } else if (e.key === 'Escape') {
+        blankSearchInput.blur();
+      }
+    });
+
+    blankSearchInput.addEventListener('input', () => {
+      urlInput.value = blankSearchInput.value;
+    });
+
+    urlInput.addEventListener('input', () => {
+      if (!blankPage.classList.contains('eb-hidden')) {
+        blankSearchInput.value = urlInput.value;
+      }
+    });
+  }
 
   urlInput.addEventListener('focus', () => {
     if (urlInput.dataset.fullUrl) {
