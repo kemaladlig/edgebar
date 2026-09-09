@@ -789,7 +789,6 @@
   // DRAG-TO-MOVE (CLEAN IMPLEMENTATION)
   // ==========================================================================
   let dragElHeight = 60; // cached at drag start for accurate clamping
-  let dragStartElBottom = 80;
 
   function onDragStart(e) {
     if (e.button !== 0) return;
@@ -1110,7 +1109,7 @@
       'edgebar_shortcuts', 'edgebar_drawer_width', 'edgebar_drawer_height',
       'edgebar_height_mode', 'edgebar_collapsed_style', 'edgebar_panel_bottom',
       'edgebar_last_active', 'edgebar_drawer_open', 'edgebar_view_mode', 'edgebar_zoom',
-      'edgebar_click_outside_close', 'edgebar_icon_size'
+      'edgebar_click_outside_close', 'edgebar_icon_size', 'edgebar_center_v2'
     ], (result) => {
       // Shortcuts
       const isOldDefault = result.edgebar_shortcuts && Array.isArray(result.edgebar_shortcuts) &&
