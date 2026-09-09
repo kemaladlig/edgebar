@@ -286,8 +286,22 @@
 .eb-drawer.eb-strip-only.eb-strip-minimal .eb-dock-new-tab-btn,
 .eb-drawer.eb-strip-only.eb-strip-minimal .eb-open-tabs-list,
 .eb-drawer.eb-strip-only.eb-strip-minimal .eb-tabs-divider,
-.eb-drawer.eb-strip-only.eb-strip-minimal .eb-dock-bottom {
+.eb-drawer.eb-strip-only.eb-strip-minimal .eb-settings-btn {
   display: none !important;
+}
+
+.eb-drawer.eb-strip-only.eb-strip-minimal .eb-dock-bottom {
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding-top: 4px;
+}
+
+.eb-drawer.eb-strip-only.eb-strip-minimal .eb-dock-drag-handle {
+  display: flex !important;
+  height: 14px;
+  margin: 0;
 }
 
 .eb-drawer.eb-strip-only.eb-strip-minimal.eb-no-shortcuts .eb-dock-new-tab-btn {
