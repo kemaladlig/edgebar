@@ -392,10 +392,10 @@
   let zoomLevel = 1.0;
 
   // --- Drag State (bottom-relative Y positioning) ---
-  let panelBottom = null;   // null = CSS default (bottom: 24px), number = custom bottom distance in px
+  let panelBottom = null;   // null = CSS default (bottom: 80px), number = custom bottom distance in px
   let isDragging = false;
   let dragStartMouseY = 0;
-  let dragStartElBottom = 24;
+  let dragStartElBottom = 80;
   let dragMoved = false;
   let preventNextClick = false;
 
@@ -742,7 +742,7 @@
   // ==========================================================================
   // POSITION SYSTEM (BOTTOM-ANCHORED)
   //
-  // panelBottom = null  → CSS default position (bottom: 24px for strip/pill)
+  // panelBottom = null  → CSS default position (bottom: 80px for strip/pill)
   // panelBottom = <num> → custom distance in px from viewport bottom
   //
   // Key insight: Anchoring to bottom prevents any top-overlap or jumping
@@ -768,10 +768,10 @@
 
     let el = (!isOpen && collapsedStyle === 'pill') ? triggerPill : drawer;
 
-    // Default position: always bottom 24px!
+    // Default position: always bottom 80px!
     if (panelBottom === null) {
       el.style.top = 'auto';
-      el.style.bottom = '24px';
+      el.style.bottom = '80px';
       return;
     }
 
@@ -788,7 +788,7 @@
   // DRAG-TO-MOVE (CLEAN IMPLEMENTATION)
   // ==========================================================================
   let dragElHeight = 60; // cached at drag start for accurate clamping
-  let dragStartElBottom = 24;
+  let dragStartElBottom = 80;
 
   function onDragStart(e) {
     if (e.button !== 0) return;
@@ -1141,7 +1141,7 @@
       if (result.edgebar_panel_bottom !== undefined && result.edgebar_panel_bottom !== null && !isNaN(result.edgebar_panel_bottom)) {
         panelBottom = Math.max(8, result.edgebar_panel_bottom);
       } else {
-        panelBottom = null; // defaults to bottom: 24px
+        panelBottom = null; // defaults to bottom: 80px
       }
 
       // Height mode
