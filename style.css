@@ -63,8 +63,9 @@
 
 .eb-trigger-pill {
   position: fixed;
-  bottom: 80px;
-  top: auto;
+  top: 50%;
+  bottom: auto;
+  transform: translateY(-50%);
   left: 0;
   width: 36px;
   height: 40px;
@@ -107,7 +108,7 @@
 
 .eb-trigger-pill.eb-hidden {
   opacity: 0;
-  transform: translateX(-100%);
+  transform: translateY(-50%) translateX(-100%);
   pointer-events: none;
 }
 
@@ -180,8 +181,8 @@
 /* Strip-Only Mode (Drawer closed, compact dock visible on edge) */
 .eb-drawer.eb-strip-only {
   position: fixed !important;
-  bottom: 80px;
-  top: auto !important;
+  top: 50% !important;
+  bottom: auto !important;
   left: 0;
   width: var(--eb-rail-w, 46px);
   min-width: var(--eb-rail-w, 46px);
@@ -189,7 +190,7 @@
   height: auto !important;
   min-height: auto !important;
   max-height: calc(100vh - 32px);
-  transform: translateX(0);
+  transform: translateY(-50%);
   opacity: 1;
   pointer-events: auto;
   border-radius: 0 12px 12px 0;
@@ -332,8 +333,9 @@
 
 /* Height Mode 3: Custom Resizable Height */
 .eb-drawer.eb-open.eb-height-custom {
-  top: auto;
-  bottom: 80px;
+  top: 50%;
+  bottom: auto;
+  transform: translateY(-50%);
   left: 0;
   border-radius: 0 12px 12px 0;
   border: 1px solid rgba(255, 255, 255, 0.12);

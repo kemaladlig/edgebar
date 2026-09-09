@@ -392,10 +392,10 @@
   let zoomLevel = 1.0;
 
   // --- Drag State (bottom-relative Y positioning) ---
-  let panelBottom = null;   // null = CSS default (bottom: 80px), number = custom bottom distance in px
+  let panelBottom = null;   // null = CSS default (vertical center: top 50%), number = custom bottom distance in px
   let isDragging = false;
   let dragStartMouseY = 0;
-  let dragStartElBottom = 80;
+  let dragStartElBottom = 0;
   let dragMoved = false;
   let preventNextClick = false;
 
@@ -740,19 +740,18 @@
   }
 
   // ==========================================================================
-  // POSITION SYSTEM (BOTTOM-ANCHORED)
+  // POSITION SYSTEM (CENTERED DEFAULT / DRAGGABLE)
   //
-  // panelBottom = null  → CSS default position (bottom: 80px for strip/pill)
+  // panelBottom = null  → CSS default position (vertical center: top 50%)
   // panelBottom = <num> → custom distance in px from viewport bottom
-  //
-  // Key insight: Anchoring to bottom prevents any top-overlap or jumping
-  // across tabs and different screen sizes.
   // ==========================================================================
   function applyPosition() {
     drawer.style.removeProperty('top');
     drawer.style.removeProperty('bottom');
+    drawer.style.removeProperty('transform');
     triggerPill.style.removeProperty('top');
     triggerPill.style.removeProperty('bottom');
+    triggerPill.style.removeProperty('transform');
 
     const isOpen = drawer.classList.contains('eb-open');
 
@@ -768,10 +767,11 @@
 
     let el = (!isOpen && collapsedStyle === 'pill') ? triggerPill : drawer;
 
-    // Default position: always bottom 80px!
+    // Default position: vertically centered via CSS (top: 50%, translateY(-50%))
     if (panelBottom === null) {
-      el.style.top = 'auto';
-      el.style.bottom = '80px';
+      el.style.removeProperty('top');
+      el.style.removeProperty('bottom');
+      el.style.removeProperty('transform');
       return;
     }
 
@@ -782,6 +782,7 @@
 
     el.style.top = 'auto';
     el.style.bottom = `${b}px`;
+    el.style.transform = 'none';
   }
 
   // ==========================================================================
@@ -1135,13 +1136,15 @@
       }
       if (result.edgebar_view_mode) viewMode = result.edgebar_view_mode;
 
-      // Position: completely clear old edgebar_panel_y (which had buggy top values)
-      chrome.storage.local.remove('edgebar_panel_y');
-
-      if (result.edgebar_panel_bottom !== undefined && result.edgebar_panel_bottom !== null && !isNaN(result.edgebar_panel_bottom)) {
+      // Position: migrate to vertical center by default
+      if (!result.edgebar_center_v2) {
+        chrome.storage.local.remove(['edgebar_panel_y', 'edgebar_panel_bottom']);
+        chrome.storage.local.set({ edgebar_center_v2: true });
+        panelBottom = null;
+      } else if (result.edgebar_panel_bottom !== undefined && result.edgebar_panel_bottom !== null && !isNaN(result.edgebar_panel_bottom)) {
         panelBottom = Math.max(8, result.edgebar_panel_bottom);
       } else {
-        panelBottom = null; // defaults to bottom: 80px
+        panelBottom = null; // defaults to vertical center
       }
 
       // Height mode
@@ -1664,6 +1667,7 @@
         let el = (!isOpen && collapsedStyle === 'pill') ? triggerPill : drawer;
         el.style.top = 'auto';
         el.style.bottom = `${panelBottom}px`;
+        el.style.transform = 'none';
       }
       return;
     }
