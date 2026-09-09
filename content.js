@@ -1,6 +1,6 @@
 // ============================================================================
 // EdgeBar - Content Script (Linear / Raycast / Arc Inspired)
-// Standardized Design System, Drag & Drop Reordering, Zoom Controls & Persistent Sessions
+// Self-contained, High-Performance Side Dock & Slide-Out Web Panels
 // ============================================================================
 
 (function () {
@@ -11,12 +11,382 @@
   }
   window.__edgebar_initialized = true;
 
-  // --- External Dependencies (constants.js, templates.js, settings-modal.js) ---
-  const { ICONS, DEFAULT_SHORTCUTS } = window.__EDGEBAR_CONSTANTS || {};
-  const TEMPLATES = window.__EDGEBAR_TEMPLATES || {};
-  const MODAL = window.__EDGEBAR_MODAL || {};
+  // ==========================================================================
+  // CONSTANTS & ICONS
+  // ==========================================================================
+  const ICONS = {
+    sidebarClosed: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="16" x="2" y="2" rx="3.5"/><path d="M7 2v16"/><circle cx="12" cy="10" r="1.3" fill="currentColor"/></svg>`,
+    sidebarOpen: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="16" x="2" y="2" rx="3.5"/><path d="M7 2v16"/><path d="m13.5 8-2 2 2 2"/></svg>`,
+    trigger: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="16" x="2" y="2" rx="3.5"/><path d="M7 2v16"/><circle cx="12" cy="10" r="1.3" fill="currentColor"/></svg>`,
+    settings: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>`,
+    plus: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4v12M4 10h12"/></svg>`,
+    reload: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10a6.5 6.5 0 1 1 1.9 4.6L2 18"/><path d="M2 13.5V18h4.5"/></svg>`,
+    external: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 11v5a1.5 1.5 0 0 1-1.5 1.5H4.5A1.5 1.5 0 0 1 3 16V7.5A1.5 1.5 0 0 1 4.5 6H9.5"/><path d="M11.5 3.5h5v5M8 12 16.5 3.5"/></svg>`,
+    close: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-10 10M5 5l10 10"/></svg>`,
+    gemini: `<svg viewBox="0 0 24 24" fill="currentColor" color="#f4f4f5"><path d="M12 2C12 7.52 7.52 12 2 12C7.52 12 12 16.48 12 22C12 16.48 16.48 12 22 12C16.48 12 12 7.52 12 2Z"/></svg>`,
+    chatgpt: `<svg viewBox="0 0 24 24" fill="currentColor" color="#10a37f"><path d="M22.28 10.74c-.16-1.52-.89-2.92-2.07-3.92a7.35 7.35 0 0 0-4.08-1.55c-.4-.95-1.07-1.78-1.92-2.39a6.6 6.6 0 0 0-4.9-.76 6.8 6.8 0 0 0-4.07 2.62 7.2 7.2 0 0 0-2.38 4.49 7.33 7.33 0 0 0-1.14 4.31c.25 1.54 1.05 2.94 2.29 3.96a7.22 7.22 0 0 0 4.23 1.53c.4.95 1.07 1.78 1.93 2.39a6.65 6.65 0 0 0 4.88.75 6.82 6.82 0 0 0 4.08-2.62 7.23 7.23 0 0 0 2.38-4.49 7.34 7.34 0 0 0 1.15-4.32c-.17-1.54-.92-2.97-2.17-4.02l-.5-.48.5-.49Zm-9.17 11.23c-1.1 0-2.18-.3-3.13-.88l.15-.09 3.93-2.27c.2-.12.33-.33.35-.57v-5.55l1.67.96v4.61c0 2.09-1.7 3.79-3.79 3.79l-.18-.01v.01Zm-8.4-4.5c-.7-.95-1.09-2.1-1.09-3.3 0-1.05.3-2.07.87-2.95l.15.26 2.27 3.93c.12.2.33.33.57.35h5.55v1.93H7.5c-2.09 0-3.79-1.7-3.79-3.79v-.43Zm-1.03-9.5c.38-1.12 1.13-2.08 2.12-2.73a5.55 5.55 0 0 1 3.42-.58l-.16.27-2.27 3.93a.62.62 0 0 0 0 .66l2.77 4.8-1.67.96-4-6.93a3.78 3.78 0 0 1-.21-.38Zm14.28 4.58-2.77-4.8 1.67-.96 4 6.93c.3.5.47 1.07.5 1.66.08 1.18-.32 2.34-1.1 3.23a5.55 5.55 0 0 1-3.41 1.91l.15-.26 2.27-3.93a.62.62 0 0 0 0-.66l-1.31-2.12Zm3.12-2.58c0 1.05-.3 2.07-.87 2.95l-.15-.26-2.27-3.93a.62.62 0 0 0-.57-.35h-5.55v-1.93h5.45c2.09 0 3.79 1.7 3.79 3.79l.17.33Zm-10.37-4.4a3.79 3.79 0 0 1 3.79 3.79v5.55l-1.67-.96V7.07c0-2.09-1.7-3.79-3.79-3.79-.4 0-.8.06-1.19.19l.27.15 2.59 1.45Z"/></svg>`,
+    x: `<svg viewBox="0 0 24 24" fill="currentColor" color="#ffffff"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>`
+  };
 
-  // --- State Variables ---
+  const DEFAULT_SHORTCUTS = [
+    {
+      id: 'gemini',
+      name: 'Gemini',
+      url: 'https://gemini.google.com',
+      svgKey: 'gemini'
+    }
+  ];
+
+  // ==========================================================================
+  // TEMPLATES
+  // ==========================================================================
+  const TEMPLATES = {
+    getDrawerHtml: (icons) => `
+      <!-- Top Resizer for Custom Height Mode -->
+      <div class="eb-resizer-top" title="Yüksekliği ayarlamak için yukarı/aşağı sürükleyin"></div>
+
+      <!-- Left Rail: Integrated Dock Icons -->
+      <div class="eb-dock-rail">
+        <div class="eb-dock-top">
+          <button type="button" class="eb-settings-btn" title="Ayarlar">
+            ${icons.settings}
+          </button>
+        </div>
+        <div class="eb-dock-bottom">
+          <div class="eb-dock-drag-handle" title="Yukarı/aşağı taşımak için sürükleyin">
+            <span class="eb-drag-grip-line"></span>
+          </div>
+          <div class="eb-items-list"></div>
+          <button type="button" class="eb-toggle-btn" title="Paneli Daralt (Esc)">
+            ${icons.sidebarOpen}
+          </button>
+        </div>
+      </div>
+
+      <!-- Right Area: Header, Web Content & Resizers -->
+      <div class="eb-panel-main">
+        <div class="eb-drawer-header">
+          <div class="eb-drawer-title-area">
+            <img class="eb-drawer-favicon" src="" alt="" style="display:none;" />
+            <span class="eb-drawer-title">Web Panel</span>
+          </div>
+          <div class="eb-drawer-actions">
+            <!-- Zoom Controls -->
+            <div class="eb-zoom-group">
+              <button class="eb-zoom-btn eb-zoom-out" title="Uzaklaştır (−)">−</button>
+              <span class="eb-zoom-label" title="Sıfırla (%100)">100%</span>
+              <button class="eb-zoom-btn eb-zoom-in" title="Yakınlaştır (+)">+</button>
+            </div>
+
+            <button class="eb-action-btn eb-reload" title="Yenile">
+              ${icons.reload}
+            </button>
+            <button class="eb-action-btn eb-external" title="Yeni Sekmede Aç">
+              ${icons.external}
+            </button>
+            <button class="eb-action-btn eb-close" title="Kapat (Esc)">
+              ${icons.close}
+            </button>
+          </div>
+        </div>
+        <div class="eb-drawer-body">
+          <div class="eb-loader-overlay eb-hidden">
+            <div class="eb-spinner"></div>
+            <span>Yükleniyor...</span>
+          </div>
+          <div class="eb-iframe-container"></div>
+          <div class="eb-resizer" title="Genişletmek için sürükleyin"></div>
+        </div>
+      </div>
+    `,
+    getModalHtml: (icons) => `
+      <div class="eb-modal-card">
+        <div class="eb-modal-header">
+          <span class="eb-modal-title">Ayarlar</span>
+          <button type="button" class="eb-modal-close" title="Kapat">
+            ${icons.close}
+          </button>
+        </div>
+
+        <!-- Segment 1: Görünüm Modu -->
+        <div class="eb-setting-row">
+          <div class="eb-setting-label">Görünüm</div>
+          <div class="eb-segmented-control eb-mode-segmented">
+            <button type="button" class="eb-segmented-btn eb-segment-mobile" data-mode="mobile">📱 Mobil</button>
+            <button type="button" class="eb-segmented-btn eb-segment-desktop" data-mode="desktop">💻 Masaüstü</button>
+          </div>
+        </div>
+
+        <!-- Segment 2: Yükseklik -->
+        <div class="eb-setting-row">
+          <div class="eb-setting-label">Yükseklik</div>
+          <div class="eb-segmented-control eb-height-segmented">
+            <button type="button" class="eb-segmented-btn eb-h-full" data-height="full">↕ Tam</button>
+            <button type="button" class="eb-segmented-btn eb-h-floating" data-height="floating">🏝 Ada</button>
+            <button type="button" class="eb-segmented-btn eb-h-custom" data-height="custom">🎛 Serbest</button>
+          </div>
+        </div>
+
+        <!-- Segment 3: Kapalı Hal -->
+        <div class="eb-setting-row">
+          <div class="eb-setting-label">Kapalıyken</div>
+          <div class="eb-segmented-control eb-collapsed-segmented">
+            <button type="button" class="eb-segmented-btn eb-c-strip" data-collapsed="strip">📑 Kısayollar</button>
+            <button type="button" class="eb-segmented-btn eb-c-pill" data-collapsed="pill">✦ İkon</button>
+          </div>
+        </div>
+
+        <!-- Quick Add Row -->
+        <div class="eb-setting-row" style="margin-top: 10px;">
+          <div class="eb-setting-label">Site Ekle</div>
+          <div class="eb-quick-add-row">
+            <input class="eb-quick-add-input" type="text" placeholder="URL veya site (örn: notion.so)" />
+            <button type="button" class="eb-quick-add-btn" title="Kısayolu Ekle">
+              ${icons.plus}
+            </button>
+          </div>
+        </div>
+
+        <!-- Existing Shortcuts List -->
+        <div class="eb-setting-row">
+          <div class="eb-setting-label">Kayıtlı Siteler</div>
+          <div class="eb-manage-list"></div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="eb-modal-footer">
+          <button type="button" class="eb-btn-link eb-reset-defaults">Varsayılana Sıfırla (Gemini)</button>
+        </div>
+      </div>
+    `,
+    getContextMenuHtml: () => `
+      <div class="eb-context-item eb-ctx-open">Yeni Sekmede Aç</div>
+      <div class="eb-context-item eb-ctx-copy">URL'yi Kopyala</div>
+      <div class="eb-context-item eb-danger eb-ctx-delete">Kısayolu Kaldır</div>
+    `
+  };
+
+  // ==========================================================================
+  // SETTINGS MODAL FACTORY
+  // ==========================================================================
+  function createSettingsModal(options) {
+    const {
+      container,
+      icons,
+      defaultShortcuts,
+      getShortcuts,
+      setShortcuts,
+      getViewMode,
+      setViewMode,
+      getHeightMode,
+      setHeightMode,
+      getCollapsedStyle,
+      setCollapsedStyle,
+      onOpenShortcut
+    } = options;
+
+    const modalBackdrop = document.createElement('div');
+    modalBackdrop.className = 'eb-modal-backdrop';
+    modalBackdrop.innerHTML = TEMPLATES.getModalHtml(icons);
+    container.appendChild(modalBackdrop);
+
+    const modalCloseBtn = modalBackdrop.querySelector('.eb-modal-close');
+    const quickAddInput = modalBackdrop.querySelector('.eb-quick-add-input');
+    const quickAddBtn = modalBackdrop.querySelector('.eb-quick-add-btn');
+    const resetDefaultsBtn = modalBackdrop.querySelector('.eb-reset-defaults');
+    const manageList = modalBackdrop.querySelector('.eb-manage-list');
+    const segMobile = modalBackdrop.querySelector('.eb-segment-mobile');
+    const segDesktop = modalBackdrop.querySelector('.eb-segment-desktop');
+    const heightBtns = modalBackdrop.querySelectorAll('.eb-height-segmented .eb-segmented-btn');
+    const collapsedBtns = modalBackdrop.querySelectorAll('.eb-collapsed-segmented .eb-segmented-btn');
+
+    function syncUI() {
+      const currentMode = getViewMode();
+      if (segMobile && segDesktop) {
+        segMobile.classList.toggle('eb-active-segment', currentMode === 'mobile');
+        segDesktop.classList.toggle('eb-active-segment', currentMode === 'desktop');
+      }
+
+      const currentHeightMode = getHeightMode();
+      heightBtns.forEach((btn) => {
+        btn.classList.toggle('eb-active-segment', btn.dataset.height === currentHeightMode);
+      });
+
+      const currentCollapsedStyle = getCollapsedStyle();
+      collapsedBtns.forEach((btn) => {
+        btn.classList.toggle('eb-active-segment', btn.dataset.collapsed === currentCollapsedStyle);
+      });
+
+      renderManageList();
+    }
+
+    function renderManageList() {
+      manageList.innerHTML = '';
+      const list = getShortcuts();
+      if (list.length === 0) {
+        manageList.innerHTML = `<div style="color:#71717a; font-size:11.5px; padding: 6px 4px;">Henüz site eklenmedi.</div>`;
+        return;
+      }
+      list.forEach((sc) => {
+        const item = document.createElement('div');
+        item.className = 'eb-manage-item';
+
+        let iconHtml = '';
+        if (sc.svgKey && icons[sc.svgKey]) {
+          iconHtml = `<div class="eb-manage-item-icon">${icons[sc.svgKey]}</div>`;
+        } else if (sc.favicon) {
+          iconHtml = `<div class="eb-manage-item-icon"><img src="${sc.favicon}" alt="" onerror="this.parentElement.innerHTML='${sc.name.charAt(0)}'" /></div>`;
+        } else {
+          iconHtml = `<div class="eb-manage-item-icon">${sc.name.charAt(0)}</div>`;
+        }
+
+        item.innerHTML = `
+          <div class="eb-manage-item-left">
+            ${iconHtml}
+            <span class="eb-manage-item-name" title="${sc.name} (${sc.url})">${sc.name}</span>
+          </div>
+          <button type="button" class="eb-manage-item-del" title="Kaldır">${icons.close}</button>
+        `;
+
+        item.querySelector('.eb-manage-item-del').addEventListener('click', (e) => {
+          e.stopPropagation();
+          deleteShortcut(sc.id);
+        });
+
+        manageList.appendChild(item);
+      });
+    }
+
+    function openModal() {
+      quickAddInput.value = '';
+      syncUI();
+      modalBackdrop.classList.add('eb-modal-open');
+      setTimeout(() => quickAddInput.focus(), 50);
+    }
+
+    function closeModal() {
+      modalBackdrop.classList.remove('eb-modal-open');
+    }
+
+    function isOpen() {
+      return modalBackdrop.classList.contains('eb-modal-open');
+    }
+
+    [segMobile, segDesktop].forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const newMode = btn.dataset.mode;
+        if (newMode === getViewMode()) return;
+        setViewMode(newMode);
+        syncUI();
+      });
+    });
+
+    heightBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const newHeightMode = btn.dataset.height;
+        setHeightMode(newHeightMode);
+        syncUI();
+      });
+    });
+
+    collapsedBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const newStyle = btn.dataset.collapsed;
+        setCollapsedStyle(newStyle);
+        syncUI();
+      });
+    });
+
+    function handleSaveCustomShortcut() {
+      let raw = quickAddInput.value.trim();
+      if (!raw) {
+        quickAddInput.focus();
+        return;
+      }
+
+      let name = '';
+      let url = '';
+
+      if (raw.includes(' ') && (raw.includes('http') || raw.includes('.'))) {
+        const parts = raw.split(/\s+/);
+        const urlPart = parts.find((p) => p.includes('.') || p.startsWith('http'));
+        if (urlPart) {
+          url = urlPart;
+          name = parts.filter((p) => p !== urlPart).join(' ');
+        }
+      }
+
+      if (!url) {
+        url = raw;
+      }
+
+      if (!/^https?:\/\//i.test(url)) {
+        url = 'https://' + url;
+      }
+
+      try {
+        const parsedUrl = new URL(url);
+        if (!name) {
+          let host = parsedUrl.hostname.replace(/^www\./, '');
+          let base = host.split('.')[0];
+          name = base.charAt(0).toUpperCase() + base.slice(1);
+        }
+
+        const favicon = `https://www.google.com/s2/favicons?domain=${parsedUrl.hostname}&sz=64`;
+
+        const newShortcut = {
+          id: 'custom_' + Date.now(),
+          name: name,
+          url: url,
+          favicon: favicon
+        };
+
+        const updated = [...getShortcuts(), newShortcut];
+        setShortcuts(updated);
+        closeModal();
+        if (onOpenShortcut) {
+          onOpenShortcut(newShortcut);
+        }
+      } catch (_) {
+        alert('Geçerli bir web adresi giriniz.');
+        quickAddInput.focus();
+      }
+    }
+
+    function deleteShortcut(id) {
+      const remaining = getShortcuts().filter((s) => s.id !== id);
+      setShortcuts(remaining);
+      syncUI();
+    }
+
+    modalCloseBtn.addEventListener('click', closeModal);
+    modalBackdrop.addEventListener('click', (e) => {
+      if (e.target === modalBackdrop) closeModal();
+    });
+    quickAddBtn.addEventListener('click', handleSaveCustomShortcut);
+    quickAddInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') handleSaveCustomShortcut();
+    });
+    resetDefaultsBtn.addEventListener('click', () => {
+      setShortcuts([...defaultShortcuts]);
+      syncUI();
+      closeModal();
+      if (onOpenShortcut) {
+        onOpenShortcut(defaultShortcuts[0]);
+      }
+    });
+
+    return {
+      openModal,
+      closeModal,
+      isOpen,
+      syncUI
+    };
+  }
+
+  // ==========================================================================
+  // STATE VARIABLES
+  // ==========================================================================
   let shortcuts = [];
   let activeShortcutId = null;
   let drawerWidth = 486;
@@ -24,7 +394,7 @@
   let currentActiveUrl = '';
   let viewMode = 'mobile';
   let heightMode = 'full';
-  let collapsedStyle = 'strip'; // 'strip' (dock visible) or 'pill' (trigger icon only)
+  let collapsedStyle = 'strip'; // 'strip' or 'pill'
   let openTop = null;
   let closedTop = null;
   let isDraggingDock = false;
@@ -34,7 +404,6 @@
   let preventNextClick = false;
   let zoomLevel = 1.0;
 
-  // Clean any lingering host page styles
   try {
     if (document.documentElement) {
       document.documentElement.style.removeProperty('margin-left');
@@ -49,30 +418,25 @@
     }
   } catch (_) {}
 
-  // Persistent Iframe Cache (Multi-Session Pool)
   const iframePool = new Map();
 
-  // --- Initialize Shadow DOM ---
+  // ==========================================================================
+  // INITIALIZE SHADOW DOM
+  // ==========================================================================
   const host = document.createElement('div');
   host.id = 'v-edgebar-host';
   const shadow = host.attachShadow({ mode: 'open' });
 
-  // Stylesheet
   const styleLink = document.createElement('link');
   styleLink.rel = 'stylesheet';
   styleLink.href = chrome.runtime.getURL('style.css');
   shadow.appendChild(styleLink);
 
-  // Root Container
   const container = document.createElement('div');
   container.className = 'eb-container';
   shadow.appendChild(container);
 
   (document.body || document.documentElement).appendChild(host);
-
-  // ==========================================================================
-  // DOM BUILDERS
-  // ==========================================================================
 
   // 1. Tooltip
   const tooltip = document.createElement('div');
@@ -90,7 +454,7 @@
     tooltip.classList.remove('eb-tooltip-show');
   }
 
-  // 2. Top-Left Trigger Pill
+  // 2. Trigger Pill
   const triggerPill = document.createElement('button');
   triggerPill.className = 'eb-trigger-pill';
   triggerPill.title = 'EdgeBar Aç';
@@ -107,9 +471,9 @@
   const toggleBtn = drawer.querySelector('.eb-toggle-btn');
   const settingsBtn = drawer.querySelector('.eb-settings-btn');
   const dockDragHandle = drawer.querySelector('.eb-dock-drag-handle');
-  const drawerHeader = drawer.querySelector('.eb-drawer-header');
   const drawerFavicon = drawer.querySelector('.eb-drawer-favicon');
   const drawerTitle = drawer.querySelector('.eb-drawer-title');
+  const drawerHeader = drawer.querySelector('.eb-drawer-header');
   const reloadBtn = drawer.querySelector('.eb-reload');
   const externalBtn = drawer.querySelector('.eb-external');
   const closeBtn = drawer.querySelector('.eb-close');
@@ -121,12 +485,12 @@
   const zoomOutBtn = drawer.querySelector('.eb-zoom-out');
   const zoomLabel = drawer.querySelector('.eb-zoom-label');
 
-  // Drag Overlay for smooth resizing
+  // Drag Overlay
   const dragOverlay = document.createElement('div');
   dragOverlay.className = 'eb-drag-overlay';
   container.appendChild(dragOverlay);
 
-  // 4. Safe Right-Click Context Menu
+  // 4. Safe Context Menu
   const contextMenu = document.createElement('div');
   contextMenu.className = 'eb-context-menu';
   contextMenu.innerHTML = TEMPLATES.getContextMenuHtml();
@@ -169,11 +533,11 @@
     }
   });
 
-  // 5. Settings & Shortcuts Management Modal
-  const settingsModal = MODAL.createSettingsModal({
+  // 5. Settings Modal
+  const settingsModal = createSettingsModal({
     container,
-    ICONS,
-    DEFAULT_SHORTCUTS,
+    icons: ICONS,
+    defaultShortcuts: DEFAULT_SHORTCUTS,
     getShortcuts: () => shortcuts,
     setShortcuts: (updated) => {
       shortcuts = updated;
@@ -210,9 +574,6 @@
     },
     onOpenShortcut: (shortcut) => {
       openDrawer(shortcut);
-    },
-    onCloseDrawer: () => {
-      closeDrawer();
     }
   });
 
@@ -242,7 +603,6 @@
   // ==========================================================================
   // ZOOM LOGIC
   // ==========================================================================
-
   function applyZoom(newZoom) {
     zoomLevel = Math.max(0.7, Math.min(newZoom, 1.5));
     zoomLevel = Math.round(zoomLevel * 10) / 10;
@@ -260,7 +620,6 @@
   // ==========================================================================
   // VIEW MODE & HEIGHT MODE
   // ==========================================================================
-
   function applyHeightMode(mode) {
     heightMode = mode;
     drawer.classList.remove('eb-height-full', 'eb-height-floating', 'eb-height-custom');
@@ -284,9 +643,8 @@
   }
 
   // ==========================================================================
-  // INDEPENDENT DOCK & OPEN WINDOW POSITIONING
+  // POSITIONING (INDEPENDENT DOCK & OPEN WINDOW)
   // ==========================================================================
-
   function applyClosedPosition(topPx) {
     drawer.style.removeProperty('top');
     drawer.style.removeProperty('bottom');
@@ -324,7 +682,6 @@
       return;
     }
 
-    // heightMode === 'custom'
     if (topPx === null || topPx === undefined) {
       drawer.style.bottom = '0px';
       drawer.style.height = `${drawerHeight}px`;
@@ -369,9 +726,8 @@
   }
 
   // ==========================================================================
-  // SHORTCUTS & DRAG-AND-DROP REORDERING
+  // SHORTCUTS & REORDERING
   // ==========================================================================
-
   let draggedItemIndex = null;
 
   function renderShortcuts() {
@@ -466,7 +822,6 @@
   // ==========================================================================
   // STATE LOADING & PERSISTENCE
   // ==========================================================================
-
   function loadState() {
     chrome.storage.local.get(
       [
@@ -553,7 +908,9 @@
     chrome.storage.local.set({ edgebar_shortcuts: shortcuts });
   }
 
-  // --- Drawer Open / Close ---
+  // ==========================================================================
+  // DRAWER OPEN / CLOSE
+  // ==========================================================================
   function openDrawer(sc) {
     if (!sc) {
       sc = shortcuts[0] || DEFAULT_SHORTCUTS[0];
@@ -702,7 +1059,9 @@
     }
   });
 
-  // --- Resizer Handles (Width & Height) ---
+  // ==========================================================================
+  // RESIZERS
+  // ==========================================================================
   let isResizing = false;
   let isResizingHeight = false;
   let startX = 0;
@@ -825,7 +1184,9 @@
     }
   });
 
-  // --- Keyboard Listeners ---
+  // ==========================================================================
+  // KEYBOARD & CHROME RUNTIME LISTENERS
+  // ==========================================================================
   window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       if (contextMenu.classList.contains('eb-show')) {
@@ -838,7 +1199,6 @@
     }
   });
 
-  // --- Chrome Action & Toolbar Toggle Listener ---
   chrome.runtime.onMessage.addListener((message) => {
     if (message.type === 'TOGGLE_DRAWER') {
       if (drawer.classList.contains('eb-open')) {
