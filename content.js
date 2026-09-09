@@ -16,6 +16,7 @@
     sidebarClosed: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="16" x="2" y="2" rx="3.5"/><path d="M7 2v16"/><circle cx="12" cy="10" r="1.3" fill="currentColor"/></svg>`,
     sidebarOpen: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="16" x="2" y="2" rx="3.5"/><path d="M7 2v16"/><path d="m13.5 8-2 2 2 2"/></svg>`,
     trigger: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="16" x="2" y="2" rx="3.5"/><path d="M7 2v16"/><circle cx="12" cy="10" r="1.3" fill="currentColor"/></svg>`,
+    settings: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="3"/><path d="M16.24 7.76a1.5 1.5 0 0 1 .36 1.64l-.06.14a1.5 1.5 0 0 0 .54 1.76l.12.08a1.5 1.5 0 0 1 .54 1.59l-.2.75a1.5 1.5 0 0 1-1.28 1.1l-.14.02a1.5 1.5 0 0 0-1.34 1.25l-.02.14a1.5 1.5 0 0 1-1.1 1.28l-.75.2a1.5 1.5 0 0 1-1.59-.54l-.08-.12a1.5 1.5 0 0 0-1.76-.54l-.14.06a1.5 1.5 0 0 1-1.64-.36l-.55-.55a1.5 1.5 0 0 1-.36-1.64l.06-.14a1.5 1.5 0 0 0-.54-1.76l-.12-.08a1.5 1.5 0 0 1-.54-1.59l.2-.75a1.5 1.5 0 0 1 1.28-1.1l.14-.02a1.5 1.5 0 0 0 1.34-1.25l.02-.14a1.5 1.5 0 0 1 1.1-1.28l.75-.2a1.5 1.5 0 0 1 1.59.54l.08.12a1.5 1.5 0 0 0 1.76.54l.14-.06a1.5 1.5 0 0 1 1.64.36l.55.55Z"/></svg>`,
     plus: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4v12M4 10h12"/></svg>`,
     reload: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10a6.5 6.5 0 1 1 1.9 4.6L2 18"/><path d="M2 13.5V18h4.5"/></svg>`,
     external: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 11v5a1.5 1.5 0 0 1-1.5 1.5H4.5A1.5 1.5 0 0 1 3 16V7.5A1.5 1.5 0 0 1 4.5 6H9.5"/><path d="M11.5 3.5h5v5M8 12 16.5 3.5"/></svg>`,
@@ -127,15 +128,15 @@
         <div class="eb-dock-drag-handle" title="Konumu değiştirmek için yukarı/aşağı sürükleyin">
           <span class="eb-drag-grip-line"></span>
         </div>
-        <button type="button" class="eb-toggle-btn" title="Paneli Daralt (Esc)">
-          ${ICONS.sidebarOpen}
-        </button>
-        <button type="button" class="eb-add-btn" title="Site Ekle / Ayarlar (+)">
-          ${ICONS.plus}
+        <button type="button" class="eb-settings-btn" title="Ayarlar">
+          ${ICONS.settings}
         </button>
       </div>
       <div class="eb-dock-bottom">
         <div class="eb-items-list"></div>
+        <button type="button" class="eb-toggle-btn" title="Paneli Daralt (Esc)">
+          ${ICONS.sidebarOpen}
+        </button>
       </div>
     </div>
 
@@ -179,7 +180,7 @@
 
   const itemsList = drawer.querySelector('.eb-items-list');
   const toggleBtn = drawer.querySelector('.eb-toggle-btn');
-  const addBtn = drawer.querySelector('.eb-add-btn');
+  const settingsBtn = drawer.querySelector('.eb-settings-btn');
   const dockDragHandle = drawer.querySelector('.eb-dock-drag-handle');
   const drawerHeader = drawer.querySelector('.eb-drawer-header');
   const dockRail = drawer.querySelector('.eb-dock-rail');
@@ -972,7 +973,7 @@
     modalBackdrop.classList.remove('eb-modal-open');
   }
 
-  addBtn.addEventListener('click', openAddModal);
+  settingsBtn.addEventListener('click', openAddModal);
   modalCloseBtn.addEventListener('click', closeAddModal);
 
   modalBackdrop.addEventListener('click', (e) => {
@@ -1023,8 +1024,8 @@
         favicon: favicon
       };
 
-      // Add to beginning so the first added items sit at the bottom of the stack
-      shortcuts.unshift(newShortcut);
+      // Push to list so it stacks above Gemini (first item stays at bottom above toggle)
+      shortcuts.push(newShortcut);
       saveShortcuts();
       renderShortcuts();
       closeAddModal();

@@ -167,8 +167,8 @@
   gap: 0 !important;
 }
 
-/* Hide + button when drawer is collapsed into strip */
-.eb-drawer.eb-strip-only .eb-add-btn {
+/* Hide settings button when drawer is collapsed into strip */
+.eb-drawer.eb-strip-only .eb-settings-btn {
   display: none !important;
 }
 
@@ -177,6 +177,8 @@
 }
 
 .eb-drawer.eb-strip-only .eb-items-list {
+  display: flex !important;
+  flex-direction: column-reverse !important;
   max-height: none !important;
   gap: 4px !important;
   padding: 0 4px !important;
@@ -341,7 +343,7 @@
 
 .eb-items-list {
   display: flex;
-  flex-direction: column;
+  flex-direction: column-reverse;
   align-items: center;
   gap: 6px;
   width: 100%;
@@ -438,9 +440,9 @@
   text-transform: uppercase;
 }
 
-/* Top Dock Buttons (Toggle & Add) */
+/* Top Dock Buttons (Toggle & Settings) */
 .eb-toggle-btn,
-.eb-add-btn {
+.eb-settings-btn {
   width: 32px;
   height: 32px;
   display: flex;
@@ -456,13 +458,13 @@
 }
 
 .eb-toggle-btn:hover,
-.eb-add-btn:hover {
+.eb-settings-btn:hover {
   background: rgba(255, 255, 255, 0.08);
   color: #ffffff;
 }
 
 .eb-toggle-btn svg,
-.eb-add-btn svg {
+.eb-settings-btn svg {
   width: 16px;
   height: 16px;
 }
