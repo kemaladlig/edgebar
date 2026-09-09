@@ -780,9 +780,9 @@
     const maxBottom = Math.max(8, window.innerHeight - elHeight - 8);
     const b = Math.max(8, Math.min(panelBottom, maxBottom));
 
-    el.style.top = 'auto';
-    el.style.bottom = `${b}px`;
-    el.style.transform = 'none';
+    el.style.setProperty('top', 'auto', 'important');
+    el.style.setProperty('bottom', `${b}px`, 'important');
+    el.style.setProperty('transform', 'none', 'important');
   }
 
   // ==========================================================================
@@ -1655,6 +1655,8 @@
         dragMoved = true;
         dragOverlay.classList.add('eb-active');
         dragOverlay.style.cursor = 'grabbing';
+        drawer.classList.add('eb-dragging');
+        triggerPill.classList.add('eb-dragging');
       }
       if (dragMoved) {
         // dy > 0 means mouse moved down, so distance from bottom decreases
@@ -1664,9 +1666,9 @@
 
         const isOpen = drawer.classList.contains('eb-open');
         let el = (!isOpen && collapsedStyle === 'pill') ? triggerPill : drawer;
-        el.style.top = 'auto';
-        el.style.bottom = `${panelBottom}px`;
-        el.style.transform = 'none';
+        el.style.setProperty('top', 'auto', 'important');
+        el.style.setProperty('bottom', `${panelBottom}px`, 'important');
+        el.style.setProperty('transform', 'none', 'important');
       }
       return;
     }
@@ -1690,6 +1692,8 @@
       isDragging = false;
       dragOverlay.classList.remove('eb-active');
       dragOverlay.style.cursor = '';
+      drawer.classList.remove('eb-dragging');
+      triggerPill.classList.remove('eb-dragging');
       if (dragMoved) {
         preventNextClick = true;
         setTimeout(() => { preventNextClick = false; }, 120);

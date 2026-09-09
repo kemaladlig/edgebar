@@ -181,8 +181,8 @@
 /* Strip-Only Mode (Drawer closed, compact dock visible on edge) */
 .eb-drawer.eb-strip-only {
   position: fixed !important;
-  top: 50% !important;
-  bottom: auto !important;
+  top: 50%;
+  bottom: auto;
   left: 0;
   width: var(--eb-rail-w, 46px);
   min-width: var(--eb-rail-w, 46px);
