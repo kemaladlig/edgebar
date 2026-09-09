@@ -581,6 +581,43 @@
   flex-shrink: 0;
 }
 
+.eb-dock-new-tab-btn.eb-active-dock-tab {
+  background: rgba(255, 255, 255, 0.14) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+.eb-header-back {
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  color: #a1a1aa;
+  cursor: pointer;
+  transition: all 0.14s ease;
+  flex-shrink: 0;
+}
+
+.eb-header-back:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+}
+
+.eb-header-back:active {
+  transform: scale(0.95);
+}
+
+.eb-header-back svg {
+  width: 14px;
+  height: 14px;
+}
+
 .eb-header-new-tab {
   width: 26px;
   height: 26px;
@@ -756,6 +793,96 @@
   height: calc(100% - 44px);
   background: #111216;
   overflow: hidden;
+}
+
+/* Blank Page / New Tab Screen */
+.eb-blank-page {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #111216;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 5;
+  transition: opacity 0.15s ease;
+}
+
+.eb-blank-page.eb-hidden {
+  display: none !important;
+}
+
+.eb-blank-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 320px;
+  gap: 10px;
+}
+
+.eb-blank-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #a1a1aa;
+  margin-bottom: 4px;
+}
+
+.eb-blank-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.eb-blank-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #f4f4f5;
+  letter-spacing: -0.02em;
+}
+
+.eb-blank-subtitle {
+  font-size: 11.5px;
+  color: #71717a;
+  line-height: 1.4;
+  margin-bottom: 8px;
+}
+
+.eb-blank-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+}
+
+.eb-blank-chip {
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  color: #d4d4d8;
+  font-size: 11.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.14s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.eb-blank-chip:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  transform: translateY(-1px);
 }
 
 .eb-iframe-container {

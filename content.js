@@ -15,6 +15,7 @@
   // CONSTANTS & ICONS
   // ==========================================================================
   const ICONS = {
+    back: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12.5 15-5-5 5-5"/></svg>`,
     sidebarClosed: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="16" x="2" y="2" rx="3.5"/><path d="M7 2v16"/><circle cx="12" cy="10" r="1.3" fill="currentColor"/></svg>`,
     sidebarOpen: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="16" x="2" y="2" rx="3.5"/><path d="M7 2v16"/><path d="m13.5 8-2 2 2 2"/></svg>`,
     trigger: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="16" x="2" y="2" rx="3.5"/><path d="M7 2v16"/><circle cx="12" cy="10" r="1.3" fill="currentColor"/></svg>`,
@@ -55,7 +56,8 @@
       </div>
       <div class="eb-panel-main">
         <div class="eb-drawer-header">
-          <button type="button" class="eb-header-new-tab" title="Yeni Sekme Aç">${icons.plus}</button>
+          <button type="button" class="eb-action-btn eb-header-back" title="Geri">${icons.back}</button>
+          <button type="button" class="eb-action-btn eb-header-new-tab" title="Yeni Sekme">${icons.plus}</button>
           <div class="eb-url-bar-wrap">
             <img class="eb-drawer-favicon" src="" alt="" style="display:none;" />
             <input class="eb-url-input" type="text" placeholder="URL girin veya Google'da arayın..." spellcheck="false" autocomplete="off" />
@@ -75,6 +77,24 @@
           <div class="eb-loader-overlay eb-hidden">
             <div class="eb-spinner"></div>
             <span>Yükleniyor...</span>
+          </div>
+          <div class="eb-blank-page eb-hidden">
+            <div class="eb-blank-card">
+              <div class="eb-blank-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"/><path d="m10 15 5-3-5-3v6Z"/>
+                </svg>
+              </div>
+              <div class="eb-blank-title">Yeni Sekme</div>
+              <div class="eb-blank-subtitle">Adres çubuğuna bir URL yazın veya hızlıca seçin:</div>
+              <div class="eb-blank-chips">
+                <button type="button" class="eb-blank-chip" data-url="https://www.google.com">🔍 Google</button>
+                <button type="button" class="eb-blank-chip" data-url="https://gemini.google.com">✨ Gemini</button>
+                <button type="button" class="eb-blank-chip" data-url="https://chatgpt.com">🤖 ChatGPT</button>
+                <button type="button" class="eb-blank-chip" data-url="https://github.com">🐙 GitHub</button>
+                <button type="button" class="eb-blank-chip" data-url="https://youtube.com">▶ YouTube</button>
+              </div>
+            </div>
           </div>
           <div class="eb-iframe-container"></div>
           <div class="eb-resizer" title="Genişletmek için sürükleyin"></div>
@@ -296,6 +316,7 @@
   let drawerWidth = 486;
   let drawerHeight = 600;
   let currentActiveUrl = '';
+  let navHistory = [];
   let viewMode = 'mobile';
   let heightMode = 'full';
   let collapsedStyle = 'strip';
@@ -407,6 +428,7 @@
   const settingsBtn = drawer.querySelector('.eb-settings-btn');
   const dockNewTabBtn = drawer.querySelector('.eb-dock-new-tab-btn');
   const dockDragHandle = drawer.querySelector('.eb-dock-drag-handle');
+  const headerBackBtn = drawer.querySelector('.eb-header-back');
   const headerNewTabBtn = drawer.querySelector('.eb-header-new-tab');
   const urlBarWrap = drawer.querySelector('.eb-url-bar-wrap');
   const urlInput = drawer.querySelector('.eb-url-input');
@@ -417,6 +439,7 @@
   const closeBtn = drawer.querySelector('.eb-close');
   const iframeContainer = drawer.querySelector('.eb-iframe-container');
   const loader = drawer.querySelector('.eb-loader-overlay');
+  const blankPage = drawer.querySelector('.eb-blank-page');
   const resizer = drawer.querySelector('.eb-resizer');
   const resizerTop = drawer.querySelector('.eb-resizer-top');
   const zoomInBtn = drawer.querySelector('.eb-zoom-in');
@@ -667,7 +690,15 @@
       btn.addEventListener('mouseleave', hideTooltip);
       btn.addEventListener('click', () => {
         if (preventNextClick) return;
-        (activeShortcutId === sc.id && drawer.classList.contains('eb-open')) ? closeDrawer() : openDrawer(sc);
+        if (activeShortcutId === sc.id && drawer.classList.contains('eb-open')) {
+          if (currentActiveUrl !== sc.url) {
+            openDrawer(sc);
+          } else {
+            closeDrawer();
+          }
+        } else {
+          openDrawer(sc);
+        }
       });
       btn.addEventListener('contextmenu', (e) => showContextMenu(e, sc));
 
@@ -766,8 +797,12 @@
 
     activeShortcutId = sc.id;
     currentActiveUrl = sc.url;
+    navHistory = [];
 
     drawer.querySelectorAll('.eb-item-btn').forEach((b) => b.classList.toggle('eb-active', b.dataset.id === sc.id));
+    dockNewTabBtn.classList.remove('eb-active-dock-tab');
+    blankPage.classList.add('eb-hidden');
+    updateBackButtonState();
 
     try {
       const u = new URL(sc.url);
@@ -823,6 +858,7 @@
 
   function closeDrawer(saveState = true) {
     drawer.classList.remove('eb-open');
+    dockNewTabBtn.classList.remove('eb-active-dock-tab');
     toggleBtn.innerHTML = ICONS.sidebarClosed;
     toggleBtn.title = 'Paneli Genişlet';
 
@@ -869,22 +905,93 @@
   });
   externalBtn.addEventListener('click', () => { if (currentActiveUrl) window.open(currentActiveUrl, '_blank'); });
 
-  // --- New Tab & URL Bar Navigation ---
-  function startNewTab() {
-    if (!drawer.classList.contains('eb-open')) {
-      openDrawer(shortcuts.find((s) => s.id === activeShortcutId) || shortcuts[0]);
+  // ==========================================================================
+  // NAVIGATION & HISTORY
+  // ==========================================================================
+  function updateBackButtonState() {
+    if (navHistory.length > 0) {
+      headerBackBtn.style.opacity = '1';
+      headerBackBtn.style.pointerEvents = 'auto';
+      headerBackBtn.title = 'Geri';
+    } else {
+      headerBackBtn.style.opacity = '0.35';
+      headerBackBtn.style.pointerEvents = 'none';
+      headerBackBtn.title = 'Geri (Geçmiş yok)';
     }
+  }
+
+  function handleBack() {
+    if (navHistory.length === 0) return;
+    const prevUrl = navHistory.pop();
+    updateBackButtonState();
+
+    if (prevUrl === '__blank__') {
+      openBlankTab(false);
+      return;
+    }
+
+    // Check if prevUrl matches a pinned shortcut
+    const matchSc = shortcuts.find((s) => s.url === prevUrl);
+    if (matchSc) {
+      activeShortcutId = matchSc.id;
+      drawer.querySelectorAll('.eb-item-btn').forEach((b) => b.classList.toggle('eb-active', b.dataset.id === matchSc.id));
+      dockNewTabBtn.classList.remove('eb-active-dock-tab');
+    }
+    navigateTo(prevUrl, false);
+  }
+
+  headerBackBtn.addEventListener('click', handleBack);
+
+  function openBlankTab(clearHistory = true) {
+    if (clearHistory) {
+      navHistory = [];
+    }
+    activeShortcutId = 'new_tab';
+    currentActiveUrl = '';
+
+    drawer.querySelectorAll('.eb-item-btn').forEach((b) => b.classList.remove('eb-active'));
+    dockNewTabBtn.classList.add('eb-active-dock-tab');
+    iframePool.forEach((frame) => frame.classList.remove('eb-active-frame'));
+    loader.classList.add('eb-hidden');
+    blankPage.classList.remove('eb-hidden');
+
     urlInput.value = '';
     urlInput.dataset.fullUrl = '';
     urlInput.placeholder = "URL girin veya Google'da arayın...";
-    setTimeout(() => urlInput.focus(), 40);
+    drawerFavicon.style.display = 'none';
+    updateBackButtonState();
+
+    if (!drawer.classList.contains('eb-open')) {
+      triggerPill.classList.add('eb-hidden');
+      drawer.classList.remove('eb-strip-only');
+      drawer.classList.add('eb-open');
+      drawer.style.width = `${drawerWidth}px`;
+      if (heightMode === 'custom') drawer.style.height = `${drawerHeight}px`;
+      applyPosition();
+      toggleBtn.innerHTML = ICONS.sidebarOpen;
+      toggleBtn.title = 'Paneli Daralt (Esc)';
+      itemsList.querySelectorAll('.eb-item-btn').forEach((b) => { b.draggable = true; });
+      chrome.storage.local.set({ edgebar_drawer_open: true });
+    }
+
+    setTimeout(() => urlInput.focus(), 60);
   }
 
   dockNewTabBtn.addEventListener('click', (e) => {
     if (preventNextClick) return;
-    startNewTab();
+    openBlankTab(true);
   });
-  headerNewTabBtn.addEventListener('click', startNewTab);
+  headerNewTabBtn.addEventListener('click', () => openBlankTab(true));
+
+  // Quick launch chips on blank page
+  blankPage.querySelectorAll('.eb-blank-chip').forEach((chip) => {
+    chip.addEventListener('click', () => {
+      const targetUrl = chip.dataset.url;
+      if (targetUrl) {
+        handleNavigateUrl(targetUrl);
+      }
+    });
+  });
 
   urlInput.addEventListener('focus', () => {
     if (urlInput.dataset.fullUrl) {
@@ -914,6 +1021,53 @@
     }
   });
 
+  function navigateTo(finalUrl, pushToHistory = true) {
+    if (pushToHistory) {
+      if (currentActiveUrl) {
+        navHistory.push(currentActiveUrl);
+      } else if (activeShortcutId === 'new_tab') {
+        navHistory.push('__blank__');
+      }
+    }
+    updateBackButtonState();
+
+    blankPage.classList.add('eb-hidden');
+
+    try {
+      const parsed = new URL(finalUrl);
+      const hostName = parsed.hostname.replace(/^www\./, '');
+      const faviconUrl = `https://www.google.com/s2/favicons?domain=${parsed.hostname}&sz=64`;
+
+      currentActiveUrl = finalUrl;
+      urlInput.dataset.fullUrl = finalUrl;
+      urlInput.value = hostName;
+      drawerFavicon.src = faviconUrl;
+      drawerFavicon.style.display = 'block';
+
+      // Shortcuts are pinned bookmarks and are NEVER overwritten!
+      const frameKey = activeShortcutId || 'new_tab';
+      loader.classList.remove('eb-hidden');
+      iframePool.forEach((frame) => frame.classList.remove('eb-active-frame'));
+
+      let activeFrame = iframePool.get(frameKey);
+      if (activeFrame) {
+        activeFrame.classList.add('eb-active-frame');
+        activeFrame.src = finalUrl;
+      } else {
+        activeFrame = document.createElement('iframe');
+        activeFrame.className = 'eb-iframe eb-active-frame';
+        activeFrame.allow = 'clipboard-read; clipboard-write; camera; microphone; geolocation; encrypted-media';
+        activeFrame.style.zoom = `${zoomLevel}`;
+        activeFrame.src = finalUrl;
+        activeFrame.addEventListener('load', () => loader.classList.add('eb-hidden'));
+        iframeContainer.appendChild(activeFrame);
+        iframePool.set(frameKey, activeFrame);
+      }
+    } catch (err) {
+      console.error('URL navigation error:', err);
+    }
+  }
+
   function handleNavigateUrl(rawText) {
     let query = (rawText || '').trim();
     if (!query) return;
@@ -927,59 +1081,7 @@
       }
     }
 
-    try {
-      const parsed = new URL(finalUrl);
-      const hostName = parsed.hostname.replace(/^www\./, '');
-      let tabName = hostName.split('.')[0];
-      tabName = tabName.charAt(0).toUpperCase() + tabName.slice(1);
-      const faviconUrl = `https://www.google.com/s2/favicons?domain=${parsed.hostname}&sz=64`;
-
-      currentActiveUrl = finalUrl;
-      urlInput.dataset.fullUrl = finalUrl;
-      urlInput.value = hostName;
-      drawerFavicon.src = faviconUrl;
-      drawerFavicon.style.display = 'block';
-
-      // Update active shortcut or create a new one
-      let currentSc = shortcuts.find((s) => s.id === activeShortcutId);
-      if (currentSc) {
-        currentSc.url = finalUrl;
-        currentSc.name = tabName;
-        currentSc.favicon = faviconUrl;
-        saveShortcuts();
-        renderShortcuts();
-        settingsModal.syncUI();
-      } else {
-        const newSc = {
-          id: 'tab_' + Date.now(),
-          name: tabName,
-          url: finalUrl,
-          favicon: faviconUrl
-        };
-        shortcuts.push(newSc);
-        activeShortcutId = newSc.id;
-        saveShortcuts();
-        renderShortcuts();
-        settingsModal.syncUI();
-      }
-
-      loader.classList.remove('eb-hidden');
-      if (iframePool.has(activeShortcutId)) {
-        const frame = iframePool.get(activeShortcutId);
-        frame.src = finalUrl;
-      } else {
-        const activeFrame = document.createElement('iframe');
-        activeFrame.className = 'eb-iframe eb-active-frame';
-        activeFrame.allow = 'clipboard-read; clipboard-write; camera; microphone; geolocation; encrypted-media';
-        activeFrame.style.zoom = `${zoomLevel}`;
-        activeFrame.src = finalUrl;
-        activeFrame.addEventListener('load', () => loader.classList.add('eb-hidden'));
-        iframeContainer.appendChild(activeFrame);
-        iframePool.set(activeShortcutId, activeFrame);
-      }
-    } catch (err) {
-      console.error('URL navigation error:', err);
-    }
+    navigateTo(finalUrl, true);
   }
 
   // ==========================================================================
