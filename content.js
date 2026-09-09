@@ -467,11 +467,17 @@
   // POSITION SYSTEM (CLEAN, SINGLE VALUE)
   //
   // panelY = null  → CSS default position (bottom: 24px for strip/pill)
-  // panelY = <num> → custom top position in px, applied to both open & closed
+  // panelY = <num> → custom top position in px
   //
   // Key insight: when setting JS `top`, we MUST also set `bottom: auto`
   // to override CSS `bottom: 24px`, otherwise the element stretches.
   // ==========================================================================
+  function getMaxY(el) {
+    // Calculate max Y so the element stays fully visible
+    const h = el.offsetHeight || 60;
+    return Math.max(8, window.innerHeight - h - 8);
+  }
+
   function applyPosition() {
     // 1. Clear all JS position overrides — let CSS defaults take effect
     drawer.style.removeProperty('top');
@@ -489,17 +495,19 @@
     // 4. In floating open mode, CSS handles positioning (top:14px, bottom:14px)
     if (isOpen && heightMode === 'floating') return;
 
-    // 5. Clamp to safe viewport bounds
-    const y = Math.max(8, Math.min(panelY, window.innerHeight - 60));
+    // 5. Clamp to safe viewport bounds based on actual element height
+    let el, maxY;
+    if (!isOpen && collapsedStyle === 'pill') {
+      el = triggerPill;
+    } else {
+      el = drawer;
+    }
+    maxY = getMaxY(el);
+    const y = Math.max(8, Math.min(panelY, maxY));
 
     // 6. Apply position — always override CSS bottom to prevent stretching
-    if (!isOpen && collapsedStyle === 'pill') {
-      triggerPill.style.top = `${y}px`;
-      triggerPill.style.bottom = 'auto';
-    } else {
-      drawer.style.top = `${y}px`;
-      drawer.style.bottom = 'auto';
-    }
+    el.style.top = `${y}px`;
+    el.style.bottom = 'auto';
   }
 
   // ==========================================================================
@@ -508,10 +516,14 @@
   // Works on: drag handle (strip), header title area (open), trigger pill
   // Behavior: mousedown → mousemove with 3px deadzone → mouseup saves
   // ==========================================================================
+  let dragElHeight = 60; // cached at drag start for accurate clamping
+
   function onDragStart(e) {
     if (e.button !== 0) return;
     // Don't intercept clicks on buttons/interactive elements
     if (e.target.closest('.eb-action-btn, .eb-zoom-group, .eb-zoom-btn, .eb-item-btn, .eb-toggle-btn, .eb-settings-btn, .eb-drawer-actions')) return;
+
+    e.preventDefault(); // Prevent default browser drag/selection behavior
 
     isDragging = true;
     dragMoved = false;
@@ -520,7 +532,9 @@
     // Which element are we dragging?
     const isOpen = drawer.classList.contains('eb-open');
     const el = (!isOpen && collapsedStyle === 'pill') ? triggerPill : drawer;
-    dragStartElY = el.getBoundingClientRect().top;
+    const rect = el.getBoundingClientRect();
+    dragStartElY = rect.top;
+    dragElHeight = rect.height || 60;
   }
 
   // Attach drag to: drag handle, trigger pill, drawer header
@@ -784,7 +798,9 @@
       }
       if (dragMoved) {
         const newY = dragStartElY + dy;
-        panelY = Math.max(8, Math.min(newY, window.innerHeight - 60));
+        // Clamp using cached element height so panel never goes off-screen
+        const maxY = Math.max(8, window.innerHeight - dragElHeight - 8);
+        panelY = Math.max(8, Math.min(newY, maxY));
         // Directly update position during drag for instant feedback
         const isOpen = drawer.classList.contains('eb-open');
         if (!isOpen && collapsedStyle === 'pill') {
