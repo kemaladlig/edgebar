@@ -791,24 +791,24 @@
 
   function onDragStart(e) {
     if (e.button !== 0) return;
-    // Don't intercept clicks on buttons/interactive elements
-    if (e.target.closest('.eb-action-btn, .eb-zoom-group, .eb-zoom-btn, .eb-item-btn, .eb-toggle-btn, .eb-settings-btn, .eb-dock-new-tab-btn, .eb-header-new-tab, .eb-url-bar-wrap, .eb-url-input, .eb-drawer-actions')) return;
-
-    e.preventDefault(); // Prevent default browser drag/selection behavior
+    const isOpen = drawer.classList.contains('eb-open');
+    if (isOpen) {
+      // In open mode, don't drag from buttons or interactive elements
+      if (e.target.closest('.eb-action-btn, .eb-zoom-group, .eb-zoom-btn, .eb-item-btn, .eb-toggle-btn, .eb-settings-btn, .eb-dock-new-tab-btn, .eb-header-new-tab, .eb-url-bar-wrap, .eb-url-input, .eb-drawer-actions')) return;
+    }
 
     isDragging = true;
     dragMoved = false;
     dragStartMouseY = e.clientY;
 
     // Which element are we dragging?
-    const isOpen = drawer.classList.contains('eb-open');
     const el = (!isOpen && collapsedStyle === 'pill') ? triggerPill : drawer;
     const rect = el.getBoundingClientRect();
     dragStartElY = rect.top;
     dragElHeight = rect.height || 60;
   }
 
-  // Attach drag to: drag handle, trigger pill, drawer header
+  // Attach drag to: drag handle, trigger pill, drawer header, and compact dock
   if (dockDragHandle) {
     dockDragHandle.addEventListener('mousedown', onDragStart);
     dockDragHandle.addEventListener('dblclick', (e) => {
@@ -823,6 +823,19 @@
     if (e.target.closest('.eb-drawer-actions, .eb-action-btn, .eb-zoom-group, .eb-zoom-btn, .eb-header-new-tab, .eb-url-bar-wrap, .eb-url-input')) return;
     onDragStart(e);
   });
+  drawer.addEventListener('mousedown', (e) => {
+    if (!drawer.classList.contains('eb-open')) {
+      onDragStart(e);
+    }
+  });
+  drawer.addEventListener('dblclick', (e) => {
+    if (!drawer.classList.contains('eb-open')) {
+      e.stopPropagation();
+      panelY = null;
+      chrome.storage.local.remove('edgebar_panel_y');
+      applyPosition();
+    }
+  });
 
   // ==========================================================================
   // SHORTCUTS & DRAG-AND-DROP REORDERING
@@ -831,6 +844,7 @@
 
   function renderShortcuts() {
     itemsList.innerHTML = '';
+    drawer.classList.toggle('eb-no-shortcuts', shortcuts.length === 0);
     shortcuts.forEach((sc, index) => {
       const btn = document.createElement('button');
       btn.className = 'eb-item-btn';

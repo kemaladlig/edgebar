@@ -206,32 +206,43 @@
   width: var(--eb-rail-w, 46px);
   height: auto;
   border-right: none;
-  padding: 4px 0 8px 0;
-  gap: 4px;
-  justify-content: flex-start;
+  padding: 5px 0;
+  gap: 0;
+  justify-content: center;
 }
 
 .eb-drawer.eb-strip-only .eb-dock-top {
-  padding: 4px 4px 0 4px;
+  padding: 0;
+  gap: 4px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.eb-drawer.eb-strip-only .eb-settings-btn,
-.eb-drawer.eb-strip-only .eb-dock-new-tab-btn {
-  width: var(--eb-btn-size, 34px);
-  height: calc(var(--eb-btn-size, 34px) - 6px);
-  min-height: 22px;
-}
-
+/* Minimal Strip: Hide open tabs, plus button, tabs divider, and bottom controls */
+.eb-drawer.eb-strip-only .eb-dock-new-tab-btn,
+.eb-drawer.eb-strip-only .eb-open-tabs-list,
+.eb-drawer.eb-strip-only .eb-tabs-divider,
 .eb-drawer.eb-strip-only .eb-dock-bottom {
-  gap: 4px !important;
+  display: none !important;
+}
+
+/* Fallback: if user removes all shortcuts, show the plus button so dock is still usable */
+.eb-drawer.eb-strip-only.eb-no-shortcuts .eb-dock-new-tab-btn {
+  display: flex !important;
+  width: var(--eb-btn-size, 34px);
+  height: var(--eb-btn-size, 34px);
 }
 
 .eb-drawer.eb-strip-only .eb-items-list {
   display: flex !important;
   flex-direction: column !important;
-  max-height: none !important;
+  max-height: calc(100vh - 60px) !important;
   gap: 4px !important;
-  padding: 0 4px !important;
+  padding: 0 !important;
+  width: 100% !important;
+  align-items: center;
 }
 
 .eb-drawer.eb-strip-only .eb-panel-main,
@@ -240,13 +251,17 @@
   display: none !important;
 }
 
+.eb-drawer.eb-strip-only .eb-item-btn {
+  cursor: pointer !important;
+}
+
 .eb-drawer.eb-strip-only .eb-item-btn.eb-active {
   background: transparent;
   color: #a1a1aa;
 }
 
 .eb-drawer.eb-strip-only .eb-item-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.12);
   color: #ffffff;
 }
 
