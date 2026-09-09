@@ -47,9 +47,8 @@ Geleneksel tarayıcılarda ChatGPT'ye bir soru sormak, Gemini'ye kod inceletmek 
 - **🏝 Ada (Floating Island):** Üstten ve alttan zarif boşluklar bırakan, yuvarlatılmış köşeli ada görünümü.
 - **🎛 Serbest (Custom Height):** Üst kenarından dilediğiniz gibi yukarı/aşağı boyutlandırabildiğiniz serbest yükseklik.
 
-### 5. 📑 2 Farklı Kapalı Görünüm Modu
-- **Kısayollar (Strip Mode):** Panel kapalıyken bile favori ikonlarınız sol kenarda kompakt bir şerit olarak hazır bekler; tek tıkla doğrudan o uygulamayı açar.
-- **Tek İkon (Pill Mode):** Sadece sol altta minimal yarı saydam bir kapsül bekler, ekranı tamamen temiz tutar.
+### 5. 📑 Kompakt Kenar Şeridi (Zero-Distraction Dock)
+- Panel kapalıyken bile favori ikonlarınız sol kenarda zarif fasetli bir şerit olarak hazır bekler; tek tıkla doğrudan o uygulamayı veya yapay zekayı açar. Sayfanızı veya içeriğinizi asla işgal etmez.
 
 ### 6. ↕ Serbest Dikey Konumlandırma
 - Sol sütundaki tutamaçtan tutarak dock'u ekranın dilediğiniz yüksekliğine (yukarı/aşağı) sürükleyip bırakabilirsiniz. Tercihiniz tüm sekmelerde anında hatırlanır.

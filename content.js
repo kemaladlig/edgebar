@@ -112,7 +112,26 @@
                 <p class="eb-settings-hero-desc">Çalışma alanınızı, dikey sekmeleri ve kısayol davranışlarını kişiselleştirin.</p>
               </div>
 
-              <!-- Section 1: Görünüm & Panel -->
+              <!-- Section 1: Kısayol & Uygulama Yönetimi (Öncelikli) -->
+              <div class="eb-settings-card">
+                <div class="eb-settings-card-header">
+                  <span class="eb-settings-card-title">Kayıtlı Uygulamalar & Kısayollar</span>
+                </div>
+                <div class="eb-settings-card-body">
+                  <div class="eb-quick-add-row">
+                    <input class="eb-quick-add-input" type="text" placeholder="Yeni site ekleyin (örn: notion.so, figma.com)..." spellcheck="false" autocomplete="off" />
+                    <button type="button" class="eb-quick-add-btn" title="Kısayolu Ekle">
+                      ${icons.plus} <span>Ekle</span>
+                    </button>
+                  </div>
+                  <div class="eb-manage-list"></div>
+                  <div class="eb-settings-card-footer">
+                    <button type="button" class="eb-btn-link eb-reset-defaults">Varsayılan Kısayollara Sıfırla (Gemini)</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section 2: Görünüm & Panel -->
               <div class="eb-settings-card">
                 <div class="eb-settings-card-header">
                   <span class="eb-settings-card-title">Görünüm & Panel</span>
@@ -132,17 +151,6 @@
 
                   <div class="eb-setting-item">
                     <div class="eb-setting-info">
-                      <span class="eb-setting-name">Kapalıyken Görünüm</span>
-                      <span class="eb-setting-desc">Panel kapalıyken sol kenardaki dock stili</span>
-                    </div>
-                    <div class="eb-segmented-control eb-collapsed-segmented">
-                      <button type="button" class="eb-segmented-btn eb-c-strip" data-collapsed="strip">Kısayol Şeridi</button>
-                      <button type="button" class="eb-segmented-btn eb-c-pill" data-collapsed="pill">Tek Kapsül</button>
-                    </div>
-                  </div>
-
-                  <div class="eb-setting-item">
-                    <div class="eb-setting-info">
                       <span class="eb-setting-name">İkon Boyutu</span>
                       <span class="eb-setting-desc">Dock üzerindeki butonların ölçeği</span>
                     </div>
@@ -155,7 +163,7 @@
                 </div>
               </div>
 
-              <!-- Section 2: Çalışma & Davranış -->
+              <!-- Section 3: Çalışma & Davranış -->
               <div class="eb-settings-card">
                 <div class="eb-settings-card-header">
                   <span class="eb-settings-card-title">Çalışma & Davranış</span>
@@ -191,25 +199,6 @@
                     <div class="eb-kbd-badge">
                       <kbd>Alt</kbd> + <kbd>S</kbd>
                     </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Section 3: Kısayol Yönetimi -->
-              <div class="eb-settings-card">
-                <div class="eb-settings-card-header">
-                  <span class="eb-settings-card-title">Kayıtlı Uygulamalar & Kısayollar</span>
-                </div>
-                <div class="eb-settings-card-body">
-                  <div class="eb-quick-add-row">
-                    <input class="eb-quick-add-input" type="text" placeholder="Yeni site ekleyin (örn: notion.so, figma.com)..." spellcheck="false" autocomplete="off" />
-                    <button type="button" class="eb-quick-add-btn" title="Kısayolu Ekle">
-                      ${icons.plus} <span>Ekle</span>
-                    </button>
-                  </div>
-                  <div class="eb-manage-list"></div>
-                  <div class="eb-settings-card-footer">
-                    <button type="button" class="eb-btn-link eb-reset-defaults">Varsayılan Kısayollara Sıfırla (Gemini)</button>
                   </div>
                 </div>
               </div>
@@ -251,7 +240,6 @@
     const segDesktop = settingsView.querySelector('.eb-segment-desktop');
     const sizeBtns = settingsView.querySelectorAll('.eb-size-segmented .eb-segmented-btn');
     const heightBtns = settingsView.querySelectorAll('.eb-height-segmented .eb-segmented-btn');
-    const collapsedBtns = settingsView.querySelectorAll('.eb-collapsed-segmented .eb-segmented-btn');
     const clickoutBtns = settingsView.querySelectorAll('.eb-clickout-segmented .eb-segmented-btn');
 
     function syncUI() {
@@ -260,7 +248,6 @@
       segDesktop.classList.toggle('eb-active-segment', currentMode === 'desktop');
       sizeBtns.forEach((btn) => btn.classList.toggle('eb-active-segment', btn.dataset.size === getIconSize()));
       heightBtns.forEach((btn) => btn.classList.toggle('eb-active-segment', btn.dataset.height === getHeightMode()));
-      collapsedBtns.forEach((btn) => btn.classList.toggle('eb-active-segment', btn.dataset.collapsed === getCollapsedStyle()));
       const coVal = String(getClickOutsideClose());
       clickoutBtns.forEach((btn) => btn.classList.toggle('eb-active-segment', btn.dataset.clickout === coVal));
       renderManageList();
@@ -335,7 +322,6 @@
     });
     sizeBtns.forEach((btn) => btn.addEventListener('click', () => { setIconSize(btn.dataset.size); syncUI(); }));
     heightBtns.forEach((btn) => btn.addEventListener('click', () => { setHeightMode(btn.dataset.height); syncUI(); }));
-    collapsedBtns.forEach((btn) => btn.addEventListener('click', () => { setCollapsedStyle(btn.dataset.collapsed); syncUI(); }));
     clickoutBtns.forEach((btn) => btn.addEventListener('click', () => { setClickOutsideClose(btn.dataset.clickout === 'true'); syncUI(); }));
 
     function handleSaveCustomShortcut() {
