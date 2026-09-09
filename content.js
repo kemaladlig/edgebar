@@ -44,6 +44,12 @@
   let heightMode = 'full';
   let collapsedStyle = 'strip'; // 'strip' (shortcuts visible on left rail) or 'pill' (only icon)
   let zoomLevel = 1.0;
+  let dockTop = null;
+  let isDraggingDock = false;
+  let dockStartY = 0;
+  let dockStartTop = 0;
+  let dockHasMoved = false;
+  let preventNextClick = false;
 
   // Clean any lingering page styles
   try {
@@ -118,6 +124,9 @@
     <!-- Left Rail: Integrated Dock Icons -->
     <div class="eb-dock-rail">
       <div class="eb-dock-top">
+        <div class="eb-dock-drag-handle" title="Konumu değiştirmek için yukarı/aşağı sürükleyin">
+          <span class="eb-drag-grip-line"></span>
+        </div>
         <button type="button" class="eb-toggle-btn" title="Paneli Daralt (Esc)">
           ${ICONS.sidebarOpen}
         </button>
@@ -171,6 +180,9 @@
   const itemsList = drawer.querySelector('.eb-items-list');
   const toggleBtn = drawer.querySelector('.eb-toggle-btn');
   const addBtn = drawer.querySelector('.eb-add-btn');
+  const dockDragHandle = drawer.querySelector('.eb-dock-drag-handle');
+  const drawerHeader = drawer.querySelector('.eb-drawer-header');
+  const dockRail = drawer.querySelector('.eb-dock-rail');
 
   const drawerFavicon = drawer.querySelector('.eb-drawer-favicon');
   const drawerTitle = drawer.querySelector('.eb-drawer-title');
@@ -352,8 +364,11 @@
     drawer.classList.add(`eb-height-${mode}`);
     if (mode === 'custom') {
       drawer.style.height = `${drawerHeight}px`;
+      applyDockPosition(dockTop);
     } else {
       drawer.style.height = '';
+      drawer.style.top = '';
+      drawer.style.bottom = '';
     }
     heightBtns.forEach((btn) => {
       btn.classList.toggle('eb-active-segment', btn.dataset.height === mode);
@@ -385,6 +400,63 @@
       chrome.storage.local.set({ edgebar_collapsed_style: newStyle });
     });
   });
+
+  // ==========================================================================
+  // DOCK POSITION & VERTICAL DRAGGING
+  // ==========================================================================
+
+  function applyDockPosition(topPx) {
+    if (topPx === null || topPx === undefined) return;
+
+    const isOpen = drawer.classList.contains('eb-open');
+    let targetHeight = 40;
+    if (isOpen) {
+      targetHeight = heightMode === 'custom' ? drawerHeight : window.innerHeight;
+    } else if (collapsedStyle === 'strip') {
+      targetHeight = drawer.offsetHeight || 110;
+    }
+
+    const minTop = 10;
+    const maxTop = Math.max(minTop, window.innerHeight - targetHeight - 10);
+    const clampedTop = Math.max(minTop, Math.min(topPx, maxTop));
+    dockTop = clampedTop;
+
+    if (!isOpen) {
+      if (collapsedStyle === 'strip') {
+        drawer.style.setProperty('top', `${clampedTop}px`, 'important');
+        drawer.style.setProperty('bottom', 'auto', 'important');
+      } else {
+        triggerPill.style.setProperty('top', `${clampedTop}px`, 'important');
+        triggerPill.style.setProperty('bottom', 'auto', 'important');
+      }
+    } else {
+      if (heightMode === 'custom') {
+        drawer.style.setProperty('top', `${clampedTop}px`, 'important');
+        drawer.style.setProperty('bottom', 'auto', 'important');
+      } else {
+        drawer.style.top = '';
+        drawer.style.bottom = '';
+      }
+    }
+  }
+
+  function startDockDrag(e) {
+    if (e.button !== 0) return; // Left click only
+    if (e.target.closest('.eb-action-btn') || e.target.closest('.eb-zoom-group') || e.target.closest('.eb-zoom-btn')) {
+      return;
+    }
+
+    isDraggingDock = true;
+    dockHasMoved = false;
+    dockStartY = e.clientY;
+
+    const el = drawer.classList.contains('eb-open')
+      ? drawer
+      : (collapsedStyle === 'strip' ? drawer : triggerPill);
+
+    const rect = el.getBoundingClientRect();
+    dockStartTop = rect.top;
+  }
 
   [segMobile, segDesktop].forEach((btn) => {
     btn.addEventListener('click', () => {
@@ -446,6 +518,7 @@
 
       // Left Click: Switch or Toggle
       btn.addEventListener('click', () => {
+        if (preventNextClick) return;
         if (activeShortcutId === sc.id && drawer.classList.contains('eb-open')) {
           closeDrawer();
         } else {
@@ -548,6 +621,7 @@
         'edgebar_drawer_height',
         'edgebar_height_mode',
         'edgebar_collapsed_style',
+        'edgebar_dock_top',
         'edgebar_last_active',
         'edgebar_drawer_open',
         'edgebar_view_mode',
@@ -592,6 +666,13 @@
           viewMode = result.edgebar_view_mode;
         }
         updateModeUI();
+
+        if (result.edgebar_dock_top !== undefined && result.edgebar_dock_top !== null) {
+          dockTop = result.edgebar_dock_top;
+        } else {
+          dockTop = Math.max(20, Math.round(window.innerHeight * 0.55));
+        }
+        applyDockPosition(dockTop);
 
         if (result.edgebar_height_mode) {
           heightMode = result.edgebar_height_mode;
@@ -681,8 +762,11 @@
     drawer.style.width = `${drawerWidth}px`;
     if (heightMode === 'custom') {
       drawer.style.height = `${drawerHeight}px`;
+      applyDockPosition(dockTop);
     } else {
       drawer.style.height = '';
+      drawer.style.top = '';
+      drawer.style.bottom = '';
     }
     toggleBtn.innerHTML = ICONS.sidebarOpen;
     toggleBtn.title = 'Paneli Daralt (Esc)';
@@ -708,6 +792,8 @@
       triggerPill.classList.remove('eb-hidden');
     }
 
+    applyDockPosition(dockTop);
+
     hideTooltip();
     hideContextMenu();
     chrome.storage.local.set({ edgebar_drawer_open: false });
@@ -715,12 +801,14 @@
 
   // Toggle from Trigger Pill
   triggerPill.addEventListener('click', () => {
+    if (preventNextClick) return;
     const current = shortcuts.find((s) => s.id === activeShortcutId) || shortcuts[0];
     openDrawer(current);
   });
 
   // Toggle from Primary Anchor (Top-Left Dock Button)
   toggleBtn.addEventListener('click', () => {
+    if (preventNextClick) return;
     if (drawer.classList.contains('eb-open')) {
       closeDrawer();
     } else {
@@ -730,6 +818,22 @@
   });
 
   closeBtn.addEventListener('click', closeDrawer);
+
+  // Dragging Listeners for Vertical Placement
+  if (dockDragHandle) {
+    dockDragHandle.addEventListener('mousedown', startDockDrag);
+  }
+  triggerPill.addEventListener('mousedown', startDockDrag);
+  dockRail.addEventListener('mousedown', (e) => {
+    if (drawer.classList.contains('eb-strip-only') && !e.target.closest('.eb-item-btn') && !e.target.closest('.eb-toggle-btn')) {
+      startDockDrag(e);
+    }
+  });
+  drawerHeader.addEventListener('mousedown', (e) => {
+    if (heightMode === 'custom') {
+      startDockDrag(e);
+    }
+  });
 
   // Header Actions
   reloadBtn.addEventListener('click', () => {
@@ -778,6 +882,28 @@
   });
 
   window.addEventListener('mousemove', (e) => {
+    if (isDraggingDock) {
+      const deltaY = e.clientY - dockStartY;
+      if (!dockHasMoved && Math.abs(deltaY) > 3) {
+        dockHasMoved = true;
+        dragOverlay.classList.add('eb-active');
+        dragOverlay.style.cursor = 'grabbing';
+        if (drawer.classList.contains('eb-open')) {
+          drawer.classList.add('eb-dragging-drawer');
+        } else if (collapsedStyle === 'strip') {
+          drawer.classList.add('eb-dragging');
+        } else {
+          triggerPill.classList.add('eb-dragging');
+        }
+      }
+
+      if (dockHasMoved) {
+        const newTop = dockStartTop + deltaY;
+        applyDockPosition(newTop);
+      }
+      return;
+    }
+
     if (isResizingHeight) {
       const deltaY = startY - e.clientY;
       const newHeight = Math.max(300, Math.min(startHeight + deltaY, window.innerHeight - 20));
@@ -795,6 +921,22 @@
   });
 
   window.addEventListener('mouseup', () => {
+    if (isDraggingDock) {
+      isDraggingDock = false;
+      dragOverlay.classList.remove('eb-active');
+      dragOverlay.style.cursor = '';
+      drawer.classList.remove('eb-dragging-drawer', 'eb-dragging');
+      triggerPill.classList.remove('eb-dragging');
+
+      if (dockHasMoved) {
+        preventNextClick = true;
+        setTimeout(() => {
+          preventNextClick = false;
+        }, 100);
+        chrome.storage.local.set({ edgebar_dock_top: dockTop });
+      }
+    }
+
     if (isResizingHeight) {
       isResizingHeight = false;
       resizerTop.classList.remove('eb-resizing');
@@ -809,6 +951,12 @@
       dragOverlay.classList.remove('eb-active');
       dragOverlay.style.cursor = '';
       chrome.storage.local.set({ edgebar_drawer_width: drawerWidth });
+    }
+  });
+
+  window.addEventListener('resize', () => {
+    if (dockTop !== null) {
+      applyDockPosition(dockTop);
     }
   });
 
