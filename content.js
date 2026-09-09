@@ -107,6 +107,13 @@
             <button type="button" class="eb-segmented-btn eb-c-pill" data-collapsed="pill">✦ İkon</button>
           </div>
         </div>
+        <div class="eb-setting-row">
+          <div class="eb-setting-label">Dışarı tıklayınca</div>
+          <div class="eb-segmented-control eb-clickout-segmented">
+            <button type="button" class="eb-segmented-btn eb-co-close" data-clickout="true">🚪 Kapat</button>
+            <button type="button" class="eb-segmented-btn eb-co-stay" data-clickout="false">📌 Açık kalsın</button>
+          </div>
+        </div>
         <div class="eb-setting-row" style="margin-top: 10px;">
           <div class="eb-setting-label">Site Ekle</div>
           <div class="eb-quick-add-row">
@@ -140,6 +147,7 @@
       getViewMode, setViewMode,
       getHeightMode, setHeightMode,
       getCollapsedStyle, setCollapsedStyle,
+      getClickOutsideClose, setClickOutsideClose,
       onOpenShortcut
     } = options;
 
@@ -157,6 +165,7 @@
     const segDesktop = modalBackdrop.querySelector('.eb-segment-desktop');
     const heightBtns = modalBackdrop.querySelectorAll('.eb-height-segmented .eb-segmented-btn');
     const collapsedBtns = modalBackdrop.querySelectorAll('.eb-collapsed-segmented .eb-segmented-btn');
+    const clickoutBtns = modalBackdrop.querySelectorAll('.eb-clickout-segmented .eb-segmented-btn');
 
     function syncUI() {
       const currentMode = getViewMode();
@@ -164,6 +173,8 @@
       segDesktop.classList.toggle('eb-active-segment', currentMode === 'desktop');
       heightBtns.forEach((btn) => btn.classList.toggle('eb-active-segment', btn.dataset.height === getHeightMode()));
       collapsedBtns.forEach((btn) => btn.classList.toggle('eb-active-segment', btn.dataset.collapsed === getCollapsedStyle()));
+      const coVal = String(getClickOutsideClose());
+      clickoutBtns.forEach((btn) => btn.classList.toggle('eb-active-segment', btn.dataset.clickout === coVal));
       renderManageList();
     }
 
@@ -218,6 +229,7 @@
     });
     heightBtns.forEach((btn) => btn.addEventListener('click', () => { setHeightMode(btn.dataset.height); syncUI(); }));
     collapsedBtns.forEach((btn) => btn.addEventListener('click', () => { setCollapsedStyle(btn.dataset.collapsed); syncUI(); }));
+    clickoutBtns.forEach((btn) => btn.addEventListener('click', () => { setClickOutsideClose(btn.dataset.clickout === 'true'); syncUI(); }));
 
     function handleSaveCustomShortcut() {
       let raw = quickAddInput.value.trim();
@@ -265,6 +277,7 @@
   let viewMode = 'mobile';
   let heightMode = 'full';
   let collapsedStyle = 'strip';
+  let clickOutsideClose = false;
   let zoomLevel = 1.0;
 
   // --- Drag State (unified single-axis Y positioning) ---
@@ -410,6 +423,8 @@
     setHeightMode: (mode) => { applyHeightMode(mode); chrome.storage.local.set({ edgebar_height_mode: mode }); },
     getCollapsedStyle: () => collapsedStyle,
     setCollapsedStyle: (style) => { applyCollapsedStyle(style); chrome.storage.local.set({ edgebar_collapsed_style: style }); },
+    getClickOutsideClose: () => clickOutsideClose,
+    setClickOutsideClose: (val) => { clickOutsideClose = val; chrome.storage.local.set({ edgebar_click_outside_close: val }); },
     onOpenShortcut: (sc) => openDrawer(sc)
   });
   settingsBtn.addEventListener('click', () => settingsModal.openModal());
@@ -610,7 +625,8 @@
     chrome.storage.local.get([
       'edgebar_shortcuts', 'edgebar_drawer_width', 'edgebar_drawer_height',
       'edgebar_height_mode', 'edgebar_collapsed_style', 'edgebar_panel_y',
-      'edgebar_last_active', 'edgebar_drawer_open', 'edgebar_view_mode', 'edgebar_zoom'
+      'edgebar_last_active', 'edgebar_drawer_open', 'edgebar_view_mode', 'edgebar_zoom',
+      'edgebar_click_outside_close'
     ], (result) => {
       // Shortcuts
       const isOldDefault = result.edgebar_shortcuts && Array.isArray(result.edgebar_shortcuts) &&
@@ -645,6 +661,7 @@
 
       // Collapsed style
       collapsedStyle = result.edgebar_collapsed_style || 'strip';
+      clickOutsideClose = result.edgebar_click_outside_close === true;
 
       renderShortcuts();
       settingsModal.syncUI();
@@ -877,6 +894,15 @@
       drawer.classList.contains('eb-open') ? closeDrawer() : openDrawer(shortcuts.find((s) => s.id === activeShortcutId) || shortcuts[0]);
     }
   });
+
+  // --- Click Outside to Close ---
+  window.addEventListener('mousedown', (e) => {
+    if (!clickOutsideClose) return;
+    if (!drawer.classList.contains('eb-open')) return;
+    // Check if click is inside our shadow host
+    if (host.contains(e.target) || e.target === host) return;
+    closeDrawer();
+  }, true);
 
   loadState();
 })();

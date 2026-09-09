@@ -177,8 +177,14 @@
   cursor: grabbing !important;
 }
 
+/* In strip mode, settings btn stays visible so icons don't shift */
 .eb-drawer.eb-strip-only .eb-dock-top {
-  display: none !important;
+  padding: 4px 4px 0 4px;
+}
+
+.eb-drawer.eb-strip-only .eb-settings-btn {
+  width: 34px;
+  height: 28px;
 }
 
 .eb-drawer.eb-strip-only .eb-dock-bottom {
