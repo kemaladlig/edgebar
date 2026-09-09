@@ -391,11 +391,11 @@
   let iconSize = 'medium';
   let zoomLevel = 1.0;
 
-  // --- Drag State (bottom-relative Y positioning) ---
-  let panelBottom = null;   // null = CSS default (vertical center: top 50%), number = custom bottom distance in px
+  // --- Drag State (top-relative Y positioning) ---
+  let panelY = null;        // null = CSS default (vertical center: top 50%), number = custom Y in px
   let isDragging = false;
   let dragStartMouseY = 0;
-  let dragStartElBottom = 0;
+  let dragStartElTop = 0;
   let dragMoved = false;
   let preventNextClick = false;
 
@@ -740,10 +740,10 @@
   }
 
   // ==========================================================================
-  // POSITION SYSTEM (CENTERED DEFAULT / DRAGGABLE)
+  // POSITION SYSTEM (TOP-ANCHORED / VERTICALLY CENTERED BY DEFAULT)
   //
-  // panelBottom = null  → CSS default position (vertical center: top 50%)
-  // panelBottom = <num> → custom distance in px from viewport bottom
+  // panelY = null  → CSS handles perfect vertical centering (top: 50%, translateY(-50%))
+  // panelY = <num> → custom distance in px from viewport top (when user drags)
   // ==========================================================================
   function applyPosition() {
     drawer.style.removeProperty('top');
@@ -767,36 +767,37 @@
 
     let el = (!isOpen && collapsedStyle === 'pill') ? triggerPill : drawer;
 
-    // Default position: vertically centered via CSS (top: 50%, translateY(-50%))
-    if (panelBottom === null) {
+    // Default position: vertically centered via CSS rules (top: 50%, translateY(-50%))
+    if (panelY === null) {
       el.style.removeProperty('top');
       el.style.removeProperty('bottom');
       el.style.removeProperty('transform');
       return;
     }
 
-    // Clamp custom position
+    // Clamp custom position within viewport
     const elHeight = el.offsetHeight || 60;
-    const maxBottom = Math.max(8, window.innerHeight - elHeight - 8);
-    const b = Math.max(8, Math.min(panelBottom, maxBottom));
+    const maxTop = Math.max(8, window.innerHeight - elHeight - 8);
+    const y = Math.max(8, Math.min(panelY, maxTop));
 
-    el.style.setProperty('top', 'auto', 'important');
-    el.style.setProperty('bottom', `${b}px`, 'important');
+    el.style.setProperty('top', `${y}px`, 'important');
+    el.style.setProperty('bottom', 'auto', 'important');
     el.style.setProperty('transform', 'none', 'important');
   }
 
   // ==========================================================================
-  // DRAG-TO-MOVE (CLEAN IMPLEMENTATION)
+  // DRAG-TO-MOVE (CLEAN & RELIABLE)
   // ==========================================================================
-  let dragElHeight = 60; // cached at drag start for accurate clamping
+  let dragElHeight = 60;
 
   function onDragStart(e) {
     if (e.button !== 0) return;
+    // Don't drag from interactive buttons, inputs or actions
+    if (e.target.closest('.eb-action-btn, .eb-zoom-group, .eb-zoom-btn, .eb-item-btn, .eb-toggle-btn, .eb-settings-btn, .eb-dock-new-tab-btn, .eb-header-new-tab, .eb-url-bar-wrap, .eb-url-input, .eb-drawer-actions')) return;
+
     const isOpen = drawer.classList.contains('eb-open');
-    if (isOpen) {
-      // In open mode, don't drag from buttons or interactive elements
-      if (e.target.closest('.eb-action-btn, .eb-zoom-group, .eb-zoom-btn, .eb-item-btn, .eb-toggle-btn, .eb-settings-btn, .eb-dock-new-tab-btn, .eb-header-new-tab, .eb-url-bar-wrap, .eb-url-input, .eb-drawer-actions')) return;
-    }
+    // In open mode with full or floating height, don't drag
+    if (isOpen && (heightMode === 'full' || heightMode === 'floating')) return;
 
     isDragging = true;
     dragMoved = false;
@@ -804,13 +805,13 @@
 
     const el = (!isOpen && collapsedStyle === 'pill') ? triggerPill : drawer;
     const rect = el.getBoundingClientRect();
-    dragStartElBottom = window.innerHeight - rect.bottom;
+    dragStartElTop = rect.top;
     dragElHeight = rect.height || 60;
   }
 
   function resetDockPosition() {
-    panelBottom = null;
-    chrome.storage.local.remove(['edgebar_panel_y', 'edgebar_panel_bottom']);
+    panelY = null;
+    chrome.storage.local.remove(['edgebar_panel_y', 'edgebar_panel_bottom', 'edgebar_center_v2']);
     applyPosition();
   }
 
@@ -823,10 +824,7 @@
     });
   }
   triggerPill.addEventListener('mousedown', onDragStart);
-  drawerHeader.addEventListener('mousedown', (e) => {
-    if (e.target.closest('.eb-drawer-actions, .eb-action-btn, .eb-zoom-group, .eb-zoom-btn, .eb-header-new-tab, .eb-url-bar-wrap, .eb-url-input')) return;
-    onDragStart(e);
-  });
+  drawerHeader.addEventListener('mousedown', onDragStart);
   drawer.addEventListener('mousedown', (e) => {
     if (!drawer.classList.contains('eb-open')) {
       onDragStart(e);
@@ -1107,9 +1105,9 @@
   function loadState() {
     chrome.storage.local.get([
       'edgebar_shortcuts', 'edgebar_drawer_width', 'edgebar_drawer_height',
-      'edgebar_height_mode', 'edgebar_collapsed_style', 'edgebar_panel_bottom',
+      'edgebar_height_mode', 'edgebar_collapsed_style', 'edgebar_panel_y',
       'edgebar_last_active', 'edgebar_drawer_open', 'edgebar_view_mode', 'edgebar_zoom',
-      'edgebar_click_outside_close', 'edgebar_icon_size', 'edgebar_center_v2'
+      'edgebar_click_outside_close', 'edgebar_icon_size'
     ], (result) => {
       // Shortcuts
       const isOldDefault = result.edgebar_shortcuts && Array.isArray(result.edgebar_shortcuts) &&
@@ -1135,15 +1133,13 @@
       }
       if (result.edgebar_view_mode) viewMode = result.edgebar_view_mode;
 
-      // Position: migrate to vertical center by default
-      if (!result.edgebar_center_v2) {
-        chrome.storage.local.remove(['edgebar_panel_y', 'edgebar_panel_bottom']);
-        chrome.storage.local.set({ edgebar_center_v2: true });
-        panelBottom = null;
-      } else if (result.edgebar_panel_bottom !== undefined && result.edgebar_panel_bottom !== null && !isNaN(result.edgebar_panel_bottom)) {
-        panelBottom = Math.max(8, result.edgebar_panel_bottom);
+      // Position: clean up legacy bottom keys completely and restore top-based Y
+      chrome.storage.local.remove(['edgebar_panel_bottom', 'edgebar_center_v2']);
+
+      if (result.edgebar_panel_y !== undefined && result.edgebar_panel_y !== null && !isNaN(result.edgebar_panel_y)) {
+        panelY = Math.max(8, result.edgebar_panel_y);
       } else {
-        panelBottom = null; // defaults to vertical center
+        panelY = null; // Default: clean vertical center
       }
 
       // Height mode
@@ -1659,25 +1655,23 @@
         triggerPill.classList.add('eb-dragging');
       }
       if (dragMoved) {
-        // dy > 0 means mouse moved down, so distance from bottom decreases
-        const rawBottom = dragStartElBottom - dy;
-        const maxBottom = Math.max(8, window.innerHeight - dragElHeight - 8);
-        panelBottom = Math.max(8, Math.min(rawBottom, maxBottom));
+        const rawTop = dragStartElTop + dy;
+        const maxTop = Math.max(8, window.innerHeight - dragElHeight - 8);
+        panelY = Math.max(8, Math.min(rawTop, maxTop));
 
         const isOpen = drawer.classList.contains('eb-open');
         let el = (!isOpen && collapsedStyle === 'pill') ? triggerPill : drawer;
-        el.style.setProperty('top', 'auto', 'important');
-        el.style.setProperty('bottom', `${panelBottom}px`, 'important');
+        el.style.setProperty('top', `${panelY}px`, 'important');
+        el.style.setProperty('bottom', 'auto', 'important');
         el.style.setProperty('transform', 'none', 'important');
       }
       return;
     }
-    // --- Height resize (anchored to bottom so only top moves) ---
+    // --- Height resize (anchored to top) ---
     if (isResizingHeight) {
       const maxH = window.innerHeight - 20;
       drawerHeight = Math.max(300, Math.min(startHeight + (startY - e.clientY), maxH));
       drawer.style.height = `${drawerHeight}px`;
-      drawer.style.top = 'auto';
       return;
     }
     // --- Width resize ---
@@ -1697,7 +1691,7 @@
       if (dragMoved) {
         preventNextClick = true;
         setTimeout(() => { preventNextClick = false; }, 120);
-        chrome.storage.local.set({ edgebar_panel_bottom: panelBottom });
+        chrome.storage.local.set({ edgebar_panel_y: panelY });
       }
     }
     if (isResizingHeight) {
