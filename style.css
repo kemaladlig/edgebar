@@ -20,6 +20,23 @@
   -webkit-font-smoothing: antialiased;
 }
 
+/* Prevent FOUC / Initial load transition flash */
+.eb-preload,
+.eb-preload * {
+  transition: none !important;
+  animation: none !important;
+}
+
+.eb-container {
+  opacity: 1;
+  transition: opacity 0.1s ease;
+}
+
+.eb-container:not(.eb-ready) {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
 /* ==========================================================================
    TRIGGER PILL (Closed State)
    ========================================================================== */

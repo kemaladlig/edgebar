@@ -332,14 +332,48 @@
   const host = document.createElement('div');
   host.id = 'v-edgebar-host';
   const shadow = host.attachShadow({ mode: 'open' });
+
+  // Critical inline CSS: Prevents any FOUC (flash of unstyled content) or transition flicker
+  const inlineCriticalStyle = document.createElement('style');
+  inlineCriticalStyle.textContent = `
+    :host { all: initial; }
+    .eb-container { opacity: 0 !important; pointer-events: none !important; }
+    .eb-container.eb-ready { opacity: 1 !important; pointer-events: auto !important; }
+    .eb-preload, .eb-preload * { transition: none !important; animation: none !important; }
+  `;
+  shadow.appendChild(inlineCriticalStyle);
+
   const styleLink = document.createElement('link');
   styleLink.rel = 'stylesheet';
   styleLink.href = chrome.runtime.getURL('style.css');
   shadow.appendChild(styleLink);
+
   const container = document.createElement('div');
-  container.className = 'eb-container';
+  container.className = 'eb-container eb-preload';
   shadow.appendChild(container);
   (document.body || document.documentElement).appendChild(host);
+
+  let isCssReady = false;
+  let isStateReady = false;
+
+  function markReadyIfComplete() {
+    if (!isCssReady || !isStateReady) return;
+    requestAnimationFrame(() => {
+      container.classList.add('eb-ready');
+      setTimeout(() => {
+        container.classList.remove('eb-preload');
+      }, 50);
+    });
+  }
+
+  styleLink.onload = () => {
+    isCssReady = true;
+    markReadyIfComplete();
+  };
+  setTimeout(() => {
+    isCssReady = true;
+    markReadyIfComplete();
+  }, 100);
 
   // --- Tooltip ---
   const tooltip = document.createElement('div');
@@ -703,12 +737,15 @@
       renderShortcuts();
       settingsModal.syncUI();
 
-      // Restore open/closed state
-      if (result.edgebar_drawer_open !== false) {
+      // Restore open/closed state (default to closed / strip mode on fresh page load)
+      if (result.edgebar_drawer_open === true) {
         openDrawer(shortcuts.find((s) => s.id === result.edgebar_last_active) || shortcuts[0]);
       } else {
         closeDrawer(false);
       }
+
+      isStateReady = true;
+      markReadyIfComplete();
     });
   }
 
