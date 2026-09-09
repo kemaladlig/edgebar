@@ -7,6 +7,16 @@
 [![Performance](https://img.shields.io/badge/Parse%20Time-%3C1ms-brightgreen.svg?style=flat-square)]()
 [![License: MIT](https://img.shields.io/badge/License-MIT-purple.svg?style=flat-square)]()
 
+<br/>
+
+<p align="center">
+  <img src="assets/dock-collapsed.png" alt="EdgeBar Collapsed Dock" height="420" style="border-radius: 12px; margin-right: 16px; vertical-align: middle;" />
+  <img src="assets/preview-open.png" alt="EdgeBar Workspace in Action" height="420" style="border-radius: 12px; vertical-align: middle;" />
+</p>
+<p align="center">
+  <sub>✨ <b>Sol:</b> Sayfayı işgal etmeyen fasetli kompakt şerit &nbsp;•&nbsp; <b>Sağ:</b> Kod/doküman okurken tek tıkla kayarak açılan Gemini & AI paneli</sub>
+</p>
+
 ---
 
 ## 🚀 Neden EdgeBar?
