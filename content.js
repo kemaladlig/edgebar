@@ -809,7 +809,7 @@
 
   function resetDockPosition() {
     panelY = null;
-    chrome.storage.local.remove(['edgebar_panel_y', 'edgebar_panel_bottom', 'edgebar_center_v2']);
+    chrome.storage.local.remove(['edgebar_panel_y_v4', 'edgebar_panel_y', 'edgebar_panel_bottom', 'edgebar_center_v2']);
     applyPosition();
   }
 
@@ -1101,7 +1101,7 @@
   function loadState() {
     chrome.storage.local.get([
       'edgebar_shortcuts', 'edgebar_drawer_width', 'edgebar_drawer_height',
-      'edgebar_height_mode', 'edgebar_collapsed_style', 'edgebar_panel_y',
+      'edgebar_height_mode', 'edgebar_collapsed_style', 'edgebar_panel_y_v4',
       'edgebar_last_active', 'edgebar_drawer_open', 'edgebar_view_mode', 'edgebar_zoom',
       'edgebar_click_outside_close', 'edgebar_icon_size'
     ], (result) => {
@@ -1129,11 +1129,11 @@
       }
       if (result.edgebar_view_mode) viewMode = result.edgebar_view_mode;
 
-      // Position: clean up legacy bottom keys completely and restore top-based Y
-      chrome.storage.local.remove(['edgebar_panel_bottom', 'edgebar_center_v2']);
+      // Position: purge legacy stored positions so dock ALWAYS starts in pristine vertical center
+      chrome.storage.local.remove(['edgebar_panel_y', 'edgebar_panel_bottom', 'edgebar_center_v2']);
 
-      if (result.edgebar_panel_y !== undefined && result.edgebar_panel_y !== null && !isNaN(result.edgebar_panel_y)) {
-        panelY = Math.max(8, result.edgebar_panel_y);
+      if (result.edgebar_panel_y_v4 !== undefined && result.edgebar_panel_y_v4 !== null && !isNaN(result.edgebar_panel_y_v4)) {
+        panelY = Math.max(8, result.edgebar_panel_y_v4);
       } else {
         panelY = null; // Default: clean vertical center
       }
@@ -1679,7 +1679,7 @@
       if (dragMoved) {
         preventNextClick = true;
         setTimeout(() => { preventNextClick = false; }, 120);
-        chrome.storage.local.set({ edgebar_panel_y: panelY });
+        chrome.storage.local.set({ edgebar_panel_y_v4: panelY });
       }
     }
     if (isResizingHeight) {
