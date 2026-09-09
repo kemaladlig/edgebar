@@ -44,13 +44,13 @@
           <button type="button" class="eb-dock-new-tab-btn" title="Yeni Sekme">${icons.plus}</button>
           <div class="eb-open-tabs-list"></div>
           <div class="eb-tabs-divider" style="display:none;"></div>
-          <button type="button" class="eb-settings-btn" title="Ayarlar">${icons.settings}</button>
+          <div class="eb-items-list"></div>
         </div>
         <div class="eb-dock-bottom">
           <div class="eb-dock-drag-handle" title="Yukarı/aşağı taşımak için sürükleyin">
             <span class="eb-drag-grip-line"></span>
           </div>
-          <div class="eb-items-list"></div>
+          <button type="button" class="eb-settings-btn" title="Ayarlar">${icons.settings}</button>
           <button type="button" class="eb-toggle-btn" title="Paneli Daralt (Esc)">
             ${icons.sidebarOpen}
           </button>
@@ -699,6 +699,7 @@
       if (mode === 'custom') {
         drawer.style.height = `${drawerHeight}px`;
       }
+      applyPosition();
     }
     settingsView.syncUI();
   }
@@ -745,15 +746,21 @@
     triggerPill.style.removeProperty('top');
     triggerPill.style.removeProperty('bottom');
 
-    // 2. If no custom position, CSS defaults apply (bottom: 24px)
-    if (panelY === null) return;
-
     const isOpen = drawer.classList.contains('eb-open');
 
-    // 3. In full-height open mode, panel fills viewport — custom Y is irrelevant
+    // 2. In full-height open mode, panel fills viewport — custom Y is irrelevant
     if (isOpen && heightMode === 'full') return;
-    // 4. In floating open mode, CSS handles positioning (top:14px, bottom:14px)
+    // 3. In floating open mode, CSS handles positioning (top:14px, bottom:14px)
     if (isOpen && heightMode === 'floating') return;
+
+    // 4. If no custom position, default is bottom: 24px
+    if (panelY === null) {
+      drawer.style.top = 'auto';
+      drawer.style.bottom = '24px';
+      triggerPill.style.top = 'auto';
+      triggerPill.style.bottom = '24px';
+      return;
+    }
 
     // 5. Clamp to safe viewport bounds based on actual element height
     let el, maxY;
@@ -1179,13 +1186,18 @@
       activeFrame.allow = 'clipboard-read; clipboard-write; camera; microphone; geolocation; encrypted-media';
       activeFrame.style.zoom = `${zoomLevel}`;
       activeFrame.src = sc.url;
-      activeFrame.addEventListener('load', () => loader.classList.add('eb-hidden'));
+      activeFrame.addEventListener('load', () => {
+        loader.classList.add('eb-hidden');
+        try { activeFrame.focus(); } catch (_) {}
+      });
       iframeContainer.appendChild(activeFrame);
       iframePool.set(sc.id, activeFrame);
+      try { activeFrame.focus(); } catch (_) {}
     } else {
       activeFrame.classList.add('eb-active-frame');
       activeFrame.style.zoom = `${zoomLevel}`;
       loader.classList.add('eb-hidden');
+      try { activeFrame.focus(); } catch (_) {}
     }
 
     // Reset inline styles, then apply open state
@@ -1578,16 +1590,20 @@
   let isResizing = false;
   let isResizingHeight = false;
   let startX = 0, startY = 0, startWidth = 0, startHeight = 0;
+  let startDrawerBottom = 0;
 
   resizer.addEventListener('mousedown', (e) => {
     isResizing = true; startX = e.clientX; startWidth = drawer.getBoundingClientRect().width;
-    resizer.classList.add('eb-resizing'); dragOverlay.classList.add('eb-active'); dragOverlay.style.cursor = 'col-resize';
+    resizer.classList.add('eb-resizing'); drawer.classList.add('eb-resizing-active'); dragOverlay.classList.add('eb-active'); dragOverlay.style.cursor = 'col-resize';
     e.preventDefault();
   });
   resizerTop.addEventListener('mousedown', (e) => {
     if (heightMode !== 'custom') return;
-    isResizingHeight = true; startY = e.clientY; startHeight = drawer.getBoundingClientRect().height;
-    resizerTop.classList.add('eb-resizing'); dragOverlay.classList.add('eb-active'); dragOverlay.style.cursor = 'ns-resize';
+    isResizingHeight = true; startY = e.clientY;
+    const rect = drawer.getBoundingClientRect();
+    startHeight = rect.height;
+    startDrawerBottom = rect.bottom;
+    resizerTop.classList.add('eb-resizing'); drawer.classList.add('eb-resizing-active'); dragOverlay.classList.add('eb-active'); dragOverlay.style.cursor = 'ns-resize';
     e.preventDefault();
   });
 
@@ -1620,9 +1636,13 @@
       }
       return;
     }
-    // --- Height resize ---
+    // --- Height resize (anchored to bottom so only top moves) ---
     if (isResizingHeight) {
-      drawerHeight = Math.max(300, Math.min(startHeight + (startY - e.clientY), window.innerHeight - 20));
+      const maxH = Math.max(300, startDrawerBottom - 8);
+      drawerHeight = Math.max(300, Math.min(startHeight + (startY - e.clientY), maxH));
+      panelY = Math.round(startDrawerBottom - drawerHeight);
+      drawer.style.top = `${panelY}px`;
+      drawer.style.bottom = 'auto';
       drawer.style.height = `${drawerHeight}px`;
       return;
     }
@@ -1647,13 +1667,15 @@
     if (isResizingHeight) {
       isResizingHeight = false;
       resizerTop.classList.remove('eb-resizing');
+      drawer.classList.remove('eb-resizing-active');
       dragOverlay.classList.remove('eb-active');
       dragOverlay.style.cursor = '';
-      chrome.storage.local.set({ edgebar_drawer_height: drawerHeight });
+      chrome.storage.local.set({ edgebar_drawer_height: drawerHeight, edgebar_panel_y: panelY });
     }
     if (isResizing) {
       isResizing = false;
       resizer.classList.remove('eb-resizing');
+      drawer.classList.remove('eb-resizing-active');
       dragOverlay.classList.remove('eb-active');
       dragOverlay.style.cursor = '';
       chrome.storage.local.set({ edgebar_drawer_width: drawerWidth });

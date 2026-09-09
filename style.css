@@ -228,7 +228,7 @@
 
 .eb-drawer.eb-strip-only .eb-items-list {
   display: flex !important;
-  flex-direction: column-reverse !important;
+  flex-direction: column !important;
   max-height: none !important;
   gap: 4px !important;
   padding: 0 4px !important;
@@ -278,6 +278,8 @@
 
 /* Height Mode 3: Custom Resizable Height */
 .eb-drawer.eb-height-custom {
+  top: auto;
+  bottom: 24px;
   left: 0;
   border-radius: 0 12px 12px 0;
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -290,7 +292,8 @@
   cursor: grab;
 }
 
-.eb-drawer.eb-height-custom.eb-dragging-drawer {
+.eb-drawer.eb-height-custom.eb-dragging-drawer,
+.eb-drawer.eb-resizing-active {
   transition: none !important;
 }
 
@@ -429,14 +432,14 @@
 
 .eb-items-list {
   display: flex;
-  flex-direction: column-reverse;
+  flex-direction: column;
   align-items: center;
   gap: 6px;
   width: 100%;
   overflow-y: auto;
   overflow-x: hidden;
   scrollbar-width: none;
-  max-height: calc(100vh - 120px);
+  max-height: calc(100vh - 160px);
   padding: 0 4px;
 }
 
