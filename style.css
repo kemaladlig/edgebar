@@ -1217,146 +1217,201 @@
 }
 
 /* ==========================================================================
-   10. SETTINGS MODAL & SHORTCUT MANAGEMENT
+   10. IN-PANEL SETTINGS VIEW & SHORTCUT MANAGEMENT (Raycast / Arc Aesthetic)
    ========================================================================== */
 
-.eb-modal-backdrop {
-  position: fixed;
+/* Header adaptations when in settings mode */
+.eb-drawer-header.eb-settings-mode .eb-zoom-group,
+.eb-drawer-header.eb-settings-mode .eb-reload,
+.eb-drawer-header.eb-settings-mode .eb-external {
+  opacity: 0.25;
+  pointer-events: none;
+  filter: grayscale(1);
+}
+
+.eb-drawer-header.eb-settings-mode .eb-header-back {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+/* Settings View Container */
+.eb-settings-view {
+  position: absolute;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0, 0, 0, 0.28);
-  backdrop-filter: blur(2px);
-  -webkit-backdrop-filter: blur(2px);
+  right: 0;
+  bottom: 0;
+  background: #0d0e12;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: ebFadeIn 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes ebFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.eb-settings-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 22px 24px 48px;
+  max-width: 640px;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+
+.eb-settings-container::-webkit-scrollbar {
+  width: 5px;
+}
+
+.eb-settings-container::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+}
+
+/* Hero Title Section */
+.eb-settings-hero {
+  margin-bottom: 22px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.eb-settings-hero-title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.eb-settings-hero-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 2147483647;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  color: #f4f4f5;
 }
 
-.eb-modal-backdrop.eb-modal-open {
-  opacity: 1;
-  pointer-events: auto;
+.eb-settings-hero-icon svg {
+  width: 15px;
+  height: 15px;
 }
 
-.eb-modal-card {
-  width: 356px;
-  max-width: 92vw;
-  background: linear-gradient(180deg, #181920 0%, #121318 100%);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 14px;
-  padding: 18px 20px;
-  box-shadow: 0 24px 64px -12px rgba(0, 0, 0, 0.8),
-              0 0 0 1px rgba(255, 255, 255, 0.08),
-              inset 0 1px 0 rgba(255, 255, 255, 0.12);
-  transform: scale(0.96) translateY(4px);
-  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
-}
-
-.eb-modal-backdrop.eb-modal-open .eb-modal-card {
-  transform: scale(1) translateY(0);
-}
-
-.eb-modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 14px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-}
-
-.eb-modal-title-wrap {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.eb-modal-title {
-  font-size: 13.5px;
+.eb-settings-hero h2 {
+  font-size: 16px;
   font-weight: 600;
   color: #f4f4f5;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
+  margin: 0;
 }
 
-.eb-modal-badge {
+.eb-settings-badge {
   font-size: 10px;
   font-weight: 600;
-  padding: 1.5px 6px;
+  padding: 2px 7px;
   border-radius: 9999px;
   background: rgba(255, 255, 255, 0.08);
   color: #a1a1aa;
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.eb-modal-close {
-  width: 26px;
-  height: 26px;
+.eb-settings-hero-desc {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #71717a;
+  line-height: 1.45;
+}
+
+/* Settings Cards */
+.eb-settings-card {
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+  margin-bottom: 18px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.eb-settings-card-header {
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.015);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.eb-settings-card-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #a1a1aa;
+}
+
+.eb-settings-card-body {
+  padding: 4px 16px 14px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Individual Setting Items */
+.eb-setting-item {
   display: flex;
   align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 7px;
-  color: #a1a1aa;
-  cursor: pointer;
-  transition: all 0.15s ease;
+  justify-content: space-between;
+  padding: 13px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  gap: 16px;
 }
 
-.eb-modal-close svg {
-  width: 14px;
-  height: 14px;
+.eb-setting-item:last-child {
+  border-bottom: none;
 }
 
-.eb-modal-close:hover {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.16);
-  color: #ffffff;
-}
-
-.eb-modal-body {
+.eb-setting-info {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 2.5px;
+  min-width: 0;
 }
 
-.eb-setting-row {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
+.eb-setting-name {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #f4f4f5;
+  letter-spacing: -0.01em;
 }
 
-.eb-setting-label {
-  font-size: 10.5px;
-  font-weight: 600;
+.eb-setting-desc {
+  font-size: 11px;
   color: #71717a;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
 }
 
-.eb-modal-divider {
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08) 20%, rgba(255, 255, 255, 0.08) 80%, transparent);
-  margin: 3px 0;
-}
-
-/* Segmented Controls in Modal */
+/* Segmented Control Buttons */
 .eb-segmented-control {
-  display: flex;
-  background: #0d0e12;
+  display: inline-flex;
+  background: #08090c;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 8px;
   padding: 2.5px;
   gap: 2.5px;
+  flex-shrink: 0;
 }
 
 .eb-segmented-btn {
-  flex: 1;
-  padding: 5.5px 6px;
+  padding: 5px 11px;
   border: 1px solid transparent;
   border-radius: 6px;
   background: transparent;
@@ -1364,10 +1419,6 @@
   font-size: 11.5px;
   font-weight: 500;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
   transition: all 0.14s ease;
   white-space: nowrap;
 }
@@ -1385,49 +1436,72 @@
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
 }
 
-/* Quick Add Single Line */
+/* Keyboard badge */
+.eb-kbd-badge {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #71717a;
+  font-size: 11px;
+}
+
+.eb-kbd-badge kbd {
+  font-family: inherit;
+  font-size: 11.5px;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 5px;
+  padding: 2.5px 7px;
+  color: #f4f4f5;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+/* Quick Add Shortcut Line */
 .eb-quick-add-row {
   display: flex;
-  gap: 6px;
+  gap: 8px;
+  margin: 12px 0 14px;
 }
 
 .eb-quick-add-input {
   flex: 1;
-  background: #0d0e12;
+  background: #08090c;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
-  padding: 7px 11px;
+  padding: 8px 12px;
   color: #f4f4f5;
   font-size: 12px;
   outline: none;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  transition: all 0.15s ease;
 }
 
 .eb-quick-add-input:focus {
-  background: #13141a;
+  background: #111218;
   border-color: rgba(255, 255, 255, 0.35);
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.08);
 }
 
 .eb-quick-add-btn {
-  width: 32px;
-  height: 32px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 5px;
+  padding: 0 14px;
   background: #ffffff;
   color: #09090b;
   border: none;
   border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
   cursor: pointer;
   flex-shrink: 0;
   transition: all 0.14s ease;
 }
 
 .eb-quick-add-btn svg {
-  width: 15px;
-  height: 15px;
-  stroke-width: 2px;
+  width: 14px;
+  height: 14px;
+  stroke-width: 2.2;
 }
 
 .eb-quick-add-btn:hover {
@@ -1436,48 +1510,56 @@
 }
 
 .eb-quick-add-btn:active {
-  transform: scale(0.96);
+  transform: scale(0.97);
 }
 
-/* Manage registered shortcuts list */
+/* Manage List */
 .eb-manage-list {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  max-height: 120px;
+  gap: 5px;
+  max-height: 220px;
   overflow-y: auto;
   scrollbar-width: thin;
   padding-right: 2px;
+}
+
+.eb-manage-empty {
+  color: #71717a;
+  font-size: 11.5px;
+  padding: 10px 4px;
+  text-align: center;
 }
 
 .eb-manage-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 6px 10px;
+  padding: 7px 11px;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 7px;
-  font-size: 12px;
-  color: #d4d4d8;
-  transition: background 0.12s ease;
+  border-radius: 8px;
+  transition: all 0.12s ease;
+  cursor: pointer;
 }
 
 .eb-manage-item:hover {
   background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .eb-manage-item-left {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   min-width: 0;
 }
 
 .eb-manage-item-icon {
-  width: 18px;
-  height: 18px;
-  border-radius: 4px;
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.06);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1497,11 +1579,27 @@
   object-fit: contain;
 }
 
+.eb-manage-item-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
 .eb-manage-item-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: #f4f4f5;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-weight: 500;
+}
+
+.eb-manage-item-url {
+  font-size: 10.5px;
+  color: #71717a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .eb-manage-item-del {
@@ -1509,7 +1607,7 @@
   background: transparent;
   border: none;
   cursor: pointer;
-  padding: 3px;
+  padding: 4px;
   border-radius: 5px;
   display: flex;
   align-items: center;
@@ -1527,12 +1625,11 @@
   background: rgba(239, 68, 68, 0.18);
 }
 
-.eb-modal-footer {
+.eb-settings-card-footer {
   display: flex;
   justify-content: flex-end;
-  margin-top: 12px;
-  padding-top: 10px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  margin-top: 10px;
+  padding-top: 8px;
 }
 
 .eb-btn-link {
