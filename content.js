@@ -16,7 +16,7 @@
     sidebarClosed: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="16" x="2" y="2" rx="3.5"/><path d="M7 2v16"/><circle cx="12" cy="10" r="1.3" fill="currentColor"/></svg>`,
     sidebarOpen: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="16" x="2" y="2" rx="3.5"/><path d="M7 2v16"/><path d="m13.5 8-2 2 2 2"/></svg>`,
     trigger: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="16" x="2" y="2" rx="3.5"/><path d="M7 2v16"/><circle cx="12" cy="10" r="1.3" fill="currentColor"/></svg>`,
-    settings: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="3"/><path d="M16.24 7.76a1.5 1.5 0 0 1 .36 1.64l-.06.14a1.5 1.5 0 0 0 .54 1.76l.12.08a1.5 1.5 0 0 1 .54 1.59l-.2.75a1.5 1.5 0 0 1-1.28 1.1l-.14.02a1.5 1.5 0 0 0-1.34 1.25l-.02.14a1.5 1.5 0 0 1-1.1 1.28l-.75.2a1.5 1.5 0 0 1-1.59-.54l-.08-.12a1.5 1.5 0 0 0-1.76-.54l-.14.06a1.5 1.5 0 0 1-1.64-.36l-.55-.55a1.5 1.5 0 0 1-.36-1.64l.06-.14a1.5 1.5 0 0 0-.54-1.76l-.12-.08a1.5 1.5 0 0 1-.54-1.59l.2-.75a1.5 1.5 0 0 1 1.28-1.1l.14-.02a1.5 1.5 0 0 0 1.34-1.25l.02-.14a1.5 1.5 0 0 1 1.1-1.28l.75-.2a1.5 1.5 0 0 1 1.59.54l.08.12a1.5 1.5 0 0 0 1.76.54l.14-.06a1.5 1.5 0 0 1 1.64.36l.55.55Z"/></svg>`,
+    settings: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>`,
     plus: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4v12M4 10h12"/></svg>`,
     reload: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10a6.5 6.5 0 1 1 1.9 4.6L2 18"/><path d="M2 13.5V18h4.5"/></svg>`,
     external: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 11v5a1.5 1.5 0 0 1-1.5 1.5H4.5A1.5 1.5 0 0 1 3 16V7.5A1.5 1.5 0 0 1 4.5 6H9.5"/><path d="M11.5 3.5h5v5M8 12 16.5 3.5"/></svg>`,
@@ -125,9 +125,6 @@
     <!-- Left Rail: Integrated Dock Icons -->
     <div class="eb-dock-rail">
       <div class="eb-dock-top">
-        <div class="eb-dock-drag-handle" title="Konumu değiştirmek için yukarı/aşağı sürükleyin">
-          <span class="eb-drag-grip-line"></span>
-        </div>
         <button type="button" class="eb-settings-btn" title="Ayarlar">
           ${ICONS.settings}
         </button>

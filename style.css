@@ -145,36 +145,7 @@
   cursor: default !important;
 }
 
-.eb-dock-drag-handle {
-  width: 100%;
-  height: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: grab;
-  padding: 2px 0;
-  user-select: none;
-}
-
-.eb-dock-drag-handle .eb-drag-grip-line {
-  width: 16px;
-  height: 3px;
-  background: rgba(255, 255, 255, 0.22);
-  border-radius: 2px;
-  transition: background 0.15s ease;
-}
-
-.eb-dock-drag-handle:hover .eb-drag-grip-line {
-  background: rgba(255, 255, 255, 0.6);
-}
-
 .eb-drawer.eb-strip-only .eb-dock-top {
-  gap: 0 !important;
-}
-
-/* Hide drag handle and settings button when drawer is collapsed into strip */
-.eb-drawer.eb-strip-only .eb-dock-drag-handle,
-.eb-drawer.eb-strip-only .eb-settings-btn {
   display: none !important;
 }
 
@@ -453,33 +424,42 @@
   text-transform: uppercase;
 }
 
-/* Top Dock Buttons (Toggle & Settings) */
+/* Dock Control Buttons (Toggle & Settings) */
 .eb-toggle-btn,
 .eb-settings-btn {
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: transparent;
-  border: none;
-  border-radius: 7px;
-  color: #9ca3af;
-  cursor: pointer;
-  transition: all 0.14s ease;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: #a1a1aa;
+  cursor: pointer !important;
+  user-select: none !important;
+  -webkit-user-drag: none;
+  transition: all 0.16s ease;
   flex-shrink: 0;
 }
 
 .eb-toggle-btn:hover,
 .eb-settings-btn:hover {
   background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.08);
   color: #ffffff;
+}
+
+.eb-toggle-btn:active,
+.eb-settings-btn:active {
+  transform: scale(0.95);
 }
 
 .eb-toggle-btn svg,
 .eb-settings-btn svg {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
+  display: block;
 }
 
 /* ==========================================================================
