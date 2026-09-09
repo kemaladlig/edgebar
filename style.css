@@ -26,7 +26,8 @@
 
 .eb-trigger-pill {
   position: fixed;
-  top: 14px;
+  bottom: 24px;
+  top: auto;
   left: 0;
   width: 36px;
   height: 40px;
@@ -106,8 +107,8 @@
 
 /* Strip-Only Mode (When drawer is closed, but shortcuts remain visible on left edge as a compact pill dock) */
 .eb-drawer.eb-strip-only {
-  top: 14px !important;
-  bottom: auto !important;
+  top: auto !important;
+  bottom: 24px !important;
   left: 0 !important;
   width: 46px !important;
   min-width: 46px !important;
