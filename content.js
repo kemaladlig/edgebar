@@ -51,9 +51,6 @@
             <span class="eb-drag-grip-line"></span>
           </div>
           <button type="button" class="eb-settings-btn" title="Ayarlar">${icons.settings}</button>
-          <button type="button" class="eb-toggle-btn" title="Paneli Daralt (Esc)">
-            ${icons.sidebarOpen}
-          </button>
         </div>
       </div>
       <div class="eb-panel-main">
@@ -491,7 +488,6 @@
   container.appendChild(drawer);
 
   const itemsList = drawer.querySelector('.eb-items-list');
-  const toggleBtn = drawer.querySelector('.eb-toggle-btn');
   const settingsBtn = drawer.querySelector('.eb-settings-btn');
   const dockNewTabBtn = drawer.querySelector('.eb-dock-new-tab-btn');
   const openTabsList = drawer.querySelector('.eb-open-tabs-list');
@@ -614,8 +610,6 @@
       drawer.style.width = `${drawerWidth}px`;
       if (heightMode === 'custom') drawer.style.height = `${drawerHeight}px`;
       applyPosition();
-      toggleBtn.innerHTML = ICONS.sidebarOpen;
-      toggleBtn.title = 'Paneli Daralt (Esc)';
       itemsList.querySelectorAll('.eb-item-btn').forEach((b) => { b.draggable = true; });
       chrome.storage.local.set({ edgebar_drawer_open: true });
     }
@@ -673,6 +667,10 @@
 
   settingsBtn.addEventListener('click', () => {
     if (preventNextClick) return;
+    if (isSettingsViewActive && drawer.classList.contains('eb-open')) {
+      closeDrawer();
+      return;
+    }
     openSettingsView();
   });
 
@@ -793,7 +791,7 @@
   function onDragStart(e) {
     if (e.button !== 0) return;
     // Don't drag from interactive buttons, inputs or actions
-    if (e.target.closest('.eb-action-btn, .eb-zoom-group, .eb-zoom-btn, .eb-item-btn, .eb-toggle-btn, .eb-settings-btn, .eb-dock-new-tab-btn, .eb-header-new-tab, .eb-url-bar-wrap, .eb-url-input, .eb-drawer-actions')) return;
+    if (e.target.closest('.eb-action-btn, .eb-zoom-group, .eb-zoom-btn, .eb-item-btn, .eb-settings-btn, .eb-dock-new-tab-btn, .eb-header-new-tab, .eb-url-bar-wrap, .eb-url-input, .eb-drawer-actions')) return;
 
     const isOpen = drawer.classList.contains('eb-open');
     // In open mode with full or floating height, don't drag
@@ -877,11 +875,7 @@
           return;
         }
         if (activeShortcutId === sc.id && drawer.classList.contains('eb-open')) {
-          if (currentActiveUrl !== sc.url) {
-            openDrawer(sc);
-          } else {
-            closeDrawer();
-          }
+          closeDrawer();
         } else {
           openDrawer(sc);
         }
@@ -942,6 +936,10 @@
 
       btn.addEventListener('click', () => {
         if (preventNextClick) return;
+        if (activeTabId === tab.id && drawer.classList.contains('eb-open')) {
+          closeDrawer();
+          return;
+        }
         switchToTab(tab.id);
       });
 
@@ -1067,8 +1065,6 @@
       drawer.style.width = `${drawerWidth}px`;
       if (heightMode === 'custom') drawer.style.height = `${drawerHeight}px`;
       applyPosition();
-      toggleBtn.innerHTML = ICONS.sidebarOpen;
-      toggleBtn.title = 'Paneli Daralt (Esc)';
       itemsList.querySelectorAll('.eb-item-btn').forEach((b) => { b.draggable = true; });
       chrome.storage.local.set({ edgebar_drawer_open: true });
     }
@@ -1246,8 +1242,6 @@
 
     applyPosition();
 
-    toggleBtn.innerHTML = ICONS.sidebarOpen;
-    toggleBtn.title = 'Paneli Daralt (Esc)';
     itemsList.querySelectorAll('.eb-item-btn').forEach((b) => { b.draggable = true; });
 
     chrome.storage.local.set({ edgebar_drawer_open: true, edgebar_last_active: sc.id });
@@ -1263,8 +1257,6 @@
 
     drawer.classList.remove('eb-open');
     dockNewTabBtn.classList.remove('eb-active-dock-tab');
-    toggleBtn.innerHTML = ICONS.sidebarClosed;
-    toggleBtn.title = 'Paneli Genişlet';
 
     drawer.style.removeProperty('top');
     drawer.style.removeProperty('bottom');
@@ -1296,10 +1288,6 @@
   triggerPill.addEventListener('click', () => {
     if (preventNextClick) return;
     openDrawer(shortcuts.find((s) => s.id === activeShortcutId) || shortcuts[0]);
-  });
-  toggleBtn.addEventListener('click', () => {
-    if (preventNextClick) return;
-    drawer.classList.contains('eb-open') ? closeDrawer() : openDrawer(shortcuts.find((s) => s.id === activeShortcutId) || shortcuts[0]);
   });
   closeBtn.addEventListener('click', () => closeDrawer());
   reloadBtn.addEventListener('click', () => {

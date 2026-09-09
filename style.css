@@ -583,7 +583,6 @@
 }
 
 /* Dock Control Buttons */
-.eb-toggle-btn,
 .eb-settings-btn,
 .eb-dock-new-tab-btn {
   width: var(--eb-btn-size, 34px);
@@ -602,7 +601,6 @@
   flex-shrink: 0;
 }
 
-.eb-toggle-btn:hover,
 .eb-settings-btn:hover,
 .eb-dock-new-tab-btn:hover {
   background: rgba(255, 255, 255, 0.08);
@@ -610,13 +608,11 @@
   color: #ffffff;
 }
 
-.eb-toggle-btn:active,
 .eb-settings-btn:active,
 .eb-dock-new-tab-btn:active {
   transform: scale(0.95);
 }
 
-.eb-toggle-btn svg,
 .eb-settings-btn svg,
 .eb-dock-new-tab-btn svg {
   width: calc(var(--eb-icon-size, 20px) - 2px);
