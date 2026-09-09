@@ -5,6 +5,7 @@
   "description": "Ultra-minimal, collapsible side dock & slide-out web panels for Gemini, ChatGPT, X, and your custom shortcuts.",
   "permissions": [
     "declarativeNetRequest",
+    "declarativeNetRequestWithHostAccess",
     "storage"
   ],
   "host_permissions": [

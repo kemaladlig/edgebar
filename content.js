@@ -90,6 +90,7 @@
                   <svg class="eb-blank-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                   <input type="text" class="eb-blank-search-input" placeholder="Google'da arayın veya URL yazın..." spellcheck="false" autocomplete="off" />
                 </div>
+                <div class="eb-suggestions-dropdown eb-hidden"></div>
               </form>
               <div class="eb-blank-chips">
                 <button type="button" class="eb-blank-chip" data-url="https://www.google.com">🔍 Google</button>
@@ -449,6 +450,7 @@
   const loader = drawer.querySelector('.eb-loader-overlay');
   const blankPage = drawer.querySelector('.eb-blank-page');
   const blankSearchInput = drawer.querySelector('.eb-blank-search-input');
+  const suggestionsDropdown = drawer.querySelector('.eb-suggestions-dropdown');
   const resizer = drawer.querySelector('.eb-resizer');
   const resizerTop = drawer.querySelector('.eb-resizer-top');
   const zoomInBtn = drawer.querySelector('.eb-zoom-in');
@@ -1161,24 +1163,125 @@
     });
   });
 
+  let suggestDebounceTimer = null;
+  let activeSuggestionIndex = -1;
+  let currentSuggestions = [];
+
+  function hideSuggestions() {
+    if (suggestionsDropdown) {
+      suggestionsDropdown.classList.add('eb-hidden');
+      suggestionsDropdown.innerHTML = '';
+      currentSuggestions = [];
+      activeSuggestionIndex = -1;
+    }
+  }
+
+  function renderSuggestions(list) {
+    if (!suggestionsDropdown) return;
+    currentSuggestions = list;
+    activeSuggestionIndex = -1;
+    suggestionsDropdown.innerHTML = '';
+
+    if (!list || list.length === 0) {
+      hideSuggestions();
+      return;
+    }
+
+    list.forEach((itemText, idx) => {
+      const itemEl = document.createElement('div');
+      itemEl.className = 'eb-suggestion-item';
+      itemEl.dataset.index = idx;
+      itemEl.innerHTML = `
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <span>${itemText}</span>
+      `;
+
+      itemEl.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        blankSearchInput.value = itemText;
+        urlInput.value = itemText;
+        hideSuggestions();
+        handleNavigateUrl(itemText);
+      });
+
+      suggestionsDropdown.appendChild(itemEl);
+    });
+
+    suggestionsDropdown.classList.remove('eb-hidden');
+  }
+
+  function updateActiveSuggestionUI() {
+    if (!suggestionsDropdown) return;
+    const items = suggestionsDropdown.querySelectorAll('.eb-suggestion-item');
+    items.forEach((it, idx) => {
+      it.classList.toggle('eb-sug-active', idx === activeSuggestionIndex);
+    });
+    if (activeSuggestionIndex >= 0 && currentSuggestions[activeSuggestionIndex]) {
+      blankSearchInput.value = currentSuggestions[activeSuggestionIndex];
+      urlInput.value = currentSuggestions[activeSuggestionIndex];
+    }
+  }
+
+  function fetchSuggestions(query) {
+    clearTimeout(suggestDebounceTimer);
+    const q = (query || '').trim();
+    if (!q || q.length < 2) {
+      hideSuggestions();
+      return;
+    }
+
+    suggestDebounceTimer = setTimeout(() => {
+      chrome.runtime.sendMessage({ type: 'GET_SEARCH_SUGGESTIONS', query: q }, (res) => {
+        if (chrome.runtime.lastError || !res || !res.suggestions) {
+          hideSuggestions();
+          return;
+        }
+        renderSuggestions(res.suggestions);
+      });
+    }, 120);
+  }
+
   if (blankSearchInput) {
     blankSearchInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
+      if (e.key === 'ArrowDown') {
         e.preventDefault();
-        handleNavigateUrl(blankSearchInput.value);
+        if (currentSuggestions.length > 0) {
+          activeSuggestionIndex = (activeSuggestionIndex + 1) % currentSuggestions.length;
+          updateActiveSuggestionUI();
+        }
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (currentSuggestions.length > 0) {
+          activeSuggestionIndex = (activeSuggestionIndex - 1 + currentSuggestions.length) % currentSuggestions.length;
+          updateActiveSuggestionUI();
+        }
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        const selected = activeSuggestionIndex >= 0 && currentSuggestions[activeSuggestionIndex]
+          ? currentSuggestions[activeSuggestionIndex]
+          : blankSearchInput.value;
+        hideSuggestions();
+        handleNavigateUrl(selected);
         blankSearchInput.blur();
       } else if (e.key === 'Escape') {
+        hideSuggestions();
         blankSearchInput.blur();
       }
     });
 
     blankSearchInput.addEventListener('input', () => {
       urlInput.value = blankSearchInput.value;
+      fetchSuggestions(blankSearchInput.value);
+    });
+
+    blankSearchInput.addEventListener('blur', () => {
+      setTimeout(hideSuggestions, 180);
     });
 
     urlInput.addEventListener('input', () => {
       if (!blankPage.classList.contains('eb-hidden')) {
         blankSearchInput.value = urlInput.value;
+        fetchSuggestions(urlInput.value);
       }
     });
   }

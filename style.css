@@ -951,6 +951,54 @@
 
 .eb-blank-search-form {
   width: 100%;
+  position: relative;
+}
+
+.eb-suggestions-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  width: 100%;
+  background: #181920;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 14px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.75);
+  overflow: hidden;
+  z-index: 100;
+  padding: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.eb-suggestions-dropdown.eb-hidden {
+  display: none !important;
+}
+
+.eb-suggestion-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 9px;
+  color: #d4d4d8;
+  font-size: 12.5px;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  text-align: left;
+}
+
+.eb-suggestion-item:hover,
+.eb-suggestion-item.eb-sug-active {
+  background: rgba(255, 255, 255, 0.09);
+  color: #ffffff;
+}
+
+.eb-suggestion-item svg {
+  width: 14px;
+  height: 14px;
+  color: #71717a;
+  flex-shrink: 0;
 }
 
 .eb-blank-search-box {
