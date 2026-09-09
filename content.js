@@ -759,7 +759,7 @@
 
       btn.innerHTML = `
         <div class="eb-tab-icon">${iconContent}</div>
-        <button type="button" class="eb-tab-close-btn" title="Sekmeyi Kapat">${ICONS.close}</button>
+        <button type="button" class="eb-tab-close-btn" aria-label="Sekmeyi Kapat">${ICONS.close}</button>
       `;
 
       btn.addEventListener('mouseenter', () => showTooltip(tab.title || tab.url || 'Yeni Sekme', btn));
@@ -771,6 +771,11 @@
       });
 
       const closeBtn = btn.querySelector('.eb-tab-close-btn');
+      closeBtn.addEventListener('mouseenter', (e) => {
+        e.stopPropagation();
+        showTooltip('Sekmeyi Kapat', closeBtn);
+      });
+      closeBtn.addEventListener('mouseleave', hideTooltip);
       closeBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         hideTooltip();

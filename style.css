@@ -361,6 +361,8 @@
    ========================================================================== */
 
 .eb-dock-rail {
+  position: relative;
+  z-index: 20;
   width: var(--eb-rail-w, 46px);
   height: 100%;
   background: #111216;
@@ -577,9 +579,9 @@
   width: 100%;
   max-height: 180px;
   overflow-y: auto;
-  overflow-x: hidden;
+  overflow-x: visible;
   scrollbar-width: none;
-  padding: 0 4px;
+  padding: 2px 4px;
 }
 
 .eb-open-tabs-list::-webkit-scrollbar {
@@ -647,13 +649,13 @@
 
 .eb-tab-close-btn {
   position: absolute;
-  top: -3px;
-  right: -3px;
-  width: 15px;
-  height: 15px;
+  top: 1px;
+  right: 1px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   background: #27272a;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.25);
   color: #a1a1aa;
   display: flex;
   align-items: center;
@@ -661,9 +663,9 @@
   cursor: pointer !important;
   opacity: 0;
   pointer-events: none;
-  transform: scale(0.6);
+  transform: scale(0.7);
   transition: all 0.14s ease;
-  z-index: 10;
+  z-index: 25;
   padding: 0;
 }
 
@@ -684,7 +686,7 @@
   background: #ef4444 !important;
   color: #ffffff !important;
   border-color: #ef4444 !important;
-  transform: scale(1.15) !important;
+  transform: scale(1.1) !important;
 }
 
 .eb-tab-close-btn:active {
