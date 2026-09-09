@@ -29,12 +29,7 @@
   };
 
   const DEFAULT_SHORTCUTS = [
-    {
-      id: 'gemini',
-      name: 'Gemini',
-      url: 'https://gemini.google.com',
-      svgKey: 'gemini'
-    }
+    { id: 'gemini', name: 'Gemini', url: 'https://gemini.google.com', svgKey: 'gemini' }
   ];
 
   // ==========================================================================
@@ -42,15 +37,10 @@
   // ==========================================================================
   const TEMPLATES = {
     getDrawerHtml: (icons) => `
-      <!-- Top Resizer for Custom Height Mode -->
       <div class="eb-resizer-top" title="Yüksekliği ayarlamak için yukarı/aşağı sürükleyin"></div>
-
-      <!-- Left Rail: Integrated Dock Icons -->
       <div class="eb-dock-rail">
         <div class="eb-dock-top">
-          <button type="button" class="eb-settings-btn" title="Ayarlar">
-            ${icons.settings}
-          </button>
+          <button type="button" class="eb-settings-btn" title="Ayarlar">${icons.settings}</button>
         </div>
         <div class="eb-dock-bottom">
           <div class="eb-dock-drag-handle" title="Yukarı/aşağı taşımak için sürükleyin">
@@ -62,8 +52,6 @@
           </button>
         </div>
       </div>
-
-      <!-- Right Area: Header, Web Content & Resizers -->
       <div class="eb-panel-main">
         <div class="eb-drawer-header">
           <div class="eb-drawer-title-area">
@@ -71,22 +59,14 @@
             <span class="eb-drawer-title">Web Panel</span>
           </div>
           <div class="eb-drawer-actions">
-            <!-- Zoom Controls -->
             <div class="eb-zoom-group">
               <button class="eb-zoom-btn eb-zoom-out" title="Uzaklaştır (−)">−</button>
               <span class="eb-zoom-label" title="Sıfırla (%100)">100%</span>
               <button class="eb-zoom-btn eb-zoom-in" title="Yakınlaştır (+)">+</button>
             </div>
-
-            <button class="eb-action-btn eb-reload" title="Yenile">
-              ${icons.reload}
-            </button>
-            <button class="eb-action-btn eb-external" title="Yeni Sekmede Aç">
-              ${icons.external}
-            </button>
-            <button class="eb-action-btn eb-close" title="Kapat (Esc)">
-              ${icons.close}
-            </button>
+            <button class="eb-action-btn eb-reload" title="Yenile">${icons.reload}</button>
+            <button class="eb-action-btn eb-external" title="Yeni Sekmede Aç">${icons.external}</button>
+            <button class="eb-action-btn eb-close" title="Kapat (Esc)">${icons.close}</button>
           </div>
         </div>
         <div class="eb-drawer-body">
@@ -103,12 +83,8 @@
       <div class="eb-modal-card">
         <div class="eb-modal-header">
           <span class="eb-modal-title">Ayarlar</span>
-          <button type="button" class="eb-modal-close" title="Kapat">
-            ${icons.close}
-          </button>
+          <button type="button" class="eb-modal-close" title="Kapat">${icons.close}</button>
         </div>
-
-        <!-- Segment 1: Görünüm Modu -->
         <div class="eb-setting-row">
           <div class="eb-setting-label">Görünüm</div>
           <div class="eb-segmented-control eb-mode-segmented">
@@ -116,8 +92,6 @@
             <button type="button" class="eb-segmented-btn eb-segment-desktop" data-mode="desktop">💻 Masaüstü</button>
           </div>
         </div>
-
-        <!-- Segment 2: Yükseklik -->
         <div class="eb-setting-row">
           <div class="eb-setting-label">Yükseklik</div>
           <div class="eb-segmented-control eb-height-segmented">
@@ -126,8 +100,6 @@
             <button type="button" class="eb-segmented-btn eb-h-custom" data-height="custom">🎛 Serbest</button>
           </div>
         </div>
-
-        <!-- Segment 3: Kapalı Hal -->
         <div class="eb-setting-row">
           <div class="eb-setting-label">Kapalıyken</div>
           <div class="eb-segmented-control eb-collapsed-segmented">
@@ -135,25 +107,17 @@
             <button type="button" class="eb-segmented-btn eb-c-pill" data-collapsed="pill">✦ İkon</button>
           </div>
         </div>
-
-        <!-- Quick Add Row -->
         <div class="eb-setting-row" style="margin-top: 10px;">
           <div class="eb-setting-label">Site Ekle</div>
           <div class="eb-quick-add-row">
             <input class="eb-quick-add-input" type="text" placeholder="URL veya site (örn: notion.so)" />
-            <button type="button" class="eb-quick-add-btn" title="Kısayolu Ekle">
-              ${icons.plus}
-            </button>
+            <button type="button" class="eb-quick-add-btn" title="Kısayolu Ekle">${icons.plus}</button>
           </div>
         </div>
-
-        <!-- Existing Shortcuts List -->
         <div class="eb-setting-row">
           <div class="eb-setting-label">Kayıtlı Siteler</div>
           <div class="eb-manage-list"></div>
         </div>
-
-        <!-- Modal Footer -->
         <div class="eb-modal-footer">
           <button type="button" class="eb-btn-link eb-reset-defaults">Varsayılana Sıfırla (Gemini)</button>
         </div>
@@ -171,17 +135,11 @@
   // ==========================================================================
   function createSettingsModal(options) {
     const {
-      container,
-      icons,
-      defaultShortcuts,
-      getShortcuts,
-      setShortcuts,
-      getViewMode,
-      setViewMode,
-      getHeightMode,
-      setHeightMode,
-      getCollapsedStyle,
-      setCollapsedStyle,
+      container, icons, defaultShortcuts,
+      getShortcuts, setShortcuts,
+      getViewMode, setViewMode,
+      getHeightMode, setHeightMode,
+      getCollapsedStyle, setCollapsedStyle,
       onOpenShortcut
     } = options;
 
@@ -202,21 +160,10 @@
 
     function syncUI() {
       const currentMode = getViewMode();
-      if (segMobile && segDesktop) {
-        segMobile.classList.toggle('eb-active-segment', currentMode === 'mobile');
-        segDesktop.classList.toggle('eb-active-segment', currentMode === 'desktop');
-      }
-
-      const currentHeightMode = getHeightMode();
-      heightBtns.forEach((btn) => {
-        btn.classList.toggle('eb-active-segment', btn.dataset.height === currentHeightMode);
-      });
-
-      const currentCollapsedStyle = getCollapsedStyle();
-      collapsedBtns.forEach((btn) => {
-        btn.classList.toggle('eb-active-segment', btn.dataset.collapsed === currentCollapsedStyle);
-      });
-
+      segMobile.classList.toggle('eb-active-segment', currentMode === 'mobile');
+      segDesktop.classList.toggle('eb-active-segment', currentMode === 'desktop');
+      heightBtns.forEach((btn) => btn.classList.toggle('eb-active-segment', btn.dataset.height === getHeightMode()));
+      collapsedBtns.forEach((btn) => btn.classList.toggle('eb-active-segment', btn.dataset.collapsed === getCollapsedStyle()));
       renderManageList();
     }
 
@@ -230,7 +177,6 @@
       list.forEach((sc) => {
         const item = document.createElement('div');
         item.className = 'eb-manage-item';
-
         let iconHtml = '';
         if (sc.svgKey && icons[sc.svgKey]) {
           iconHtml = `<div class="eb-manage-item-icon">${icons[sc.svgKey]}</div>`;
@@ -239,22 +185,19 @@
         } else {
           iconHtml = `<div class="eb-manage-item-icon">${sc.name.charAt(0)}</div>`;
         }
-
         item.innerHTML = `
-          <div class="eb-manage-item-left">
-            ${iconHtml}
-            <span class="eb-manage-item-name" title="${sc.name} (${sc.url})">${sc.name}</span>
-          </div>
+          <div class="eb-manage-item-left">${iconHtml}<span class="eb-manage-item-name" title="${sc.name} (${sc.url})">${sc.name}</span></div>
           <button type="button" class="eb-manage-item-del" title="Kaldır">${icons.close}</button>
         `;
-
-        item.querySelector('.eb-manage-item-del').addEventListener('click', (e) => {
-          e.stopPropagation();
-          deleteShortcut(sc.id);
-        });
-
+        item.querySelector('.eb-manage-item-del').addEventListener('click', (e) => { e.stopPropagation(); deleteShortcutFromModal(sc.id); });
         manageList.appendChild(item);
       });
+    }
+
+    function deleteShortcutFromModal(id) {
+      const remaining = getShortcuts().filter((s) => s.id !== id);
+      setShortcuts(remaining);
+      syncUI();
     }
 
     function openModal() {
@@ -263,125 +206,52 @@
       modalBackdrop.classList.add('eb-modal-open');
       setTimeout(() => quickAddInput.focus(), 50);
     }
-
-    function closeModal() {
-      modalBackdrop.classList.remove('eb-modal-open');
-    }
-
-    function isOpen() {
-      return modalBackdrop.classList.contains('eb-modal-open');
-    }
+    function closeModal() { modalBackdrop.classList.remove('eb-modal-open'); }
+    function isOpen() { return modalBackdrop.classList.contains('eb-modal-open'); }
 
     [segMobile, segDesktop].forEach((btn) => {
       btn.addEventListener('click', () => {
-        const newMode = btn.dataset.mode;
-        if (newMode === getViewMode()) return;
-        setViewMode(newMode);
+        if (btn.dataset.mode === getViewMode()) return;
+        setViewMode(btn.dataset.mode);
         syncUI();
       });
     });
-
-    heightBtns.forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const newHeightMode = btn.dataset.height;
-        setHeightMode(newHeightMode);
-        syncUI();
-      });
-    });
-
-    collapsedBtns.forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const newStyle = btn.dataset.collapsed;
-        setCollapsedStyle(newStyle);
-        syncUI();
-      });
-    });
+    heightBtns.forEach((btn) => btn.addEventListener('click', () => { setHeightMode(btn.dataset.height); syncUI(); }));
+    collapsedBtns.forEach((btn) => btn.addEventListener('click', () => { setCollapsedStyle(btn.dataset.collapsed); syncUI(); }));
 
     function handleSaveCustomShortcut() {
       let raw = quickAddInput.value.trim();
-      if (!raw) {
-        quickAddInput.focus();
-        return;
-      }
-
-      let name = '';
-      let url = '';
-
+      if (!raw) { quickAddInput.focus(); return; }
+      let name = '', url = '';
       if (raw.includes(' ') && (raw.includes('http') || raw.includes('.'))) {
         const parts = raw.split(/\s+/);
         const urlPart = parts.find((p) => p.includes('.') || p.startsWith('http'));
-        if (urlPart) {
-          url = urlPart;
-          name = parts.filter((p) => p !== urlPart).join(' ');
-        }
+        if (urlPart) { url = urlPart; name = parts.filter((p) => p !== urlPart).join(' '); }
       }
-
-      if (!url) {
-        url = raw;
-      }
-
-      if (!/^https?:\/\//i.test(url)) {
-        url = 'https://' + url;
-      }
-
+      if (!url) url = raw;
+      if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
       try {
         const parsedUrl = new URL(url);
-        if (!name) {
-          let host = parsedUrl.hostname.replace(/^www\./, '');
-          let base = host.split('.')[0];
-          name = base.charAt(0).toUpperCase() + base.slice(1);
-        }
-
-        const favicon = `https://www.google.com/s2/favicons?domain=${parsedUrl.hostname}&sz=64`;
-
-        const newShortcut = {
-          id: 'custom_' + Date.now(),
-          name: name,
-          url: url,
-          favicon: favicon
-        };
-
-        const updated = [...getShortcuts(), newShortcut];
-        setShortcuts(updated);
+        if (!name) { const base = parsedUrl.hostname.replace(/^www\./, '').split('.')[0]; name = base.charAt(0).toUpperCase() + base.slice(1); }
+        const newShortcut = { id: 'custom_' + Date.now(), name, url, favicon: `https://www.google.com/s2/favicons?domain=${parsedUrl.hostname}&sz=64` };
+        setShortcuts([...getShortcuts(), newShortcut]);
         closeModal();
-        if (onOpenShortcut) {
-          onOpenShortcut(newShortcut);
-        }
-      } catch (_) {
-        alert('Geçerli bir web adresi giriniz.');
-        quickAddInput.focus();
-      }
-    }
-
-    function deleteShortcut(id) {
-      const remaining = getShortcuts().filter((s) => s.id !== id);
-      setShortcuts(remaining);
-      syncUI();
+        if (onOpenShortcut) onOpenShortcut(newShortcut);
+      } catch (_) { alert('Geçerli bir web adresi giriniz.'); quickAddInput.focus(); }
     }
 
     modalCloseBtn.addEventListener('click', closeModal);
-    modalBackdrop.addEventListener('click', (e) => {
-      if (e.target === modalBackdrop) closeModal();
-    });
+    modalBackdrop.addEventListener('click', (e) => { if (e.target === modalBackdrop) closeModal(); });
     quickAddBtn.addEventListener('click', handleSaveCustomShortcut);
-    quickAddInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') handleSaveCustomShortcut();
-    });
+    quickAddInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleSaveCustomShortcut(); });
     resetDefaultsBtn.addEventListener('click', () => {
       setShortcuts([...defaultShortcuts]);
       syncUI();
       closeModal();
-      if (onOpenShortcut) {
-        onOpenShortcut(defaultShortcuts[0]);
-      }
+      if (onOpenShortcut) onOpenShortcut(defaultShortcuts[0]);
     });
 
-    return {
-      openModal,
-      closeModal,
-      isOpen,
-      syncUI
-    };
+    return { openModal, closeModal, isOpen, syncUI };
   }
 
   // ==========================================================================
@@ -394,16 +264,18 @@
   let currentActiveUrl = '';
   let viewMode = 'mobile';
   let heightMode = 'full';
-  let collapsedStyle = 'strip'; // 'strip' or 'pill'
-  let openTop = null;
-  let closedTop = null;
-  let isDraggingDock = false;
-  let dockStartY = 0;
-  let dockStartTop = 0;
-  let dockHasMoved = false;
-  let preventNextClick = false;
+  let collapsedStyle = 'strip';
   let zoomLevel = 1.0;
 
+  // --- Drag State (unified single-axis Y positioning) ---
+  let panelY = null;        // null = CSS default (bottom:24px), number = custom top in px
+  let isDragging = false;
+  let dragStartMouseY = 0;
+  let dragStartElY = 0;
+  let dragMoved = false;
+  let preventNextClick = false;
+
+  // Clean host page styles
   try {
     if (document.documentElement) {
       document.documentElement.style.removeProperty('margin-left');
@@ -421,47 +293,40 @@
   const iframePool = new Map();
 
   // ==========================================================================
-  // INITIALIZE SHADOW DOM
+  // SHADOW DOM SETUP
   // ==========================================================================
   const host = document.createElement('div');
   host.id = 'v-edgebar-host';
   const shadow = host.attachShadow({ mode: 'open' });
-
   const styleLink = document.createElement('link');
   styleLink.rel = 'stylesheet';
   styleLink.href = chrome.runtime.getURL('style.css');
   shadow.appendChild(styleLink);
-
   const container = document.createElement('div');
   container.className = 'eb-container';
   shadow.appendChild(container);
-
   (document.body || document.documentElement).appendChild(host);
 
-  // 1. Tooltip
+  // --- Tooltip ---
   const tooltip = document.createElement('div');
   tooltip.className = 'eb-tooltip';
   container.appendChild(tooltip);
-
   function showTooltip(text, targetEl) {
     const rect = targetEl.getBoundingClientRect();
     tooltip.textContent = text;
     tooltip.style.top = `${rect.top + (rect.height / 2) - 13}px`;
     tooltip.classList.add('eb-tooltip-show');
   }
+  function hideTooltip() { tooltip.classList.remove('eb-tooltip-show'); }
 
-  function hideTooltip() {
-    tooltip.classList.remove('eb-tooltip-show');
-  }
-
-  // 2. Trigger Pill
+  // --- Trigger Pill ---
   const triggerPill = document.createElement('button');
   triggerPill.className = 'eb-trigger-pill';
   triggerPill.title = 'EdgeBar Aç';
   triggerPill.innerHTML = ICONS.sidebarClosed;
   container.appendChild(triggerPill);
 
-  // 3. Unified Drawer
+  // --- Drawer ---
   const drawer = document.createElement('div');
   drawer.className = 'eb-drawer eb-height-full';
   drawer.innerHTML = TEMPLATES.getDrawerHtml(ICONS);
@@ -485,55 +350,38 @@
   const zoomOutBtn = drawer.querySelector('.eb-zoom-out');
   const zoomLabel = drawer.querySelector('.eb-zoom-label');
 
-  // Drag Overlay
+  // --- Drag Overlay ---
   const dragOverlay = document.createElement('div');
   dragOverlay.className = 'eb-drag-overlay';
   container.appendChild(dragOverlay);
 
-  // 4. Safe Context Menu
+  // --- Context Menu ---
   const contextMenu = document.createElement('div');
   contextMenu.className = 'eb-context-menu';
   contextMenu.innerHTML = TEMPLATES.getContextMenuHtml();
   container.appendChild(contextMenu);
-
   let contextTargetShortcut = null;
-
   function showContextMenu(e, sc) {
     e.preventDefault();
     contextTargetShortcut = sc;
     contextMenu.style.top = `${Math.min(e.clientY - 20, window.innerHeight - 110)}px`;
     contextMenu.classList.add('eb-show');
   }
-
-  function hideContextMenu() {
-    contextMenu.classList.remove('eb-show');
-    contextTargetShortcut = null;
-  }
-
+  function hideContextMenu() { contextMenu.classList.remove('eb-show'); contextTargetShortcut = null; }
   window.addEventListener('click', hideContextMenu);
-
   contextMenu.querySelector('.eb-ctx-open').addEventListener('click', () => {
-    if (contextTargetShortcut) {
-      window.open(contextTargetShortcut.url, '_blank');
-      hideContextMenu();
-    }
+    if (contextTargetShortcut) { window.open(contextTargetShortcut.url, '_blank'); hideContextMenu(); }
   });
-
   contextMenu.querySelector('.eb-ctx-copy').addEventListener('click', () => {
-    if (contextTargetShortcut) {
-      navigator.clipboard.writeText(contextTargetShortcut.url);
-      hideContextMenu();
-    }
+    if (contextTargetShortcut) { navigator.clipboard.writeText(contextTargetShortcut.url); hideContextMenu(); }
   });
-
   contextMenu.querySelector('.eb-ctx-delete').addEventListener('click', () => {
-    if (contextTargetShortcut) {
-      deleteShortcut(contextTargetShortcut.id);
-      hideContextMenu();
-    }
+    if (contextTargetShortcut) { deleteShortcut(contextTargetShortcut.id); hideContextMenu(); }
   });
 
-  // 5. Settings Modal
+  // ==========================================================================
+  // SETTINGS MODAL INSTANCE
+  // ==========================================================================
   const settingsModal = createSettingsModal({
     container,
     icons: ICONS,
@@ -544,11 +392,7 @@
       saveShortcuts();
       renderShortcuts();
       if (activeShortcutId && !shortcuts.some((s) => s.id === activeShortcutId)) {
-        if (shortcuts.length > 0) {
-          openDrawer(shortcuts[0]);
-        } else {
-          closeDrawer();
-        }
+        shortcuts.length > 0 ? openDrawer(shortcuts[0]) : closeDrawer();
       }
     },
     getViewMode: () => viewMode,
@@ -557,79 +401,56 @@
         viewMode = newMode;
         if (activeShortcutId && iframePool.has(activeShortcutId)) {
           loader.classList.remove('eb-hidden');
-          const activeFrame = iframePool.get(activeShortcutId);
-          activeFrame.src = activeFrame.src;
+          const f = iframePool.get(activeShortcutId);
+          f.src = f.src;
         }
       });
     },
     getHeightMode: () => heightMode,
-    setHeightMode: (newHeightMode) => {
-      applyHeightMode(newHeightMode);
-      chrome.storage.local.set({ edgebar_height_mode: newHeightMode });
-    },
+    setHeightMode: (mode) => { applyHeightMode(mode); chrome.storage.local.set({ edgebar_height_mode: mode }); },
     getCollapsedStyle: () => collapsedStyle,
-    setCollapsedStyle: (newStyle) => {
-      applyCollapsedStyle(newStyle);
-      chrome.storage.local.set({ edgebar_collapsed_style: newStyle });
-    },
-    onOpenShortcut: (shortcut) => {
-      openDrawer(shortcut);
-    }
+    setCollapsedStyle: (style) => { applyCollapsedStyle(style); chrome.storage.local.set({ edgebar_collapsed_style: style }); },
+    onOpenShortcut: (sc) => openDrawer(sc)
   });
-
-  settingsBtn.addEventListener('click', () => {
-    settingsModal.openModal();
-  });
+  settingsBtn.addEventListener('click', () => settingsModal.openModal());
 
   function deleteShortcut(id) {
     shortcuts = shortcuts.filter((s) => s.id !== id);
     if (activeShortcutId === id) {
-      if (shortcuts.length > 0) {
-        openDrawer(shortcuts[0]);
-      } else {
-        closeDrawer();
-      }
+      shortcuts.length > 0 ? openDrawer(shortcuts[0]) : closeDrawer();
     }
-    if (iframePool.has(id)) {
-      const frame = iframePool.get(id);
-      frame.remove();
-      iframePool.delete(id);
-    }
+    if (iframePool.has(id)) { iframePool.get(id).remove(); iframePool.delete(id); }
     saveShortcuts();
     renderShortcuts();
     settingsModal.syncUI();
   }
 
   // ==========================================================================
-  // ZOOM LOGIC
+  // ZOOM
   // ==========================================================================
   function applyZoom(newZoom) {
-    zoomLevel = Math.max(0.7, Math.min(newZoom, 1.5));
-    zoomLevel = Math.round(zoomLevel * 10) / 10;
-    iframePool.forEach((frame) => {
-      frame.style.zoom = `${zoomLevel}`;
-    });
+    zoomLevel = Math.round(Math.max(0.7, Math.min(newZoom, 1.5)) * 10) / 10;
+    iframePool.forEach((frame) => { frame.style.zoom = `${zoomLevel}`; });
     zoomLabel.textContent = `${Math.round(zoomLevel * 100)}%`;
     chrome.storage.local.set({ edgebar_zoom: zoomLevel });
   }
-
   zoomInBtn.addEventListener('click', () => applyZoom(zoomLevel + 0.1));
   zoomOutBtn.addEventListener('click', () => applyZoom(zoomLevel - 0.1));
   zoomLabel.addEventListener('click', () => applyZoom(1.0));
 
   // ==========================================================================
-  // VIEW MODE & HEIGHT MODE
+  // HEIGHT MODE & COLLAPSED STYLE
   // ==========================================================================
   function applyHeightMode(mode) {
     heightMode = mode;
     drawer.classList.remove('eb-height-full', 'eb-height-floating', 'eb-height-custom');
     drawer.classList.add(`eb-height-${mode}`);
-    if (mode === 'custom') {
-      applyOpenPosition(openTop);
-    } else {
-      drawer.style.removeProperty('top');
-      drawer.style.removeProperty('bottom');
+    if (drawer.classList.contains('eb-open')) {
+      // Re-apply sizing for current mode
       drawer.style.removeProperty('height');
+      if (mode === 'custom') {
+        drawer.style.height = `${drawerHeight}px`;
+      }
     }
     settingsModal.syncUI();
   }
@@ -643,118 +464,96 @@
   }
 
   // ==========================================================================
-  // POSITIONING (INDEPENDENT DOCK & OPEN WINDOW)
+  // POSITION SYSTEM (CLEAN, SINGLE VALUE)
+  //
+  // panelY = null  → CSS default position (bottom: 24px for strip/pill)
+  // panelY = <num> → custom top position in px, applied to both open & closed
+  //
+  // Key insight: when setting JS `top`, we MUST also set `bottom: auto`
+  // to override CSS `bottom: 24px`, otherwise the element stretches.
   // ==========================================================================
-  function applyClosedPosition(topPx) {
+  function applyPosition() {
+    // 1. Clear all JS position overrides — let CSS defaults take effect
     drawer.style.removeProperty('top');
     drawer.style.removeProperty('bottom');
     triggerPill.style.removeProperty('top');
     triggerPill.style.removeProperty('bottom');
 
-    if (topPx === null || topPx === undefined) {
-      drawer.style.bottom = '24px';
-      triggerPill.style.bottom = '24px';
-      closedTop = null;
-      return;
+    // 2. If no custom position, CSS defaults apply (bottom: 24px)
+    if (panelY === null) return;
+
+    const isOpen = drawer.classList.contains('eb-open');
+
+    // 3. In full-height open mode, panel fills viewport — custom Y is irrelevant
+    if (isOpen && heightMode === 'full') return;
+    // 4. In floating open mode, CSS handles positioning (top:14px, bottom:14px)
+    if (isOpen && heightMode === 'floating') return;
+
+    // 5. Clamp to safe viewport bounds
+    const y = Math.max(8, Math.min(panelY, window.innerHeight - 60));
+
+    // 6. Apply position — always override CSS bottom to prevent stretching
+    if (!isOpen && collapsedStyle === 'pill') {
+      triggerPill.style.top = `${y}px`;
+      triggerPill.style.bottom = 'auto';
+    } else {
+      drawer.style.top = `${y}px`;
+      drawer.style.bottom = 'auto';
     }
-
-    const targetHeight = drawer.offsetHeight || 120;
-    const minTop = 10;
-    const maxTop = Math.max(minTop, window.innerHeight - targetHeight - 10);
-    const clampedTop = Math.max(minTop, Math.min(topPx, maxTop));
-    closedTop = clampedTop;
-
-    drawer.style.top = `${clampedTop}px`;
-    triggerPill.style.top = `${clampedTop}px`;
-  }
-
-  function applyOpenPosition(topPx) {
-    drawer.style.removeProperty('top');
-    drawer.style.removeProperty('bottom');
-    drawer.style.removeProperty('height');
-
-    if (heightMode === 'full') {
-      drawer.style.height = '100vh';
-      return;
-    }
-
-    if (heightMode === 'floating') {
-      return;
-    }
-
-    if (topPx === null || topPx === undefined) {
-      drawer.style.bottom = '0px';
-      drawer.style.height = `${drawerHeight}px`;
-      openTop = null;
-      return;
-    }
-
-    const minTop = 10;
-    const maxTop = Math.max(minTop, window.innerHeight - drawerHeight - 10);
-    const clampedTop = Math.max(minTop, Math.min(topPx, maxTop));
-    openTop = clampedTop;
-
-    drawer.style.height = `${drawerHeight}px`;
-    drawer.style.top = `${clampedTop}px`;
-  }
-
-  function startDockDrag(e) {
-    if (e.button !== 0) return;
-    if (
-      e.target.closest('.eb-action-btn') ||
-      e.target.closest('.eb-zoom-group') ||
-      e.target.closest('.eb-zoom-btn') ||
-      e.target.closest('.eb-item-btn') ||
-      e.target.closest('.eb-toggle-btn') ||
-      e.target.closest('.eb-settings-btn') ||
-      e.target.closest('.eb-drawer-actions') ||
-      e.target.closest('.eb-view-segment')
-    ) {
-      return;
-    }
-
-    isDraggingDock = true;
-    dockHasMoved = false;
-    dockStartY = e.clientY;
-
-    const el = drawer.classList.contains('eb-open')
-      ? drawer
-      : (collapsedStyle === 'strip' ? drawer : triggerPill);
-
-    const rect = el.getBoundingClientRect();
-    dockStartTop = rect.top;
   }
 
   // ==========================================================================
-  // SHORTCUTS & REORDERING
+  // DRAG-TO-MOVE (CLEAN IMPLEMENTATION)
+  //
+  // Works on: drag handle (strip), header title area (open), trigger pill
+  // Behavior: mousedown → mousemove with 3px deadzone → mouseup saves
+  // ==========================================================================
+  function onDragStart(e) {
+    if (e.button !== 0) return;
+    // Don't intercept clicks on buttons/interactive elements
+    if (e.target.closest('.eb-action-btn, .eb-zoom-group, .eb-zoom-btn, .eb-item-btn, .eb-toggle-btn, .eb-settings-btn, .eb-drawer-actions')) return;
+
+    isDragging = true;
+    dragMoved = false;
+    dragStartMouseY = e.clientY;
+
+    // Which element are we dragging?
+    const isOpen = drawer.classList.contains('eb-open');
+    const el = (!isOpen && collapsedStyle === 'pill') ? triggerPill : drawer;
+    dragStartElY = el.getBoundingClientRect().top;
+  }
+
+  // Attach drag to: drag handle, trigger pill, drawer header
+  if (dockDragHandle) dockDragHandle.addEventListener('mousedown', onDragStart);
+  triggerPill.addEventListener('mousedown', onDragStart);
+  drawerHeader.addEventListener('mousedown', (e) => {
+    if (e.target.closest('.eb-drawer-actions, .eb-action-btn, .eb-zoom-group, .eb-zoom-btn')) return;
+    onDragStart(e);
+  });
+
+  // ==========================================================================
+  // SHORTCUTS & DRAG-AND-DROP REORDERING
   // ==========================================================================
   let draggedItemIndex = null;
 
   function renderShortcuts() {
     itemsList.innerHTML = '';
-
     shortcuts.forEach((sc, index) => {
       const btn = document.createElement('button');
       btn.className = 'eb-item-btn';
-      if (sc.id === activeShortcutId) {
-        btn.classList.add('eb-active');
-      }
+      if (sc.id === activeShortcutId) btn.classList.add('eb-active');
       btn.dataset.id = sc.id;
       btn.dataset.index = index;
       btn.draggable = drawer.classList.contains('eb-open');
 
       const iconWrap = document.createElement('div');
       iconWrap.className = 'eb-item-icon';
-
       if (sc.svgKey && ICONS[sc.svgKey]) {
         iconWrap.innerHTML = ICONS[sc.svgKey];
       } else if (sc.favicon) {
         const img = document.createElement('img');
-        img.src = sc.favicon;
-        img.alt = sc.name;
-        img.onerror = () => {
-          iconWrap.innerHTML = `<div class="eb-letter-avatar">${sc.name.charAt(0)}</div>`;
-        };
+        img.src = sc.favicon; img.alt = sc.name;
+        img.onerror = () => { iconWrap.innerHTML = `<div class="eb-letter-avatar">${sc.name.charAt(0)}</div>`; };
         iconWrap.appendChild(img);
       } else {
         iconWrap.innerHTML = `<div class="eb-letter-avatar">${sc.name.charAt(0)}</div>`;
@@ -763,58 +562,29 @@
 
       btn.addEventListener('mouseenter', () => showTooltip(sc.name, btn));
       btn.addEventListener('mouseleave', hideTooltip);
-
       btn.addEventListener('click', () => {
         if (preventNextClick) return;
-        if (activeShortcutId === sc.id && drawer.classList.contains('eb-open')) {
-          closeDrawer();
-        } else {
-          openDrawer(sc);
-        }
+        (activeShortcutId === sc.id && drawer.classList.contains('eb-open')) ? closeDrawer() : openDrawer(sc);
       });
+      btn.addEventListener('contextmenu', (e) => showContextMenu(e, sc));
 
-      btn.addEventListener('contextmenu', (e) => {
-        showContextMenu(e, sc);
-      });
-
+      // Drag-and-drop reordering (different from position drag)
       btn.addEventListener('dragstart', (e) => {
-        if (!drawer.classList.contains('eb-open')) {
-          e.preventDefault();
-          return false;
-        }
-        draggedItemIndex = index;
-        btn.classList.add('eb-dragging');
-        hideTooltip();
+        if (!drawer.classList.contains('eb-open')) { e.preventDefault(); return; }
+        draggedItemIndex = index; btn.classList.add('eb-dragging'); hideTooltip();
         e.dataTransfer.effectAllowed = 'move';
       });
-
-      btn.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        e.dataTransfer.dropEffect = 'move';
-        btn.classList.add('eb-drag-over');
-      });
-
-      btn.addEventListener('dragleave', () => {
-        btn.classList.remove('eb-drag-over');
-      });
-
+      btn.addEventListener('dragover', (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; btn.classList.add('eb-drag-over'); });
+      btn.addEventListener('dragleave', () => btn.classList.remove('eb-drag-over'));
       btn.addEventListener('drop', (e) => {
-        e.preventDefault();
-        btn.classList.remove('eb-drag-over');
+        e.preventDefault(); btn.classList.remove('eb-drag-over');
         if (draggedItemIndex !== null && draggedItemIndex !== index) {
-          const movedItem = shortcuts.splice(draggedItemIndex, 1)[0];
-          shortcuts.splice(index, 0, movedItem);
-          saveShortcuts();
-          renderShortcuts();
-          settingsModal.syncUI();
+          const moved = shortcuts.splice(draggedItemIndex, 1)[0];
+          shortcuts.splice(index, 0, moved);
+          saveShortcuts(); renderShortcuts(); settingsModal.syncUI();
         }
       });
-
-      btn.addEventListener('dragend', () => {
-        btn.classList.remove('eb-dragging', 'eb-drag-over');
-        draggedItemIndex = null;
-      });
-
+      btn.addEventListener('dragend', () => { btn.classList.remove('eb-dragging', 'eb-drag-over'); draggedItemIndex = null; });
       itemsList.appendChild(btn);
     });
   }
@@ -823,85 +593,55 @@
   // STATE LOADING & PERSISTENCE
   // ==========================================================================
   function loadState() {
-    chrome.storage.local.get(
-      [
-        'edgebar_shortcuts',
-        'edgebar_drawer_width',
-        'edgebar_drawer_height',
-        'edgebar_height_mode',
-        'edgebar_collapsed_style',
-        'edgebar_open_top',
-        'edgebar_closed_top',
-        'edgebar_last_active',
-        'edgebar_drawer_open',
-        'edgebar_view_mode',
-        'edgebar_zoom'
-      ],
-      (result) => {
-        const isOldDefault =
-          result.edgebar_shortcuts &&
-          Array.isArray(result.edgebar_shortcuts) &&
-          result.edgebar_shortcuts.length === 3 &&
-          result.edgebar_shortcuts[0].id === 'gemini' &&
-          result.edgebar_shortcuts[1].id === 'chatgpt' &&
-          result.edgebar_shortcuts[2].id === 'x';
-
-        if (
-          !result.edgebar_shortcuts ||
-          !Array.isArray(result.edgebar_shortcuts) ||
-          result.edgebar_shortcuts.length === 0 ||
-          isOldDefault
-        ) {
-          shortcuts = [...DEFAULT_SHORTCUTS];
-          chrome.storage.local.set({ edgebar_shortcuts: shortcuts });
-        } else {
-          shortcuts = result.edgebar_shortcuts;
-        }
-
-        if (result.edgebar_drawer_width) {
-          drawerWidth = Math.max(360, Math.min(result.edgebar_drawer_width, window.innerWidth * 0.85));
-          drawer.style.width = `${drawerWidth}px`;
-        }
-
-        if (result.edgebar_drawer_height) {
-          drawerHeight = Math.max(300, Math.min(result.edgebar_drawer_height, window.innerHeight - 20));
-        }
-
-        if (result.edgebar_zoom) {
-          zoomLevel = result.edgebar_zoom;
-          zoomLabel.textContent = `${Math.round(zoomLevel * 100)}%`;
-        }
-
-        if (result.edgebar_view_mode) {
-          viewMode = result.edgebar_view_mode;
-        }
-
-        openTop = (result.edgebar_open_top !== undefined && result.edgebar_open_top !== null) ? result.edgebar_open_top : null;
-        closedTop = (result.edgebar_closed_top !== undefined && result.edgebar_closed_top !== null) ? result.edgebar_closed_top : null;
-
-        if (result.edgebar_height_mode) {
-          heightMode = result.edgebar_height_mode;
-        }
-        applyHeightMode(heightMode);
-
-        if (result.edgebar_collapsed_style) {
-          collapsedStyle = result.edgebar_collapsed_style;
-        } else {
-          collapsedStyle = 'strip';
-        }
-
-        renderShortcuts();
-        settingsModal.syncUI();
-
-        const shouldOpen = result.edgebar_drawer_open !== false;
-        if (shouldOpen) {
-          const targetShortcut = shortcuts.find((s) => s.id === result.edgebar_last_active) || shortcuts[0];
-          openDrawer(targetShortcut);
-        } else {
-          closeDrawer(false);
-        }
+    chrome.storage.local.get([
+      'edgebar_shortcuts', 'edgebar_drawer_width', 'edgebar_drawer_height',
+      'edgebar_height_mode', 'edgebar_collapsed_style', 'edgebar_panel_y',
+      'edgebar_last_active', 'edgebar_drawer_open', 'edgebar_view_mode', 'edgebar_zoom'
+    ], (result) => {
+      // Shortcuts
+      const isOldDefault = result.edgebar_shortcuts && Array.isArray(result.edgebar_shortcuts) &&
+        result.edgebar_shortcuts.length === 3 && result.edgebar_shortcuts[0].id === 'gemini' &&
+        result.edgebar_shortcuts[1].id === 'chatgpt' && result.edgebar_shortcuts[2].id === 'x';
+      if (!result.edgebar_shortcuts || !Array.isArray(result.edgebar_shortcuts) || result.edgebar_shortcuts.length === 0 || isOldDefault) {
+        shortcuts = [...DEFAULT_SHORTCUTS];
+        chrome.storage.local.set({ edgebar_shortcuts: shortcuts });
+      } else {
+        shortcuts = result.edgebar_shortcuts;
       }
-    );
+
+      // Dimensions
+      if (result.edgebar_drawer_width) {
+        drawerWidth = Math.max(360, Math.min(result.edgebar_drawer_width, window.innerWidth * 0.85));
+      }
+      if (result.edgebar_drawer_height) {
+        drawerHeight = Math.max(300, Math.min(result.edgebar_drawer_height, window.innerHeight - 20));
+      }
+      if (result.edgebar_zoom) {
+        zoomLevel = result.edgebar_zoom;
+        zoomLabel.textContent = `${Math.round(zoomLevel * 100)}%`;
+      }
+      if (result.edgebar_view_mode) viewMode = result.edgebar_view_mode;
+
+      // Position
+      panelY = (result.edgebar_panel_y !== undefined && result.edgebar_panel_y !== null) ? result.edgebar_panel_y : null;
+
+      // Height mode
+      if (result.edgebar_height_mode) heightMode = result.edgebar_height_mode;
+      applyHeightMode(heightMode);
+
+      // Collapsed style
+      collapsedStyle = result.edgebar_collapsed_style || 'strip';
+
+      renderShortcuts();
+      settingsModal.syncUI();
+
+      // Restore open/closed state
+      if (result.edgebar_drawer_open !== false) {
+        openDrawer(shortcuts.find((s) => s.id === result.edgebar_last_active) || shortcuts[0]);
+      } else {
+        closeDrawer(false);
+      }
+    });
   }
 
   function saveShortcuts() {
@@ -912,43 +652,29 @@
   // DRAWER OPEN / CLOSE
   // ==========================================================================
   function openDrawer(sc) {
-    if (!sc) {
-      sc = shortcuts[0] || DEFAULT_SHORTCUTS[0];
-    }
+    if (!sc) sc = shortcuts[0] || DEFAULT_SHORTCUTS[0];
 
     activeShortcutId = sc.id;
     currentActiveUrl = sc.url;
 
-    drawer.querySelectorAll('.eb-item-btn').forEach((b) => {
-      b.classList.toggle('eb-active', b.dataset.id === sc.id);
-    });
+    drawer.querySelectorAll('.eb-item-btn').forEach((b) => b.classList.toggle('eb-active', b.dataset.id === sc.id));
 
     drawerTitle.textContent = sc.name;
-    if (sc.favicon) {
-      drawerFavicon.src = sc.favicon;
-      drawerFavicon.style.display = 'block';
-    } else {
-      drawerFavicon.style.display = 'none';
-    }
+    drawerFavicon.style.display = sc.favicon ? 'block' : 'none';
+    if (sc.favicon) drawerFavicon.src = sc.favicon;
 
+    // Iframe management
     let activeFrame = iframePool.get(sc.id);
-    iframePool.forEach((frame) => {
-      frame.classList.remove('eb-active-frame');
-    });
+    iframePool.forEach((frame) => frame.classList.remove('eb-active-frame'));
 
     if (!activeFrame) {
       loader.classList.remove('eb-hidden');
-
       activeFrame = document.createElement('iframe');
       activeFrame.className = 'eb-iframe eb-active-frame';
       activeFrame.allow = 'clipboard-read; clipboard-write; camera; microphone; geolocation; encrypted-media';
       activeFrame.style.zoom = `${zoomLevel}`;
       activeFrame.src = sc.url;
-
-      activeFrame.addEventListener('load', () => {
-        loader.classList.add('eb-hidden');
-      });
-
+      activeFrame.addEventListener('load', () => loader.classList.add('eb-hidden'));
       iframeContainer.appendChild(activeFrame);
       iframePool.set(sc.id, activeFrame);
     } else {
@@ -957,6 +683,7 @@
       loader.classList.add('eb-hidden');
     }
 
+    // Reset inline styles, then apply open state
     drawer.style.removeProperty('top');
     drawer.style.removeProperty('bottom');
     drawer.style.removeProperty('height');
@@ -966,20 +693,19 @@
     drawer.classList.remove('eb-strip-only');
     drawer.classList.add('eb-open');
     drawer.style.width = `${drawerWidth}px`;
-    applyOpenPosition(openTop);
+    if (heightMode === 'custom') drawer.style.height = `${drawerHeight}px`;
+
+    applyPosition();
+
     toggleBtn.innerHTML = ICONS.sidebarOpen;
     toggleBtn.title = 'Paneli Daralt (Esc)';
-
-    itemsList.querySelectorAll('.eb-item-btn').forEach((b) => {
-      b.draggable = true;
-    });
+    itemsList.querySelectorAll('.eb-item-btn').forEach((b) => { b.draggable = true; });
 
     chrome.storage.local.set({ edgebar_drawer_open: true, edgebar_last_active: sc.id });
   }
 
   function closeDrawer(saveState = true) {
     drawer.classList.remove('eb-open');
-
     toggleBtn.innerHTML = ICONS.sidebarClosed;
     toggleBtn.title = 'Paneli Genişlet';
 
@@ -997,168 +723,104 @@
       triggerPill.classList.remove('eb-hidden');
     }
 
-    applyClosedPosition(closedTop);
+    applyPosition();
 
-    itemsList.querySelectorAll('.eb-item-btn').forEach((b) => {
-      b.draggable = false;
-    });
-
+    itemsList.querySelectorAll('.eb-item-btn').forEach((b) => { b.draggable = false; });
     hideTooltip();
     hideContextMenu();
-    if (saveState) {
-      chrome.storage.local.set({ edgebar_drawer_open: false });
-    }
+    if (saveState) chrome.storage.local.set({ edgebar_drawer_open: false });
   }
 
+  // ==========================================================================
+  // CLICK HANDLERS
+  // ==========================================================================
   triggerPill.addEventListener('click', () => {
     if (preventNextClick) return;
-    const current = shortcuts.find((s) => s.id === activeShortcutId) || shortcuts[0];
-    openDrawer(current);
+    openDrawer(shortcuts.find((s) => s.id === activeShortcutId) || shortcuts[0]);
   });
-
   toggleBtn.addEventListener('click', () => {
     if (preventNextClick) return;
-    if (drawer.classList.contains('eb-open')) {
-      closeDrawer();
-    } else {
-      const current = shortcuts.find((s) => s.id === activeShortcutId) || shortcuts[0];
-      openDrawer(current);
-    }
+    drawer.classList.contains('eb-open') ? closeDrawer() : openDrawer(shortcuts.find((s) => s.id === activeShortcutId) || shortcuts[0]);
   });
-
   closeBtn.addEventListener('click', () => closeDrawer());
-
-  if (dockDragHandle) {
-    dockDragHandle.addEventListener('mousedown', startDockDrag);
-  }
-  triggerPill.addEventListener('mousedown', startDockDrag);
-  drawerHeader.addEventListener('mousedown', (e) => {
-    if (
-      e.target.closest('.eb-drawer-actions') ||
-      e.target.closest('.eb-action-btn') ||
-      e.target.closest('.eb-zoom-group') ||
-      e.target.closest('.eb-zoom-btn') ||
-      e.target.closest('.eb-view-segment')
-    ) {
-      return;
-    }
-    startDockDrag(e);
-  });
-
   reloadBtn.addEventListener('click', () => {
     if (activeShortcutId && iframePool.has(activeShortcutId)) {
       loader.classList.remove('eb-hidden');
-      const activeFrame = iframePool.get(activeShortcutId);
-      activeFrame.src = activeFrame.src;
+      const f = iframePool.get(activeShortcutId); f.src = f.src;
     }
   });
-
-  externalBtn.addEventListener('click', () => {
-    if (currentActiveUrl) {
-      window.open(currentActiveUrl, '_blank');
-    }
-  });
+  externalBtn.addEventListener('click', () => { if (currentActiveUrl) window.open(currentActiveUrl, '_blank'); });
 
   // ==========================================================================
-  // RESIZERS
+  // RESIZERS (WIDTH & HEIGHT)
   // ==========================================================================
   let isResizing = false;
   let isResizingHeight = false;
-  let startX = 0;
-  let startY = 0;
-  let startWidth = 0;
-  let startHeight = 0;
+  let startX = 0, startY = 0, startWidth = 0, startHeight = 0;
 
   resizer.addEventListener('mousedown', (e) => {
-    isResizing = true;
-    startX = e.clientX;
-    startWidth = drawer.getBoundingClientRect().width;
-    resizer.classList.add('eb-resizing');
-    dragOverlay.classList.add('eb-active');
-    dragOverlay.style.cursor = 'col-resize';
+    isResizing = true; startX = e.clientX; startWidth = drawer.getBoundingClientRect().width;
+    resizer.classList.add('eb-resizing'); dragOverlay.classList.add('eb-active'); dragOverlay.style.cursor = 'col-resize';
     e.preventDefault();
   });
-
   resizerTop.addEventListener('mousedown', (e) => {
     if (heightMode !== 'custom') return;
-    isResizingHeight = true;
-    startY = e.clientY;
-    startHeight = drawer.getBoundingClientRect().height;
-    resizerTop.classList.add('eb-resizing');
-    dragOverlay.classList.add('eb-active');
-    dragOverlay.style.cursor = 'ns-resize';
+    isResizingHeight = true; startY = e.clientY; startHeight = drawer.getBoundingClientRect().height;
+    resizerTop.classList.add('eb-resizing'); dragOverlay.classList.add('eb-active'); dragOverlay.style.cursor = 'ns-resize';
     e.preventDefault();
   });
 
+  // ==========================================================================
+  // GLOBAL MOUSE HANDLERS (drag, resize)
+  // ==========================================================================
   window.addEventListener('mousemove', (e) => {
-    if (isDraggingDock) {
-      const deltaY = e.clientY - dockStartY;
-      if (!dockHasMoved && Math.abs(deltaY) > 3) {
-        dockHasMoved = true;
+    // --- Position drag ---
+    if (isDragging) {
+      const dy = e.clientY - dragStartMouseY;
+      if (!dragMoved && Math.abs(dy) > 3) {
+        dragMoved = true;
         dragOverlay.classList.add('eb-active');
         dragOverlay.style.cursor = 'grabbing';
-        if (drawer.classList.contains('eb-open')) {
-          if (heightMode === 'full') {
-            drawerHeight = Math.max(400, window.innerHeight - 100);
-            applyHeightMode('custom');
-            chrome.storage.local.set({ edgebar_height_mode: 'custom', edgebar_drawer_height: drawerHeight });
-          }
-          drawer.classList.add('eb-dragging-drawer');
-        } else if (collapsedStyle === 'strip') {
-          drawer.classList.add('eb-dragging');
-        } else {
-          triggerPill.classList.add('eb-dragging');
-        }
       }
-
-      if (dockHasMoved) {
-        const newTop = dockStartTop + deltaY;
-        if (drawer.classList.contains('eb-open')) {
-          applyOpenPosition(newTop);
-        } else {
-          applyClosedPosition(newTop);
+      if (dragMoved) {
+        const newY = dragStartElY + dy;
+        panelY = Math.max(8, Math.min(newY, window.innerHeight - 60));
+        // Directly update position during drag for instant feedback
+        const isOpen = drawer.classList.contains('eb-open');
+        if (!isOpen && collapsedStyle === 'pill') {
+          triggerPill.style.top = `${panelY}px`;
+          triggerPill.style.bottom = 'auto';
+        } else if (!(isOpen && (heightMode === 'full' || heightMode === 'floating'))) {
+          drawer.style.top = `${panelY}px`;
+          drawer.style.bottom = 'auto';
         }
       }
       return;
     }
-
+    // --- Height resize ---
     if (isResizingHeight) {
-      const deltaY = startY - e.clientY;
-      const newHeight = Math.max(300, Math.min(startHeight + deltaY, window.innerHeight - 20));
-      drawerHeight = newHeight;
-      drawer.style.height = `${newHeight}px`;
+      drawerHeight = Math.max(300, Math.min(startHeight + (startY - e.clientY), window.innerHeight - 20));
+      drawer.style.height = `${drawerHeight}px`;
       return;
     }
-
+    // --- Width resize ---
     if (isResizing) {
-      const deltaX = e.clientX - startX;
-      const newWidth = Math.max(360, Math.min(startWidth + deltaX, window.innerWidth * 0.85));
-      drawerWidth = newWidth;
-      drawer.style.width = `${newWidth}px`;
+      drawerWidth = Math.max(360, Math.min(startWidth + (e.clientX - startX), window.innerWidth * 0.85));
+      drawer.style.width = `${drawerWidth}px`;
     }
   });
 
   window.addEventListener('mouseup', () => {
-    if (isDraggingDock) {
-      isDraggingDock = false;
+    if (isDragging) {
+      isDragging = false;
       dragOverlay.classList.remove('eb-active');
       dragOverlay.style.cursor = '';
-      drawer.classList.remove('eb-dragging-drawer', 'eb-dragging');
-      triggerPill.classList.remove('eb-dragging');
-
-      if (dockHasMoved) {
+      if (dragMoved) {
         preventNextClick = true;
-        setTimeout(() => {
-          preventNextClick = false;
-        }, 100);
-        if (drawer.classList.contains('eb-open')) {
-          chrome.storage.local.set({ edgebar_open_top: openTop });
-        } else {
-          chrome.storage.local.set({ edgebar_closed_top: closedTop });
-        }
+        setTimeout(() => { preventNextClick = false; }, 100);
+        chrome.storage.local.set({ edgebar_panel_y: panelY });
       }
     }
-
     if (isResizingHeight) {
       isResizingHeight = false;
       resizerTop.classList.remove('eb-resizing');
@@ -1166,7 +828,6 @@
       dragOverlay.style.cursor = '';
       chrome.storage.local.set({ edgebar_drawer_height: drawerHeight });
     }
-
     if (isResizing) {
       isResizing = false;
       resizer.classList.remove('eb-resizing');
@@ -1176,37 +837,28 @@
     }
   });
 
+  // Keep position valid on viewport resize
   window.addEventListener('resize', () => {
-    if (drawer.classList.contains('eb-open')) {
-      if (openTop !== null) applyOpenPosition(openTop);
-    } else {
-      if (closedTop !== null) applyClosedPosition(closedTop);
+    if (panelY !== null) {
+      panelY = Math.max(8, Math.min(panelY, window.innerHeight - 60));
+      applyPosition();
     }
   });
 
   // ==========================================================================
-  // KEYBOARD & CHROME RUNTIME LISTENERS
+  // KEYBOARD & CHROME RUNTIME
   // ==========================================================================
   window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
-      if (contextMenu.classList.contains('eb-show')) {
-        hideContextMenu();
-      } else if (settingsModal.isOpen()) {
-        settingsModal.closeModal();
-      } else if (drawer.classList.contains('eb-open')) {
-        closeDrawer();
-      }
+      if (contextMenu.classList.contains('eb-show')) hideContextMenu();
+      else if (settingsModal.isOpen()) settingsModal.closeModal();
+      else if (drawer.classList.contains('eb-open')) closeDrawer();
     }
   });
 
   chrome.runtime.onMessage.addListener((message) => {
     if (message.type === 'TOGGLE_DRAWER') {
-      if (drawer.classList.contains('eb-open')) {
-        closeDrawer();
-      } else {
-        const current = shortcuts.find((s) => s.id === activeShortcutId) || shortcuts[0];
-        openDrawer(current);
-      }
+      drawer.classList.contains('eb-open') ? closeDrawer() : openDrawer(shortcuts.find((s) => s.id === activeShortcutId) || shortcuts[0]);
     }
   });
 
