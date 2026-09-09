@@ -82,48 +82,62 @@
     getModalHtml: (icons) => `
       <div class="eb-modal-card">
         <div class="eb-modal-header">
-          <span class="eb-modal-title">Ayarlar</span>
+          <div class="eb-modal-title-wrap">
+            <span class="eb-modal-title">EdgeBar Ayarları</span>
+            <span class="eb-modal-badge">v1.2</span>
+          </div>
           <button type="button" class="eb-modal-close" title="Kapat">${icons.close}</button>
         </div>
-        <div class="eb-setting-row">
-          <div class="eb-setting-label">Görünüm</div>
-          <div class="eb-segmented-control eb-mode-segmented">
-            <button type="button" class="eb-segmented-btn eb-segment-mobile" data-mode="mobile">📱 Mobil</button>
-            <button type="button" class="eb-segmented-btn eb-segment-desktop" data-mode="desktop">💻 Masaüstü</button>
+        <div class="eb-modal-body">
+          <div class="eb-setting-row">
+            <div class="eb-setting-label">Görünüm Modu</div>
+            <div class="eb-segmented-control eb-mode-segmented">
+              <button type="button" class="eb-segmented-btn eb-segment-mobile" data-mode="mobile">📱 Mobil</button>
+              <button type="button" class="eb-segmented-btn eb-segment-desktop" data-mode="desktop">💻 Masaüstü</button>
+            </div>
           </div>
-        </div>
-        <div class="eb-setting-row">
-          <div class="eb-setting-label">Yükseklik</div>
-          <div class="eb-segmented-control eb-height-segmented">
-            <button type="button" class="eb-segmented-btn eb-h-full" data-height="full">↕ Tam</button>
-            <button type="button" class="eb-segmented-btn eb-h-floating" data-height="floating">🏝 Ada</button>
-            <button type="button" class="eb-segmented-btn eb-h-custom" data-height="custom">🎛 Serbest</button>
+          <div class="eb-setting-row">
+            <div class="eb-setting-label">İkon Boyutu</div>
+            <div class="eb-segmented-control eb-size-segmented">
+              <button type="button" class="eb-segmented-btn eb-size-small" data-size="small">S • Küçük</button>
+              <button type="button" class="eb-segmented-btn eb-size-medium" data-size="medium">M • Normal</button>
+              <button type="button" class="eb-segmented-btn eb-size-large" data-size="large">L • Büyük</button>
+            </div>
           </div>
-        </div>
-        <div class="eb-setting-row">
-          <div class="eb-setting-label">Kapalıyken</div>
-          <div class="eb-segmented-control eb-collapsed-segmented">
-            <button type="button" class="eb-segmented-btn eb-c-strip" data-collapsed="strip">📑 Kısayollar</button>
-            <button type="button" class="eb-segmented-btn eb-c-pill" data-collapsed="pill">✦ İkon</button>
+          <div class="eb-setting-row">
+            <div class="eb-setting-label">Panel Yüksekliği</div>
+            <div class="eb-segmented-control eb-height-segmented">
+              <button type="button" class="eb-segmented-btn eb-h-full" data-height="full">↕ Tam</button>
+              <button type="button" class="eb-segmented-btn eb-h-floating" data-height="floating">🏝 Ada</button>
+              <button type="button" class="eb-segmented-btn eb-h-custom" data-height="custom">🎛 Serbest</button>
+            </div>
           </div>
-        </div>
-        <div class="eb-setting-row">
-          <div class="eb-setting-label">Dışarı tıklayınca</div>
-          <div class="eb-segmented-control eb-clickout-segmented">
-            <button type="button" class="eb-segmented-btn eb-co-close" data-clickout="true">🚪 Kapat</button>
-            <button type="button" class="eb-segmented-btn eb-co-stay" data-clickout="false">📌 Açık kalsın</button>
+          <div class="eb-setting-row">
+            <div class="eb-setting-label">Kapalıyken Görünüm</div>
+            <div class="eb-segmented-control eb-collapsed-segmented">
+              <button type="button" class="eb-segmented-btn eb-c-strip" data-collapsed="strip">📑 Kısayollar</button>
+              <button type="button" class="eb-segmented-btn eb-c-pill" data-collapsed="pill">✦ Tek İkon</button>
+            </div>
           </div>
-        </div>
-        <div class="eb-setting-row" style="margin-top: 10px;">
-          <div class="eb-setting-label">Site Ekle</div>
-          <div class="eb-quick-add-row">
-            <input class="eb-quick-add-input" type="text" placeholder="URL veya site (örn: notion.so)" />
-            <button type="button" class="eb-quick-add-btn" title="Kısayolu Ekle">${icons.plus}</button>
+          <div class="eb-setting-row">
+            <div class="eb-setting-label">Dışarı Tıklayınca</div>
+            <div class="eb-segmented-control eb-clickout-segmented">
+              <button type="button" class="eb-segmented-btn eb-co-close" data-clickout="true">🚪 Kapat</button>
+              <button type="button" class="eb-segmented-btn eb-co-stay" data-clickout="false">📌 Açık Kalsın</button>
+            </div>
           </div>
-        </div>
-        <div class="eb-setting-row">
-          <div class="eb-setting-label">Kayıtlı Siteler</div>
-          <div class="eb-manage-list"></div>
+          <div class="eb-modal-divider"></div>
+          <div class="eb-setting-row">
+            <div class="eb-setting-label">Yeni Kısayol Ekle</div>
+            <div class="eb-quick-add-row">
+              <input class="eb-quick-add-input" type="text" placeholder="URL veya site (örn: notion.so)" />
+              <button type="button" class="eb-quick-add-btn" title="Kısayolu Ekle">${icons.plus}</button>
+            </div>
+          </div>
+          <div class="eb-setting-row">
+            <div class="eb-setting-label">Kayıtlı Siteler</div>
+            <div class="eb-manage-list"></div>
+          </div>
         </div>
         <div class="eb-modal-footer">
           <button type="button" class="eb-btn-link eb-reset-defaults">Varsayılana Sıfırla (Gemini)</button>
@@ -145,6 +159,7 @@
       container, icons, defaultShortcuts,
       getShortcuts, setShortcuts,
       getViewMode, setViewMode,
+      getIconSize, setIconSize,
       getHeightMode, setHeightMode,
       getCollapsedStyle, setCollapsedStyle,
       getClickOutsideClose, setClickOutsideClose,
@@ -163,6 +178,7 @@
     const manageList = modalBackdrop.querySelector('.eb-manage-list');
     const segMobile = modalBackdrop.querySelector('.eb-segment-mobile');
     const segDesktop = modalBackdrop.querySelector('.eb-segment-desktop');
+    const sizeBtns = modalBackdrop.querySelectorAll('.eb-size-segmented .eb-segmented-btn');
     const heightBtns = modalBackdrop.querySelectorAll('.eb-height-segmented .eb-segmented-btn');
     const collapsedBtns = modalBackdrop.querySelectorAll('.eb-collapsed-segmented .eb-segmented-btn');
     const clickoutBtns = modalBackdrop.querySelectorAll('.eb-clickout-segmented .eb-segmented-btn');
@@ -171,6 +187,7 @@
       const currentMode = getViewMode();
       segMobile.classList.toggle('eb-active-segment', currentMode === 'mobile');
       segDesktop.classList.toggle('eb-active-segment', currentMode === 'desktop');
+      sizeBtns.forEach((btn) => btn.classList.toggle('eb-active-segment', btn.dataset.size === getIconSize()));
       heightBtns.forEach((btn) => btn.classList.toggle('eb-active-segment', btn.dataset.height === getHeightMode()));
       collapsedBtns.forEach((btn) => btn.classList.toggle('eb-active-segment', btn.dataset.collapsed === getCollapsedStyle()));
       const coVal = String(getClickOutsideClose());
@@ -227,6 +244,7 @@
         syncUI();
       });
     });
+    sizeBtns.forEach((btn) => btn.addEventListener('click', () => { setIconSize(btn.dataset.size); syncUI(); }));
     heightBtns.forEach((btn) => btn.addEventListener('click', () => { setHeightMode(btn.dataset.height); syncUI(); }));
     collapsedBtns.forEach((btn) => btn.addEventListener('click', () => { setCollapsedStyle(btn.dataset.collapsed); syncUI(); }));
     clickoutBtns.forEach((btn) => btn.addEventListener('click', () => { setClickOutsideClose(btn.dataset.clickout === 'true'); syncUI(); }));
@@ -258,6 +276,8 @@
     quickAddInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleSaveCustomShortcut(); });
     resetDefaultsBtn.addEventListener('click', () => {
       setShortcuts([...defaultShortcuts]);
+      setCollapsedStyle('strip');
+      setIconSize('medium');
       syncUI();
       closeModal();
       if (onOpenShortcut) onOpenShortcut(defaultShortcuts[0]);
@@ -278,6 +298,7 @@
   let heightMode = 'full';
   let collapsedStyle = 'strip';
   let clickOutsideClose = false;
+  let iconSize = 'medium';
   let zoomLevel = 1.0;
 
   // --- Drag State (unified single-axis Y positioning) ---
@@ -421,6 +442,8 @@
     },
     getHeightMode: () => heightMode,
     setHeightMode: (mode) => { applyHeightMode(mode); chrome.storage.local.set({ edgebar_height_mode: mode }); },
+    getIconSize: () => iconSize,
+    setIconSize: (size) => applyIconSize(size),
     getCollapsedStyle: () => collapsedStyle,
     setCollapsedStyle: (style) => { applyCollapsedStyle(style); chrome.storage.local.set({ edgebar_collapsed_style: style }); },
     getClickOutsideClose: () => clickOutsideClose,
@@ -475,6 +498,18 @@
     if (!drawer.classList.contains('eb-open')) {
       closeDrawer(false);
     }
+    settingsModal.syncUI();
+  }
+
+  function applyIconSize(size) {
+    iconSize = size || 'medium';
+    drawer.classList.remove('eb-size-small', 'eb-size-medium', 'eb-size-large');
+    drawer.classList.add(`eb-size-${iconSize}`);
+    if (!drawer.classList.contains('eb-open') && collapsedStyle === 'strip') {
+      const railWidths = { small: 38, medium: 46, large: 54 };
+      drawer.style.width = `${railWidths[iconSize] || 46}px`;
+    }
+    chrome.storage.local.set({ edgebar_icon_size: iconSize });
     settingsModal.syncUI();
   }
 
@@ -626,7 +661,7 @@
       'edgebar_shortcuts', 'edgebar_drawer_width', 'edgebar_drawer_height',
       'edgebar_height_mode', 'edgebar_collapsed_style', 'edgebar_panel_y',
       'edgebar_last_active', 'edgebar_drawer_open', 'edgebar_view_mode', 'edgebar_zoom',
-      'edgebar_click_outside_close'
+      'edgebar_click_outside_close', 'edgebar_icon_size'
     ], (result) => {
       // Shortcuts
       const isOldDefault = result.edgebar_shortcuts && Array.isArray(result.edgebar_shortcuts) &&
@@ -659,9 +694,11 @@
       if (result.edgebar_height_mode) heightMode = result.edgebar_height_mode;
       applyHeightMode(heightMode);
 
-      // Collapsed style
+      // Collapsed style & Icon size
       collapsedStyle = result.edgebar_collapsed_style || 'strip';
       clickOutsideClose = result.edgebar_click_outside_close === true;
+      iconSize = result.edgebar_icon_size || 'medium';
+      applyIconSize(iconSize);
 
       renderShortcuts();
       settingsModal.syncUI();
@@ -747,7 +784,8 @@
 
     if (collapsedStyle === 'strip') {
       drawer.classList.add('eb-strip-only');
-      drawer.style.width = '46px';
+      const railWidths = { small: 38, medium: 46, large: 54 };
+      drawer.style.width = `${railWidths[iconSize] || 46}px`;
       triggerPill.classList.add('eb-hidden');
     } else {
       drawer.classList.remove('eb-strip-only');

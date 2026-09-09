@@ -79,6 +79,11 @@
    ========================================================================== */
 
 .eb-drawer {
+  --eb-rail-w: 46px;
+  --eb-btn-size: 34px;
+  --eb-icon-size: 20px;
+  --eb-icon-font: 11px;
+  --eb-btn-radius: 8px;
   position: fixed;
   top: 0;
   left: 0;
@@ -104,6 +109,31 @@
               opacity 0.18s ease;
 }
 
+/* Dock Icon Size Presets */
+.eb-drawer.eb-size-small {
+  --eb-rail-w: 38px;
+  --eb-btn-size: 28px;
+  --eb-icon-size: 16px;
+  --eb-icon-font: 10px;
+  --eb-btn-radius: 6px;
+}
+
+.eb-drawer.eb-size-medium {
+  --eb-rail-w: 46px;
+  --eb-btn-size: 34px;
+  --eb-icon-size: 20px;
+  --eb-icon-font: 11px;
+  --eb-btn-radius: 8px;
+}
+
+.eb-drawer.eb-size-large {
+  --eb-rail-w: 54px;
+  --eb-btn-size: 42px;
+  --eb-icon-size: 24px;
+  --eb-icon-font: 13px;
+  --eb-btn-radius: 10px;
+}
+
 .eb-drawer.eb-open {
   transform: translateX(0);
   opacity: 1;
@@ -115,9 +145,9 @@
   bottom: 24px;
   top: auto;
   left: 0;
-  width: 46px;
-  min-width: 46px;
-  max-width: 46px;
+  width: var(--eb-rail-w, 46px);
+  min-width: var(--eb-rail-w, 46px);
+  max-width: var(--eb-rail-w, 46px);
   height: auto;
   min-height: auto;
   transform: translateX(0);
@@ -136,7 +166,7 @@
 }
 
 .eb-drawer.eb-strip-only .eb-dock-rail {
-  width: 46px;
+  width: var(--eb-rail-w, 46px);
   height: auto;
   border-right: none;
   padding: 4px 0 8px 0;
@@ -183,8 +213,9 @@
 }
 
 .eb-drawer.eb-strip-only .eb-settings-btn {
-  width: 34px;
-  height: 28px;
+  width: var(--eb-btn-size, 34px);
+  height: calc(var(--eb-btn-size, 34px) - 6px);
+  min-height: 22px;
 }
 
 .eb-drawer.eb-strip-only .eb-dock-bottom {
@@ -328,7 +359,7 @@
    ========================================================================== */
 
 .eb-dock-rail {
-  width: 46px;
+  width: var(--eb-rail-w, 46px);
   height: 100%;
   background: #111216;
   border-right: 1px solid rgba(255, 255, 255, 0.07);
@@ -384,14 +415,14 @@
 /* Standardized Buttons in Rail */
 .eb-item-btn {
   position: relative;
-  width: 34px;
-  height: 34px;
+  width: var(--eb-btn-size, 34px);
+  height: var(--eb-btn-size, 34px);
   display: flex;
   align-items: center;
   justify-content: center;
   background: transparent;
   border: 1px solid transparent;
-  border-radius: 8px;
+  border-radius: var(--eb-btn-radius, 8px);
   cursor: pointer !important;
   user-select: none !important;
   -webkit-user-drag: none;
@@ -427,8 +458,8 @@
 }
 
 .eb-item-icon {
-  width: 20px;
-  height: 20px;
+  width: var(--eb-icon-size, 20px);
+  height: var(--eb-icon-size, 20px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -449,13 +480,13 @@
 }
 
 .eb-letter-avatar {
-  width: 20px;
-  height: 20px;
+  width: var(--eb-icon-size, 20px);
+  height: var(--eb-icon-size, 20px);
   border-radius: 4px;
   background: #27272a;
   color: #ffffff;
   font-weight: 600;
-  font-size: 11px;
+  font-size: var(--eb-icon-font, 11px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -465,14 +496,14 @@
 /* Dock Control Buttons (Toggle & Settings) */
 .eb-toggle-btn,
 .eb-settings-btn {
-  width: 34px;
-  height: 34px;
+  width: var(--eb-btn-size, 34px);
+  height: var(--eb-btn-size, 34px);
   display: flex;
   align-items: center;
   justify-content: center;
   background: transparent;
   border: 1px solid transparent;
-  border-radius: 8px;
+  border-radius: var(--eb-btn-radius, 8px);
   color: #a1a1aa;
   cursor: pointer !important;
   user-select: none !important;
@@ -495,8 +526,10 @@
 
 .eb-toggle-btn svg,
 .eb-settings-btn svg {
-  width: 18px;
-  height: 18px;
+  width: calc(var(--eb-icon-size, 20px) - 2px);
+  height: calc(var(--eb-icon-size, 20px) - 2px);
+  min-width: 14px;
+  min-height: 14px;
   display: block;
 }
 
@@ -777,7 +810,7 @@
 }
 
 /* ==========================================================================
-   MODAL: SETTINGS & SHORTCUTS MANAGEMENT (Minimalist Apple / Linear Aesthetic)
+   MODAL: SETTINGS & SHORTCUTS MANAGEMENT (Refined Raycast / Apple Aesthetic)
    ========================================================================== */
 
 .eb-modal-backdrop {
@@ -786,16 +819,16 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.65);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 2147483647;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .eb-modal-backdrop.eb-modal-open {
@@ -804,45 +837,65 @@
 }
 
 .eb-modal-card {
-  width: 330px;
-  max-width: 90vw;
-  background: #13141a;
+  width: 356px;
+  max-width: 92vw;
+  background: linear-gradient(180deg, #181920 0%, #121318 100%);
   border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 12px;
-  padding: 16px 18px;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85);
-  transform: scale(0.96);
-  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 14px;
+  padding: 18px 20px;
+  box-shadow: 0 24px 64px -12px rgba(0, 0, 0, 0.8),
+              0 0 0 1px rgba(255, 255, 255, 0.08),
+              inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  transform: scale(0.96) translateY(4px);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
 }
 
 .eb-modal-backdrop.eb-modal-open .eb-modal-card {
-  transform: scale(1);
+  transform: scale(1) translateY(0);
 }
 
 .eb-modal-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.eb-modal-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .eb-modal-title {
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 600;
   color: #f4f4f5;
   letter-spacing: -0.01em;
 }
 
+.eb-modal-badge {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1.5px 6px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #a1a1aa;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
 .eb-modal-close {
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: transparent;
-  border: none;
-  border-radius: 6px;
-  color: #71717a;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 7px;
+  color: #a1a1aa;
   cursor: pointer;
   transition: all 0.15s ease;
 }
@@ -853,42 +906,54 @@
 }
 
 .eb-modal-close:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.16);
   color: #ffffff;
+}
+
+.eb-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .eb-setting-row {
   display: flex;
   flex-direction: column;
   gap: 5px;
-  margin-bottom: 10px;
 }
 
 .eb-setting-label {
   font-size: 10.5px;
-  font-weight: 500;
+  font-weight: 600;
   color: #71717a;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
+}
+
+.eb-modal-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08) 20%, rgba(255, 255, 255, 0.08) 80%, transparent);
+  margin: 3px 0;
 }
 
 /* Segmented Controls in Modal */
 .eb-segmented-control {
   display: flex;
-  background: #1b1c24;
+  background: #0d0e12;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 7px;
-  padding: 2px;
-  gap: 2px;
+  border-radius: 8px;
+  padding: 2.5px;
+  gap: 2.5px;
 }
 
 .eb-segmented-btn {
   flex: 1;
-  padding: 5px 6px;
-  border: none;
-  border-radius: 5px;
+  padding: 5.5px 6px;
+  border: 1px solid transparent;
+  border-radius: 6px;
   background: transparent;
-  color: #a1a1aa;
+  color: #9ca3af;
   font-size: 11.5px;
   font-weight: 500;
   cursor: pointer;
@@ -897,16 +962,20 @@
   justify-content: center;
   gap: 4px;
   transition: all 0.14s ease;
+  white-space: nowrap;
 }
 
 .eb-segmented-btn:hover {
   color: #ffffff;
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .eb-segmented-btn.eb-active-segment {
   background: rgba(255, 255, 255, 0.14);
   color: #ffffff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  font-weight: 600;
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
 }
 
 /* Quick Add Single Line */
@@ -917,31 +986,32 @@
 
 .eb-quick-add-input {
   flex: 1;
-  background: #1b1c24;
+  background: #0d0e12;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 7px;
-  padding: 6px 10px;
+  border-radius: 8px;
+  padding: 7px 11px;
   color: #f4f4f5;
   font-size: 12px;
   outline: none;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
 }
 
 .eb-quick-add-input:focus {
+  background: #13141a;
   border-color: rgba(255, 255, 255, 0.35);
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.08);
 }
 
 .eb-quick-add-btn {
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: #ffffff;
   color: #09090b;
   border: none;
-  border-radius: 7px;
+  border-radius: 8px;
   cursor: pointer;
   flex-shrink: 0;
   transition: all 0.14s ease;
@@ -955,6 +1025,7 @@
 
 .eb-quick-add-btn:hover {
   background: #e4e4e7;
+  transform: translateY(-0.5px);
 }
 
 .eb-quick-add-btn:active {
@@ -969,18 +1040,24 @@
   max-height: 120px;
   overflow-y: auto;
   scrollbar-width: thin;
+  padding-right: 2px;
 }
 
 .eb-manage-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 5px 8px;
+  padding: 6px 10px;
   background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 7px;
   font-size: 12px;
   color: #d4d4d8;
+  transition: background 0.12s ease;
+}
+
+.eb-manage-item:hover {
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .eb-manage-item-left {
@@ -991,8 +1068,8 @@
 }
 
 .eb-manage-item-icon {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   border-radius: 4px;
   display: flex;
   align-items: center;
@@ -1017,6 +1094,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-weight: 500;
 }
 
 .eb-manage-item-del {
@@ -1025,7 +1103,7 @@
   border: none;
   cursor: pointer;
   padding: 3px;
-  border-radius: 4px;
+  border-radius: 5px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1045,8 +1123,8 @@
 .eb-modal-footer {
   display: flex;
   justify-content: flex-end;
-  margin-top: 10px;
-  padding-top: 8px;
+  margin-top: 12px;
+  padding-top: 10px;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
