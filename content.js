@@ -406,11 +406,14 @@
   // ==========================================================================
 
   function applyClosedPosition(topPx) {
+    drawer.style.removeProperty('top');
+    drawer.style.removeProperty('bottom');
+    triggerPill.style.removeProperty('top');
+    triggerPill.style.removeProperty('bottom');
+
     if (topPx === null || topPx === undefined) {
-      drawer.style.setProperty('top', 'auto', 'important');
-      drawer.style.setProperty('bottom', '24px', 'important');
-      triggerPill.style.setProperty('top', 'auto', 'important');
-      triggerPill.style.setProperty('bottom', '24px', 'important');
+      drawer.style.bottom = '24px';
+      triggerPill.style.bottom = '24px';
       closedTop = null;
       return;
     }
@@ -421,30 +424,27 @@
     const clampedTop = Math.max(minTop, Math.min(topPx, maxTop));
     closedTop = clampedTop;
 
-    drawer.style.setProperty('top', `${clampedTop}px`, 'important');
-    drawer.style.setProperty('bottom', 'auto', 'important');
-    triggerPill.style.setProperty('top', `${clampedTop}px`, 'important');
-    triggerPill.style.setProperty('bottom', 'auto', 'important');
+    drawer.style.top = `${clampedTop}px`;
+    triggerPill.style.top = `${clampedTop}px`;
   }
 
   function applyOpenPosition(topPx) {
+    drawer.style.removeProperty('top');
+    drawer.style.removeProperty('bottom');
+    drawer.style.removeProperty('height');
+
     if (heightMode === 'full') {
-      drawer.style.top = '';
-      drawer.style.bottom = '';
       drawer.style.height = '100vh';
       return;
     }
 
     if (heightMode === 'floating') {
-      drawer.style.top = '';
-      drawer.style.bottom = '';
       return;
     }
 
     // heightMode === 'custom'
     if (topPx === null || topPx === undefined) {
-      drawer.style.setProperty('top', 'auto', 'important');
-      drawer.style.setProperty('bottom', '0px', 'important');
+      drawer.style.bottom = '0px';
       drawer.style.height = `${drawerHeight}px`;
       openTop = null;
       return;
@@ -456,8 +456,7 @@
     openTop = clampedTop;
 
     drawer.style.height = `${drawerHeight}px`;
-    drawer.style.setProperty('top', `${clampedTop}px`, 'important');
-    drawer.style.setProperty('bottom', 'auto', 'important');
+    drawer.style.top = `${clampedTop}px`;
   }
 
   function startDockDrag(e) {
@@ -722,7 +721,9 @@
         } else {
           collapsedStyle = 'strip';
         }
-        applyCollapsedStyle(collapsedStyle);
+        collapsedBtns.forEach((btn) => {
+          btn.classList.toggle('eb-active-segment', btn.dataset.collapsed === collapsedStyle);
+        });
 
         renderShortcuts();
 
@@ -732,7 +733,7 @@
           const targetShortcut = shortcuts.find((s) => s.id === result.edgebar_last_active) || shortcuts[0];
           openDrawer(targetShortcut);
         } else {
-          closeDrawer();
+          closeDrawer(false);
         }
       }
     );
@@ -793,6 +794,12 @@
       loader.classList.add('eb-hidden');
     }
 
+    // Clean any lingering closed styles
+    drawer.style.removeProperty('top');
+    drawer.style.removeProperty('bottom');
+    drawer.style.removeProperty('height');
+    drawer.style.removeProperty('width');
+
     // Hide trigger pill, remove strip-only and open full drawer
     triggerPill.classList.add('eb-hidden');
     drawer.classList.remove('eb-strip-only');
@@ -810,21 +817,23 @@
     chrome.storage.local.set({ edgebar_drawer_open: true, edgebar_last_active: sc.id });
   }
 
-  function closeDrawer() {
+  function closeDrawer(saveState = true) {
     drawer.classList.remove('eb-open');
 
     toggleBtn.innerHTML = ICONS.sidebarClosed;
     toggleBtn.title = 'Paneli Genişlet';
 
+    drawer.style.removeProperty('top');
+    drawer.style.removeProperty('bottom');
+    drawer.style.removeProperty('height');
+    drawer.style.removeProperty('width');
+
     if (collapsedStyle === 'strip') {
       drawer.classList.add('eb-strip-only');
       drawer.style.width = '46px';
-      drawer.style.height = '';
       triggerPill.classList.add('eb-hidden');
     } else {
       drawer.classList.remove('eb-strip-only');
-      drawer.style.width = '';
-      drawer.style.height = '';
       triggerPill.classList.remove('eb-hidden');
     }
 
@@ -837,7 +846,9 @@
 
     hideTooltip();
     hideContextMenu();
-    chrome.storage.local.set({ edgebar_drawer_open: false });
+    if (saveState) {
+      chrome.storage.local.set({ edgebar_drawer_open: false });
+    }
   }
 
   // Toggle from Trigger Pill
@@ -858,7 +869,7 @@
     }
   });
 
-  closeBtn.addEventListener('click', closeDrawer);
+  closeBtn.addEventListener('click', () => closeDrawer());
 
   // Dragging Listeners
   if (dockDragHandle) {
@@ -866,13 +877,14 @@
   }
   triggerPill.addEventListener('mousedown', startDockDrag);
   drawerHeader.addEventListener('mousedown', (e) => {
-    if (e.target.closest('.eb-header-actions') || e.target.closest('.eb-view-segment')) {
+    if (
+      e.target.closest('.eb-drawer-actions') ||
+      e.target.closest('.eb-action-btn') ||
+      e.target.closest('.eb-zoom-group') ||
+      e.target.closest('.eb-zoom-btn') ||
+      e.target.closest('.eb-view-segment')
+    ) {
       return;
-    }
-    if (heightMode === 'full') {
-      drawerHeight = Math.max(400, window.innerHeight - 100);
-      applyHeightMode('custom');
-      chrome.storage.local.set({ edgebar_height_mode: 'custom', edgebar_drawer_height: drawerHeight });
     }
     startDockDrag(e);
   });
@@ -931,6 +943,11 @@
         dragOverlay.classList.add('eb-active');
         dragOverlay.style.cursor = 'grabbing';
         if (drawer.classList.contains('eb-open')) {
+          if (heightMode === 'full') {
+            drawerHeight = Math.max(400, window.innerHeight - 100);
+            applyHeightMode('custom');
+            chrome.storage.local.set({ edgebar_height_mode: 'custom', edgebar_drawer_height: drawerHeight });
+          }
           drawer.classList.add('eb-dragging-drawer');
         } else if (collapsedStyle === 'strip') {
           drawer.classList.add('eb-dragging');
