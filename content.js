@@ -42,6 +42,8 @@
       <div class="eb-dock-rail">
         <div class="eb-dock-top">
           <button type="button" class="eb-dock-new-tab-btn" title="Yeni Sekme">${icons.plus}</button>
+          <div class="eb-open-tabs-list"></div>
+          <div class="eb-tabs-divider" style="display:none;"></div>
           <button type="button" class="eb-settings-btn" title="Ayarlar">${icons.settings}</button>
         </div>
         <div class="eb-dock-bottom">
@@ -313,6 +315,8 @@
   // ==========================================================================
   let shortcuts = [];
   let activeShortcutId = null;
+  let openTabs = [];
+  let activeTabId = null;
   let drawerWidth = 486;
   let drawerHeight = 600;
   let currentActiveUrl = '';
@@ -427,6 +431,8 @@
   const toggleBtn = drawer.querySelector('.eb-toggle-btn');
   const settingsBtn = drawer.querySelector('.eb-settings-btn');
   const dockNewTabBtn = drawer.querySelector('.eb-dock-new-tab-btn');
+  const openTabsList = drawer.querySelector('.eb-open-tabs-list');
+  const tabsDivider = drawer.querySelector('.eb-tabs-divider');
   const dockDragHandle = drawer.querySelector('.eb-dock-drag-handle');
   const headerBackBtn = drawer.querySelector('.eb-header-back');
   const headerNewTabBtn = drawer.querySelector('.eb-header-new-tab');
@@ -724,6 +730,177 @@
   }
 
   // ==========================================================================
+  // OPEN TABS (ARC / EDGE STYLE CLOSABLE TABS)
+  // ==========================================================================
+  function renderOpenTabs() {
+    openTabsList.innerHTML = '';
+    if (openTabs.length === 0) {
+      tabsDivider.style.display = 'none';
+      return;
+    }
+    tabsDivider.style.display = 'block';
+
+    openTabs.forEach((tab) => {
+      const btn = document.createElement('div');
+      btn.className = `eb-tab-btn ${activeTabId === tab.id ? 'eb-active' : ''}`;
+      btn.dataset.tabId = tab.id;
+
+      let iconContent = '';
+      if (tab.favicon) {
+        iconContent = `<img src="${tab.favicon}" alt="" onerror="this.parentElement.innerHTML='🌐'" />`;
+      } else {
+        iconContent = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>`;
+      }
+
+      btn.innerHTML = `
+        <div class="eb-tab-icon">${iconContent}</div>
+        <button type="button" class="eb-tab-close-btn" title="Sekmeyi Kapat">${ICONS.close}</button>
+      `;
+
+      btn.addEventListener('mouseenter', () => showTooltip(tab.title || tab.url || 'Yeni Sekme', btn));
+      btn.addEventListener('mouseleave', hideTooltip);
+
+      btn.addEventListener('click', () => {
+        if (preventNextClick) return;
+        switchToTab(tab.id);
+      });
+
+      const closeBtn = btn.querySelector('.eb-tab-close-btn');
+      closeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        hideTooltip();
+        closeOpenTab(tab.id);
+      });
+
+      openTabsList.appendChild(btn);
+    });
+  }
+
+  function createOpenTab(url = '', title = '', favicon = '') {
+    const tabId = 'tab_' + Date.now();
+    let tabTitle = title;
+    let tabFavicon = favicon;
+
+    if (url && !tabTitle) {
+      try {
+        const p = new URL(url);
+        const host = p.hostname.replace(/^www\./, '');
+        tabTitle = host.split('.')[0];
+        tabTitle = tabTitle.charAt(0).toUpperCase() + tabTitle.slice(1);
+        tabFavicon = `https://www.google.com/s2/favicons?domain=${p.hostname}&sz=64`;
+      } catch (_) {
+        tabTitle = url;
+      }
+    }
+
+    const newTab = {
+      id: tabId,
+      title: tabTitle || 'Yeni Sekme',
+      url: url || '',
+      favicon: tabFavicon || '',
+      history: []
+    };
+
+    openTabs.push(newTab);
+    switchToTab(tabId);
+  }
+
+  function switchToTab(tabId) {
+    const tab = openTabs.find((t) => t.id === tabId);
+    if (!tab) return;
+
+    activeTabId = tabId;
+    activeShortcutId = null;
+    currentActiveUrl = tab.url;
+    navHistory = tab.history || [];
+
+    drawer.querySelectorAll('.eb-item-btn').forEach((b) => b.classList.remove('eb-active'));
+    dockNewTabBtn.classList.remove('eb-active-dock-tab');
+    renderOpenTabs();
+    updateBackButtonState();
+
+    if (tab.url) {
+      blankPage.classList.add('eb-hidden');
+      try {
+        const u = new URL(tab.url);
+        urlInput.value = u.hostname.replace(/^www\./, '');
+        urlInput.dataset.fullUrl = tab.url;
+      } catch (_) {
+        urlInput.value = tab.title || tab.url;
+        urlInput.dataset.fullUrl = tab.url;
+      }
+      drawerFavicon.style.display = tab.favicon ? 'block' : 'none';
+      if (tab.favicon) drawerFavicon.src = tab.favicon;
+
+      iframePool.forEach((frame) => frame.classList.remove('eb-active-frame'));
+      let activeFrame = iframePool.get(tab.id);
+      if (!activeFrame) {
+        loader.classList.remove('eb-hidden');
+        activeFrame = document.createElement('iframe');
+        activeFrame.className = 'eb-iframe eb-active-frame';
+        activeFrame.allow = 'clipboard-read; clipboard-write; camera; microphone; geolocation; encrypted-media';
+        activeFrame.style.zoom = `${zoomLevel}`;
+        activeFrame.src = tab.url;
+        activeFrame.addEventListener('load', () => loader.classList.add('eb-hidden'));
+        iframeContainer.appendChild(activeFrame);
+        iframePool.set(tab.id, activeFrame);
+      } else {
+        activeFrame.classList.add('eb-active-frame');
+        activeFrame.style.zoom = `${zoomLevel}`;
+        loader.classList.add('eb-hidden');
+      }
+    } else {
+      // Blank tab view
+      iframePool.forEach((frame) => frame.classList.remove('eb-active-frame'));
+      loader.classList.add('eb-hidden');
+      blankPage.classList.remove('eb-hidden');
+      urlInput.value = '';
+      urlInput.dataset.fullUrl = '';
+      urlInput.placeholder = "URL girin veya Google'da arayın...";
+      drawerFavicon.style.display = 'none';
+      setTimeout(() => urlInput.focus(), 60);
+    }
+
+    if (!drawer.classList.contains('eb-open')) {
+      triggerPill.classList.add('eb-hidden');
+      drawer.classList.remove('eb-strip-only');
+      drawer.classList.add('eb-open');
+      drawer.style.width = `${drawerWidth}px`;
+      if (heightMode === 'custom') drawer.style.height = `${drawerHeight}px`;
+      applyPosition();
+      toggleBtn.innerHTML = ICONS.sidebarOpen;
+      toggleBtn.title = 'Paneli Daralt (Esc)';
+      itemsList.querySelectorAll('.eb-item-btn').forEach((b) => { b.draggable = true; });
+      chrome.storage.local.set({ edgebar_drawer_open: true });
+    }
+  }
+
+  function closeOpenTab(tabId) {
+    const index = openTabs.findIndex((t) => t.id === tabId);
+    if (index === -1) return;
+
+    if (iframePool.has(tabId)) {
+      iframePool.get(tabId).remove();
+      iframePool.delete(tabId);
+    }
+
+    openTabs.splice(index, 1);
+
+    if (activeTabId === tabId) {
+      if (openTabs.length > 0) {
+        const nextTab = openTabs[Math.max(0, index - 1)];
+        switchToTab(nextTab.id);
+      } else if (shortcuts.length > 0) {
+        openDrawer(shortcuts[0]);
+      } else {
+        createOpenTab();
+      }
+    } else {
+      renderOpenTabs();
+    }
+  }
+
+  // ==========================================================================
   // STATE LOADING & PERSISTENCE
   // ==========================================================================
   function loadState() {
@@ -771,6 +948,7 @@
       applyIconSize(iconSize);
 
       renderShortcuts();
+      renderOpenTabs();
       settingsModal.syncUI();
 
       // Restore open/closed state (default to closed / strip mode on fresh page load)
@@ -796,11 +974,13 @@
     if (!sc) sc = shortcuts[0] || DEFAULT_SHORTCUTS[0];
 
     activeShortcutId = sc.id;
+    activeTabId = null;
     currentActiveUrl = sc.url;
     navHistory = [];
 
     drawer.querySelectorAll('.eb-item-btn').forEach((b) => b.classList.toggle('eb-active', b.dataset.id === sc.id));
     dockNewTabBtn.classList.remove('eb-active-dock-tab');
+    renderOpenTabs();
     blankPage.classList.add('eb-hidden');
     updateBackButtonState();
 
@@ -909,7 +1089,15 @@
   // NAVIGATION & HISTORY
   // ==========================================================================
   function updateBackButtonState() {
-    if (navHistory.length > 0) {
+    let hasHistory = false;
+    if (activeTabId) {
+      const currentTab = openTabs.find((t) => t.id === activeTabId);
+      hasHistory = currentTab && currentTab.history && currentTab.history.length > 0;
+    } else {
+      hasHistory = navHistory && navHistory.length > 0;
+    }
+
+    if (hasHistory) {
       headerBackBtn.style.opacity = '1';
       headerBackBtn.style.pointerEvents = 'auto';
       headerBackBtn.title = 'Geri';
@@ -921,67 +1109,37 @@
   }
 
   function handleBack() {
-    if (navHistory.length === 0) return;
-    const prevUrl = navHistory.pop();
-    updateBackButtonState();
+    if (activeTabId) {
+      const currentTab = openTabs.find((t) => t.id === activeTabId);
+      if (!currentTab || !currentTab.history || currentTab.history.length === 0) return;
 
-    if (prevUrl === '__blank__') {
-      openBlankTab(false);
-      return;
-    }
+      const prevUrl = currentTab.history.pop();
+      updateBackButtonState();
 
-    // Check if prevUrl matches a pinned shortcut
-    const matchSc = shortcuts.find((s) => s.url === prevUrl);
-    if (matchSc) {
-      activeShortcutId = matchSc.id;
-      drawer.querySelectorAll('.eb-item-btn').forEach((b) => b.classList.toggle('eb-active', b.dataset.id === matchSc.id));
-      dockNewTabBtn.classList.remove('eb-active-dock-tab');
+      if (prevUrl === '__blank__') {
+        currentTab.url = '';
+        currentTab.title = 'Yeni Sekme';
+        currentTab.favicon = '';
+        currentActiveUrl = '';
+        switchToTab(currentTab.id);
+        return;
+      }
+      navigateTo(prevUrl, false);
+    } else {
+      if (navHistory.length === 0) return;
+      const prevUrl = navHistory.pop();
+      updateBackButtonState();
+      navigateTo(prevUrl, false);
     }
-    navigateTo(prevUrl, false);
   }
 
   headerBackBtn.addEventListener('click', handleBack);
 
-  function openBlankTab(clearHistory = true) {
-    if (clearHistory) {
-      navHistory = [];
-    }
-    activeShortcutId = 'new_tab';
-    currentActiveUrl = '';
-
-    drawer.querySelectorAll('.eb-item-btn').forEach((b) => b.classList.remove('eb-active'));
-    dockNewTabBtn.classList.add('eb-active-dock-tab');
-    iframePool.forEach((frame) => frame.classList.remove('eb-active-frame'));
-    loader.classList.add('eb-hidden');
-    blankPage.classList.remove('eb-hidden');
-
-    urlInput.value = '';
-    urlInput.dataset.fullUrl = '';
-    urlInput.placeholder = "URL girin veya Google'da arayın...";
-    drawerFavicon.style.display = 'none';
-    updateBackButtonState();
-
-    if (!drawer.classList.contains('eb-open')) {
-      triggerPill.classList.add('eb-hidden');
-      drawer.classList.remove('eb-strip-only');
-      drawer.classList.add('eb-open');
-      drawer.style.width = `${drawerWidth}px`;
-      if (heightMode === 'custom') drawer.style.height = `${drawerHeight}px`;
-      applyPosition();
-      toggleBtn.innerHTML = ICONS.sidebarOpen;
-      toggleBtn.title = 'Paneli Daralt (Esc)';
-      itemsList.querySelectorAll('.eb-item-btn').forEach((b) => { b.draggable = true; });
-      chrome.storage.local.set({ edgebar_drawer_open: true });
-    }
-
-    setTimeout(() => urlInput.focus(), 60);
-  }
-
   dockNewTabBtn.addEventListener('click', (e) => {
     if (preventNextClick) return;
-    openBlankTab(true);
+    createOpenTab();
   });
-  headerNewTabBtn.addEventListener('click', () => openBlankTab(true));
+  headerNewTabBtn.addEventListener('click', () => createOpenTab());
 
   // Quick launch chips on blank page
   blankPage.querySelectorAll('.eb-blank-chip').forEach((chip) => {
@@ -1022,11 +1180,19 @@
   });
 
   function navigateTo(finalUrl, pushToHistory = true) {
+    let currentTab = openTabs.find((t) => t.id === activeTabId);
+
+    // If currently on a pinned shortcut and navigating, open in a new tab to preserve shortcut
+    if (!currentTab) {
+      createOpenTab(finalUrl);
+      return;
+    }
+
     if (pushToHistory) {
       if (currentActiveUrl) {
-        navHistory.push(currentActiveUrl);
-      } else if (activeShortcutId === 'new_tab') {
-        navHistory.push('__blank__');
+        currentTab.history.push(currentActiveUrl);
+      } else {
+        currentTab.history.push('__blank__');
       }
     }
     updateBackButtonState();
@@ -1036,16 +1202,23 @@
     try {
       const parsed = new URL(finalUrl);
       const hostName = parsed.hostname.replace(/^www\./, '');
+      let tabName = hostName.split('.')[0];
+      tabName = tabName.charAt(0).toUpperCase() + tabName.slice(1);
       const faviconUrl = `https://www.google.com/s2/favicons?domain=${parsed.hostname}&sz=64`;
 
+      currentTab.url = finalUrl;
+      currentTab.title = tabName;
+      currentTab.favicon = faviconUrl;
       currentActiveUrl = finalUrl;
+
       urlInput.dataset.fullUrl = finalUrl;
       urlInput.value = hostName;
       drawerFavicon.src = faviconUrl;
       drawerFavicon.style.display = 'block';
 
-      // Shortcuts are pinned bookmarks and are NEVER overwritten!
-      const frameKey = activeShortcutId || 'new_tab';
+      renderOpenTabs();
+
+      const frameKey = currentTab.id;
       loader.classList.remove('eb-hidden');
       iframePool.forEach((frame) => frame.classList.remove('eb-active-frame'));
 

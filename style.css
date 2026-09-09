@@ -568,6 +568,129 @@
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
 }
 
+/* Open Tabs List & Closable Tab Buttons (Arc / Edge Style) */
+.eb-open-tabs-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  max-height: 180px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  padding: 0 4px;
+}
+
+.eb-open-tabs-list::-webkit-scrollbar {
+  display: none;
+}
+
+.eb-tabs-divider {
+  width: 20px;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 2px 0;
+  flex-shrink: 0;
+}
+
+.eb-tab-btn {
+  position: relative;
+  width: var(--eb-btn-size, 34px);
+  height: var(--eb-btn-size, 34px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--eb-btn-radius, 8px);
+  cursor: pointer !important;
+  user-select: none !important;
+  -webkit-user-drag: none;
+  transition: all 0.16s ease;
+  flex-shrink: 0;
+}
+
+.eb-tab-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.eb-tab-btn.eb-active {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+.eb-tab-icon {
+  width: var(--eb-icon-size, 20px);
+  height: var(--eb-icon-size, 20px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  pointer-events: none;
+  color: #d4d4d8;
+}
+
+.eb-tab-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.eb-tab-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.eb-tab-close-btn {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #27272a;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #a1a1aa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer !important;
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.6);
+  transition: all 0.14s ease;
+  z-index: 10;
+  padding: 0;
+}
+
+.eb-tab-close-btn svg {
+  width: 8px;
+  height: 8px;
+  stroke-width: 2.4px;
+  pointer-events: none;
+}
+
+.eb-tab-btn:hover .eb-tab-close-btn {
+  opacity: 1;
+  pointer-events: auto;
+  transform: scale(1);
+}
+
+.eb-tab-close-btn:hover {
+  background: #ef4444 !important;
+  color: #ffffff !important;
+  border-color: #ef4444 !important;
+  transform: scale(1.15) !important;
+}
+
+.eb-tab-close-btn:active {
+  transform: scale(0.95) !important;
+}
+
 /* ==========================================================================
    6. MAIN PANEL & ARC/RAYCAST HEADER (URL BAR, ZOOM, ACTIONS)
    ========================================================================== */
