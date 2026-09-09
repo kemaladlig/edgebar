@@ -40,6 +40,7 @@
       <div class="eb-resizer-top" title="Yüksekliği ayarlamak için yukarı/aşağı sürükleyin"></div>
       <div class="eb-dock-rail">
         <div class="eb-dock-top">
+          <button type="button" class="eb-dock-new-tab-btn" title="Yeni Sekme">${icons.plus}</button>
           <button type="button" class="eb-settings-btn" title="Ayarlar">${icons.settings}</button>
         </div>
         <div class="eb-dock-bottom">
@@ -54,9 +55,10 @@
       </div>
       <div class="eb-panel-main">
         <div class="eb-drawer-header">
-          <div class="eb-drawer-title-area">
+          <button type="button" class="eb-header-new-tab" title="Yeni Sekme Aç">${icons.plus}</button>
+          <div class="eb-url-bar-wrap">
             <img class="eb-drawer-favicon" src="" alt="" style="display:none;" />
-            <span class="eb-drawer-title">Web Panel</span>
+            <input class="eb-url-input" type="text" placeholder="URL girin veya Google'da arayın..." spellcheck="false" autocomplete="off" />
           </div>
           <div class="eb-drawer-actions">
             <div class="eb-zoom-group">
@@ -403,9 +405,12 @@
   const itemsList = drawer.querySelector('.eb-items-list');
   const toggleBtn = drawer.querySelector('.eb-toggle-btn');
   const settingsBtn = drawer.querySelector('.eb-settings-btn');
+  const dockNewTabBtn = drawer.querySelector('.eb-dock-new-tab-btn');
   const dockDragHandle = drawer.querySelector('.eb-dock-drag-handle');
+  const headerNewTabBtn = drawer.querySelector('.eb-header-new-tab');
+  const urlBarWrap = drawer.querySelector('.eb-url-bar-wrap');
+  const urlInput = drawer.querySelector('.eb-url-input');
   const drawerFavicon = drawer.querySelector('.eb-drawer-favicon');
-  const drawerTitle = drawer.querySelector('.eb-drawer-title');
   const drawerHeader = drawer.querySelector('.eb-drawer-header');
   const reloadBtn = drawer.querySelector('.eb-reload');
   const externalBtn = drawer.querySelector('.eb-external');
@@ -605,7 +610,7 @@
   function onDragStart(e) {
     if (e.button !== 0) return;
     // Don't intercept clicks on buttons/interactive elements
-    if (e.target.closest('.eb-action-btn, .eb-zoom-group, .eb-zoom-btn, .eb-item-btn, .eb-toggle-btn, .eb-settings-btn, .eb-drawer-actions')) return;
+    if (e.target.closest('.eb-action-btn, .eb-zoom-group, .eb-zoom-btn, .eb-item-btn, .eb-toggle-btn, .eb-settings-btn, .eb-dock-new-tab-btn, .eb-header-new-tab, .eb-url-bar-wrap, .eb-url-input, .eb-drawer-actions')) return;
 
     e.preventDefault(); // Prevent default browser drag/selection behavior
 
@@ -625,7 +630,7 @@
   if (dockDragHandle) dockDragHandle.addEventListener('mousedown', onDragStart);
   triggerPill.addEventListener('mousedown', onDragStart);
   drawerHeader.addEventListener('mousedown', (e) => {
-    if (e.target.closest('.eb-drawer-actions, .eb-action-btn, .eb-zoom-group, .eb-zoom-btn')) return;
+    if (e.target.closest('.eb-drawer-actions, .eb-action-btn, .eb-zoom-group, .eb-zoom-btn, .eb-header-new-tab, .eb-url-bar-wrap, .eb-url-input')) return;
     onDragStart(e);
   });
 
@@ -764,7 +769,14 @@
 
     drawer.querySelectorAll('.eb-item-btn').forEach((b) => b.classList.toggle('eb-active', b.dataset.id === sc.id));
 
-    drawerTitle.textContent = sc.name;
+    try {
+      const u = new URL(sc.url);
+      urlInput.value = u.hostname.replace(/^www\./, '');
+      urlInput.dataset.fullUrl = sc.url;
+    } catch (_) {
+      urlInput.value = sc.name || sc.url;
+      urlInput.dataset.fullUrl = sc.url;
+    }
     drawerFavicon.style.display = sc.favicon ? 'block' : 'none';
     if (sc.favicon) drawerFavicon.src = sc.favicon;
 
@@ -856,6 +868,119 @@
     }
   });
   externalBtn.addEventListener('click', () => { if (currentActiveUrl) window.open(currentActiveUrl, '_blank'); });
+
+  // --- New Tab & URL Bar Navigation ---
+  function startNewTab() {
+    if (!drawer.classList.contains('eb-open')) {
+      openDrawer(shortcuts.find((s) => s.id === activeShortcutId) || shortcuts[0]);
+    }
+    urlInput.value = '';
+    urlInput.dataset.fullUrl = '';
+    urlInput.placeholder = "URL girin veya Google'da arayın...";
+    setTimeout(() => urlInput.focus(), 40);
+  }
+
+  dockNewTabBtn.addEventListener('click', (e) => {
+    if (preventNextClick) return;
+    startNewTab();
+  });
+  headerNewTabBtn.addEventListener('click', startNewTab);
+
+  urlInput.addEventListener('focus', () => {
+    if (urlInput.dataset.fullUrl) {
+      urlInput.value = urlInput.dataset.fullUrl;
+    }
+    urlInput.select();
+  });
+
+  urlInput.addEventListener('blur', () => {
+    if (urlInput.dataset.fullUrl) {
+      try {
+        const parsed = new URL(urlInput.dataset.fullUrl);
+        urlInput.value = parsed.hostname.replace(/^www\./, '');
+      } catch (_) {
+        urlInput.value = urlInput.dataset.fullUrl;
+      }
+    }
+  });
+
+  urlInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleNavigateUrl(urlInput.value);
+      urlInput.blur();
+    } else if (e.key === 'Escape') {
+      urlInput.blur();
+    }
+  });
+
+  function handleNavigateUrl(rawText) {
+    let query = (rawText || '').trim();
+    if (!query) return;
+
+    let finalUrl = query;
+    if (!/^https?:\/\//i.test(query)) {
+      if (query.includes('.') && !query.includes(' ')) {
+        finalUrl = 'https://' + query;
+      } else {
+        finalUrl = 'https://www.google.com/search?q=' + encodeURIComponent(query);
+      }
+    }
+
+    try {
+      const parsed = new URL(finalUrl);
+      const hostName = parsed.hostname.replace(/^www\./, '');
+      let tabName = hostName.split('.')[0];
+      tabName = tabName.charAt(0).toUpperCase() + tabName.slice(1);
+      const faviconUrl = `https://www.google.com/s2/favicons?domain=${parsed.hostname}&sz=64`;
+
+      currentActiveUrl = finalUrl;
+      urlInput.dataset.fullUrl = finalUrl;
+      urlInput.value = hostName;
+      drawerFavicon.src = faviconUrl;
+      drawerFavicon.style.display = 'block';
+
+      // Update active shortcut or create a new one
+      let currentSc = shortcuts.find((s) => s.id === activeShortcutId);
+      if (currentSc) {
+        currentSc.url = finalUrl;
+        currentSc.name = tabName;
+        currentSc.favicon = faviconUrl;
+        saveShortcuts();
+        renderShortcuts();
+        settingsModal.syncUI();
+      } else {
+        const newSc = {
+          id: 'tab_' + Date.now(),
+          name: tabName,
+          url: finalUrl,
+          favicon: faviconUrl
+        };
+        shortcuts.push(newSc);
+        activeShortcutId = newSc.id;
+        saveShortcuts();
+        renderShortcuts();
+        settingsModal.syncUI();
+      }
+
+      loader.classList.remove('eb-hidden');
+      if (iframePool.has(activeShortcutId)) {
+        const frame = iframePool.get(activeShortcutId);
+        frame.src = finalUrl;
+      } else {
+        const activeFrame = document.createElement('iframe');
+        activeFrame.className = 'eb-iframe eb-active-frame';
+        activeFrame.allow = 'clipboard-read; clipboard-write; camera; microphone; geolocation; encrypted-media';
+        activeFrame.style.zoom = `${zoomLevel}`;
+        activeFrame.src = finalUrl;
+        activeFrame.addEventListener('load', () => loader.classList.add('eb-hidden'));
+        iframeContainer.appendChild(activeFrame);
+        iframePool.set(activeShortcutId, activeFrame);
+      }
+    } catch (err) {
+      console.error('URL navigation error:', err);
+    }
+  }
 
   // ==========================================================================
   // RESIZERS (WIDTH & HEIGHT)
