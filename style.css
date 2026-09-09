@@ -1,6 +1,23 @@
 /* ==========================================================================
-   EdgeBar Design System (Raycast / Linear / Arc Inspired)
-   Strict Consistency, Standardized Radii & Professional Dark Aesthetic
+   EdgeBar Design System
+   Architecture: Shadow DOM Injected Dark Theme (Raycast / Arc / Linear Aesthetic)
+
+   TABLE OF CONTENTS:
+   --------------------------------------------------------------------------
+   1. RESET, HOST & PRELOAD FOUC PREVENTION
+   2. TRIGGER PILL (COLLAPSED FLOATING BUTTON)
+   3. DRAWER CONTAINER, PRESETS & HEIGHT MODES
+   4. RESIZERS & DRAG OVERLAY
+   5. LEFT DOCK RAIL (ICONS, SHORTCUTS & REORDERING)
+   6. MAIN PANEL & ARC/RAYCAST HEADER (URL BAR, ZOOM, ACTIONS)
+   7. BLANK PAGE (NEW TAB WELCOME & QUICK ACCESS CHIPS)
+   8. IFRAME CONTAINER, LOADER OVERLAY & SPINNER
+   9. TOOLTIPS & CONTEXT MENU
+   10. SETTINGS MODAL & SHORTCUT MANAGEMENT
+   ========================================================================== */
+
+/* ==========================================================================
+   1. RESET, HOST & PRELOAD FOUC PREVENTION
    ========================================================================== */
 
 :host {
@@ -20,7 +37,6 @@
   -webkit-font-smoothing: antialiased;
 }
 
-/* Prevent FOUC / Initial load transition flash */
 .eb-preload,
 .eb-preload * {
   transition: none !important;
@@ -38,7 +54,7 @@
 }
 
 /* ==========================================================================
-   TRIGGER PILL (Closed State)
+   2. TRIGGER PILL (COLLAPSED FLOATING BUTTON)
    ========================================================================== */
 
 .eb-trigger-pill {
@@ -92,7 +108,7 @@
 }
 
 /* ==========================================================================
-   DRAWER CONTAINER & HEIGHT MODES
+   3. DRAWER CONTAINER, PRESETS & HEIGHT MODES
    ========================================================================== */
 
 .eb-drawer {
@@ -126,7 +142,13 @@
               opacity 0.18s ease;
 }
 
-/* Dock Icon Size Presets */
+.eb-drawer.eb-open {
+  transform: translateX(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Size Presets */
 .eb-drawer.eb-size-small {
   --eb-rail-w: 38px;
   --eb-btn-size: 28px;
@@ -151,13 +173,7 @@
   --eb-btn-radius: 10px;
 }
 
-.eb-drawer.eb-open {
-  transform: translateX(0);
-  opacity: 1;
-  pointer-events: auto;
-}
-
-/* Strip-Only Mode (When drawer is closed, but shortcuts remain visible on left edge as a compact pill dock) */
+/* Strip-Only Mode (Drawer closed, compact dock visible on edge) */
 .eb-drawer.eb-strip-only {
   bottom: 24px;
   top: auto;
@@ -189,7 +205,188 @@
   padding: 4px 0 8px 0;
   gap: 4px;
   justify-content: flex-start;
-  cursor: default;
+}
+
+.eb-drawer.eb-strip-only .eb-dock-top {
+  padding: 4px 4px 0 4px;
+}
+
+.eb-drawer.eb-strip-only .eb-settings-btn,
+.eb-drawer.eb-strip-only .eb-dock-new-tab-btn {
+  width: var(--eb-btn-size, 34px);
+  height: calc(var(--eb-btn-size, 34px) - 6px);
+  min-height: 22px;
+}
+
+.eb-drawer.eb-strip-only .eb-dock-bottom {
+  gap: 4px !important;
+}
+
+.eb-drawer.eb-strip-only .eb-items-list {
+  display: flex !important;
+  flex-direction: column-reverse !important;
+  max-height: none !important;
+  gap: 4px !important;
+  padding: 0 4px !important;
+}
+
+.eb-drawer.eb-strip-only .eb-panel-main,
+.eb-drawer.eb-strip-only .eb-resizer,
+.eb-drawer.eb-strip-only .eb-resizer-top {
+  display: none !important;
+}
+
+.eb-drawer.eb-strip-only .eb-item-btn.eb-active {
+  background: transparent;
+  color: #a1a1aa;
+}
+
+.eb-drawer.eb-strip-only .eb-item-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+/* Height Mode 1: Full Viewport */
+.eb-drawer.eb-height-full {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  height: 100vh;
+  border-radius: 0;
+}
+
+/* Height Mode 2: Floating Island */
+.eb-drawer.eb-height-floating {
+  top: 14px;
+  bottom: 14px;
+  left: 14px;
+  height: calc(100vh - 28px);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.75);
+}
+
+.eb-drawer.eb-height-floating .eb-dock-rail,
+.eb-drawer.eb-height-floating .eb-panel-main {
+  height: 100%;
+}
+
+/* Height Mode 3: Custom Resizable Height */
+.eb-drawer.eb-height-custom {
+  left: 0;
+  border-radius: 0 12px 12px 0;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-left: none;
+  overflow: hidden;
+  box-shadow: 8px 12px 36px rgba(0, 0, 0, 0.7);
+}
+
+.eb-drawer.eb-height-custom .eb-drawer-header {
+  cursor: grab;
+}
+
+.eb-drawer.eb-height-custom.eb-dragging-drawer {
+  transition: none !important;
+}
+
+.eb-drawer.eb-height-custom.eb-dragging-drawer .eb-drawer-header {
+  cursor: grabbing !important;
+}
+
+.eb-drawer.eb-height-custom .eb-dock-rail,
+.eb-drawer.eb-height-custom .eb-panel-main {
+  height: 100%;
+}
+
+/* ==========================================================================
+   4. RESIZERS & DRAG OVERLAY
+   ========================================================================== */
+
+.eb-resizer-top {
+  position: absolute;
+  top: -4px;
+  left: 0;
+  width: 100%;
+  height: 8px;
+  cursor: ns-resize;
+  background: transparent;
+  z-index: 101;
+  display: none;
+  transition: background 0.15s ease;
+}
+
+.eb-drawer.eb-height-custom .eb-resizer-top {
+  display: block;
+}
+
+.eb-resizer-top:hover,
+.eb-resizer-top.eb-resizing {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.eb-resizer {
+  position: absolute;
+  top: 0;
+  right: -2px;
+  width: 5px;
+  height: 100%;
+  cursor: col-resize;
+  background: transparent;
+  z-index: 100;
+  transition: background 0.15s ease;
+}
+
+.eb-resizer:hover,
+.eb-resizer.eb-resizing {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.eb-drag-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 2147483647;
+  display: none;
+}
+
+.eb-drag-overlay.eb-active {
+  display: block;
+}
+
+/* ==========================================================================
+   5. LEFT DOCK RAIL (ICONS, SHORTCUTS & REORDERING)
+   ========================================================================== */
+
+.eb-dock-rail {
+  width: var(--eb-rail-w, 46px);
+  height: 100%;
+  background: #111216;
+  border-right: 1px solid rgba(255, 255, 255, 0.07);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0;
+  flex-shrink: 0;
+}
+
+.eb-dock-top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+}
+
+.eb-dock-bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  gap: 6px;
 }
 
 .eb-dock-drag-handle {
@@ -224,187 +421,6 @@
   cursor: grabbing !important;
 }
 
-/* In strip mode, settings btn stays visible so icons don't shift */
-.eb-drawer.eb-strip-only .eb-dock-top {
-  padding: 4px 4px 0 4px;
-}
-
-.eb-drawer.eb-strip-only .eb-settings-btn,
-.eb-drawer.eb-strip-only .eb-dock-new-tab-btn {
-  width: var(--eb-btn-size, 34px);
-  height: calc(var(--eb-btn-size, 34px) - 6px);
-  min-height: 22px;
-}
-
-.eb-drawer.eb-strip-only .eb-dock-bottom {
-  gap: 4px !important;
-}
-
-.eb-drawer.eb-strip-only .eb-items-list {
-  display: flex !important;
-  flex-direction: column-reverse !important;
-  max-height: none !important;
-  gap: 4px !important;
-  padding: 0 4px !important;
-}
-
-.eb-drawer.eb-strip-only .eb-panel-main {
-  display: none !important;
-}
-
-.eb-drawer.eb-strip-only .eb-resizer,
-.eb-drawer.eb-strip-only .eb-resizer-top {
-  display: none !important;
-}
-
-.eb-drawer.eb-strip-only .eb-item-btn.eb-active {
-  background: transparent;
-  color: #a1a1aa;
-}
-
-.eb-drawer.eb-strip-only .eb-item-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: #ffffff;
-}
-
-/* --- Height Mode 1: Full (100% Height) --- */
-.eb-drawer.eb-height-full {
-  top: 0;
-  bottom: 0;
-  left: 0;
-  height: 100vh;
-  border-radius: 0;
-}
-
-/* --- Height Mode 2: Floating Island --- */
-.eb-drawer.eb-height-floating {
-  top: 14px;
-  bottom: 14px;
-  left: 14px;
-  height: calc(100vh - 28px);
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  overflow: hidden;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.75);
-}
-
-.eb-drawer.eb-height-floating .eb-dock-rail,
-.eb-drawer.eb-height-floating .eb-panel-main {
-  height: 100%;
-}
-
-/* --- Height Mode 3: Custom Resizable Height --- */
-.eb-drawer.eb-height-custom {
-  left: 0;
-  border-radius: 0 12px 12px 0;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-left: none;
-  overflow: hidden;
-  box-shadow: 8px 12px 36px rgba(0, 0, 0, 0.7);
-}
-
-.eb-drawer.eb-height-custom .eb-drawer-header {
-  cursor: grab;
-}
-
-.eb-drawer.eb-height-custom.eb-dragging-drawer {
-  transition: none !important;
-}
-
-.eb-drawer.eb-height-custom.eb-dragging-drawer .eb-drawer-header {
-  cursor: grabbing !important;
-}
-
-.eb-drawer.eb-height-custom .eb-dock-rail,
-.eb-drawer.eb-height-custom .eb-panel-main {
-  height: 100%;
-}
-
-/* Resizers */
-.eb-resizer-top {
-  position: absolute;
-  top: -4px;
-  left: 0;
-  width: 100%;
-  height: 8px;
-  cursor: ns-resize;
-  background: transparent;
-  z-index: 101;
-  display: none;
-  transition: background 0.15s ease;
-}
-
-.eb-drawer.eb-height-custom .eb-resizer-top {
-  display: block;
-}
-
-.eb-resizer-top:hover, .eb-resizer-top.eb-resizing {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-.eb-resizer {
-  position: absolute;
-  top: 0;
-  right: -2px;
-  width: 5px;
-  height: 100%;
-  cursor: col-resize;
-  background: transparent;
-  z-index: 100;
-  transition: background 0.15s ease;
-}
-
-.eb-resizer:hover, .eb-resizer.eb-resizing {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-.eb-drag-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 2147483647;
-  display: none;
-}
-
-.eb-drag-overlay.eb-active {
-  display: block;
-}
-
-/* ==========================================================================
-   LEFT DOCK RAIL
-   ========================================================================== */
-
-.eb-dock-rail {
-  width: var(--eb-rail-w, 46px);
-  height: 100%;
-  background: #111216;
-  border-right: 1px solid rgba(255, 255, 255, 0.07);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  padding: 6px 0;
-  flex-shrink: 0;
-}
-
-.eb-dock-top {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  width: 100%;
-}
-
-.eb-dock-bottom {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  gap: 6px;
-}
-
 .eb-items-list {
   display: flex;
   flex-direction: column-reverse;
@@ -422,15 +438,6 @@
   display: none;
 }
 
-.eb-divider {
-  width: 22px;
-  height: 1px;
-  background: rgba(255, 255, 255, 0.08);
-  margin: 2px 0;
-  flex-shrink: 0;
-}
-
-/* Standardized Buttons in Rail */
 .eb-item-btn {
   position: relative;
   width: var(--eb-btn-size, 34px);
@@ -464,7 +471,6 @@
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
 }
 
-/* Dragging visual cues */
 .eb-item-btn.eb-dragging {
   opacity: 0.35;
   transform: scale(0.95);
@@ -511,7 +517,7 @@
   text-transform: uppercase;
 }
 
-/* Dock Control Buttons (Toggle & Settings & New Tab) */
+/* Dock Control Buttons */
 .eb-toggle-btn,
 .eb-settings-btn,
 .eb-dock-new-tab-btn {
@@ -555,8 +561,15 @@
   display: block;
 }
 
+.eb-dock-new-tab-btn.eb-active-dock-tab {
+  background: rgba(255, 255, 255, 0.14) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
 /* ==========================================================================
-   RIGHT CONTENT: HEADER & IFRAME
+   6. MAIN PANEL & ARC/RAYCAST HEADER (URL BAR, ZOOM, ACTIONS)
    ========================================================================== */
 
 .eb-panel-main {
@@ -569,7 +582,6 @@
   background: #111216;
 }
 
-/* Unified, comfortable header */
 .eb-drawer-header {
   height: 42px;
   display: flex;
@@ -581,43 +593,8 @@
   flex-shrink: 0;
 }
 
-.eb-dock-new-tab-btn.eb-active-dock-tab {
-  background: rgba(255, 255, 255, 0.14) !important;
-  border-color: rgba(255, 255, 255, 0.2) !important;
-  color: #ffffff !important;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
-}
-
-.eb-header-back {
-  width: 26px;
-  height: 26px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 6px;
-  color: #a1a1aa;
-  cursor: pointer;
-  transition: all 0.14s ease;
-  flex-shrink: 0;
-}
-
-.eb-header-back:hover {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.15);
-  color: #ffffff;
-}
-
-.eb-header-back:active {
-  transform: scale(0.95);
-}
-
-.eb-header-back svg {
-  width: 14px;
-  height: 14px;
-}
-
+/* Header Back & New Tab Buttons */
+.eb-header-back,
 .eb-header-new-tab {
   width: 26px;
   height: 26px;
@@ -633,14 +610,21 @@
   flex-shrink: 0;
 }
 
+.eb-header-back:hover,
 .eb-header-new-tab:hover {
   background: rgba(255, 255, 255, 0.12);
   border-color: rgba(255, 255, 255, 0.15);
   color: #ffffff;
 }
 
+.eb-header-back:active,
 .eb-header-new-tab:active {
   transform: scale(0.95);
+}
+
+.eb-header-back svg {
+  width: 14px;
+  height: 14px;
 }
 
 .eb-header-new-tab svg {
@@ -754,7 +738,7 @@
   text-decoration: underline;
 }
 
-/* Standard Header Buttons (Comfortable hit area) */
+/* Standard Header Action Buttons */
 .eb-action-btn {
   width: 30px;
   height: 30px;
@@ -785,7 +769,7 @@
   color: #f87171;
 }
 
-/* Body / Iframe Area */
+/* Body Container */
 .eb-drawer-body {
   position: relative;
   flex: 1;
@@ -795,7 +779,10 @@
   overflow: hidden;
 }
 
-/* Blank Page / New Tab Screen */
+/* ==========================================================================
+   7. BLANK PAGE (NEW TAB WELCOME & QUICK ACCESS CHIPS)
+   ========================================================================== */
+
 .eb-blank-page {
   position: absolute;
   top: 0;
@@ -885,6 +872,10 @@
   transform: translateY(-1px);
 }
 
+/* ==========================================================================
+   8. IFRAME CONTAINER, LOADER OVERLAY & SPINNER
+   ========================================================================== */
+
 .eb-iframe-container {
   width: 100%;
   height: 100%;
@@ -907,7 +898,6 @@
   display: block;
 }
 
-/* Loading Spinner */
 .eb-loader-overlay {
   position: absolute;
   top: 0;
@@ -946,7 +936,10 @@
   to { transform: rotate(360deg); }
 }
 
-/* Tooltip */
+/* ==========================================================================
+   9. TOOLTIPS & CONTEXT MENU
+   ========================================================================== */
+
 .eb-tooltip {
   position: fixed;
   left: 56px;
@@ -971,7 +964,6 @@
   transform: translateX(0);
 }
 
-/* Context Menu */
 .eb-context-menu {
   position: fixed;
   left: 56px;
@@ -1015,7 +1007,7 @@
 }
 
 /* ==========================================================================
-   MODAL: SETTINGS & SHORTCUTS MANAGEMENT (Refined Raycast / Apple Aesthetic)
+   10. SETTINGS MODAL & SHORTCUT MANAGEMENT
    ========================================================================== */
 
 .eb-modal-backdrop {
