@@ -44,8 +44,8 @@
   let viewMode = 'mobile';
   let heightMode = 'full';
   let collapsedStyle = 'strip'; // 'strip' (shortcuts visible on left rail) or 'pill' (only icon)
-  let zoomLevel = 1.0;
-  let dockTop = null;
+  let openTop = null;
+  let closedTop = null;
   let isDraggingDock = false;
   let dockStartY = 0;
   let dockStartTop = 0;
@@ -130,6 +130,9 @@
         </button>
       </div>
       <div class="eb-dock-bottom">
+        <div class="eb-dock-drag-handle" title="Yukarı/aşağı taşımak için sürükleyin">
+          <span class="eb-drag-grip-line"></span>
+        </div>
         <div class="eb-items-list"></div>
         <button type="button" class="eb-toggle-btn" title="Paneli Daralt (Esc)">
           ${ICONS.sidebarOpen}
@@ -361,8 +364,7 @@
     drawer.classList.remove('eb-height-full', 'eb-height-floating', 'eb-height-custom');
     drawer.classList.add(`eb-height-${mode}`);
     if (mode === 'custom') {
-      drawer.style.height = `${drawerHeight}px`;
-      applyDockPosition(dockTop);
+      applyOpenPosition(openTop);
     } else {
       drawer.style.height = '';
       drawer.style.top = '';
@@ -400,49 +402,76 @@
   });
 
   // ==========================================================================
-  // DOCK POSITION & VERTICAL DRAGGING
+  // INDEPENDENT DOCK & OPEN WINDOW POSITIONING
   // ==========================================================================
 
-  function applyDockPosition(topPx) {
-    const isOpen = drawer.classList.contains('eb-open');
-
-    if (!isOpen) {
+  function applyClosedPosition(topPx) {
+    if (topPx === null || topPx === undefined) {
       drawer.style.setProperty('top', 'auto', 'important');
       drawer.style.setProperty('bottom', '24px', 'important');
       triggerPill.style.setProperty('top', 'auto', 'important');
       triggerPill.style.setProperty('bottom', '24px', 'important');
+      closedTop = null;
       return;
     }
 
-    if (topPx === null || topPx === undefined) {
-      if (heightMode === 'custom') {
-        drawer.style.setProperty('top', 'auto', 'important');
-        drawer.style.setProperty('bottom', '0px', 'important');
-      } else {
-        drawer.style.top = '';
-        drawer.style.bottom = '';
-      }
-      return;
-    }
-
-    let targetHeight = heightMode === 'custom' ? drawerHeight : window.innerHeight;
+    const targetHeight = drawer.offsetHeight || 120;
     const minTop = 10;
     const maxTop = Math.max(minTop, window.innerHeight - targetHeight - 10);
     const clampedTop = Math.max(minTop, Math.min(topPx, maxTop));
-    dockTop = clampedTop;
+    closedTop = clampedTop;
 
-    if (heightMode === 'custom') {
-      drawer.style.setProperty('top', `${clampedTop}px`, 'important');
-      drawer.style.setProperty('bottom', 'auto', 'important');
-    } else {
+    drawer.style.setProperty('top', `${clampedTop}px`, 'important');
+    drawer.style.setProperty('bottom', 'auto', 'important');
+    triggerPill.style.setProperty('top', `${clampedTop}px`, 'important');
+    triggerPill.style.setProperty('bottom', 'auto', 'important');
+  }
+
+  function applyOpenPosition(topPx) {
+    if (heightMode === 'full') {
       drawer.style.top = '';
       drawer.style.bottom = '';
+      drawer.style.height = '100vh';
+      return;
     }
+
+    if (heightMode === 'floating') {
+      drawer.style.top = '';
+      drawer.style.bottom = '';
+      return;
+    }
+
+    // heightMode === 'custom'
+    if (topPx === null || topPx === undefined) {
+      drawer.style.setProperty('top', 'auto', 'important');
+      drawer.style.setProperty('bottom', '0px', 'important');
+      drawer.style.height = `${drawerHeight}px`;
+      openTop = null;
+      return;
+    }
+
+    const minTop = 10;
+    const maxTop = Math.max(minTop, window.innerHeight - drawerHeight - 10);
+    const clampedTop = Math.max(minTop, Math.min(topPx, maxTop));
+    openTop = clampedTop;
+
+    drawer.style.height = `${drawerHeight}px`;
+    drawer.style.setProperty('top', `${clampedTop}px`, 'important');
+    drawer.style.setProperty('bottom', 'auto', 'important');
   }
 
   function startDockDrag(e) {
     if (e.button !== 0) return; // Left click only
-    if (e.target.closest('.eb-action-btn') || e.target.closest('.eb-zoom-group') || e.target.closest('.eb-zoom-btn')) {
+    if (
+      e.target.closest('.eb-action-btn') ||
+      e.target.closest('.eb-zoom-group') ||
+      e.target.closest('.eb-zoom-btn') ||
+      e.target.closest('.eb-item-btn') ||
+      e.target.closest('.eb-toggle-btn') ||
+      e.target.closest('.eb-settings-btn') ||
+      e.target.closest('.eb-header-actions') ||
+      e.target.closest('.eb-view-segment')
+    ) {
       return;
     }
 
@@ -565,10 +594,8 @@
       });
 
       btn.addEventListener('dragend', () => {
+        btn.classList.remove('eb-dragging', 'eb-drag-over');
         draggedItemIndex = null;
-        itemsList.querySelectorAll('.eb-item-btn').forEach((b) => {
-          b.classList.remove('eb-dragging', 'eb-drag-over');
-        });
       });
 
       itemsList.appendChild(btn);
@@ -625,7 +652,8 @@
         'edgebar_drawer_height',
         'edgebar_height_mode',
         'edgebar_collapsed_style',
-        'edgebar_dock_top',
+        'edgebar_open_top',
+        'edgebar_closed_top',
         'edgebar_last_active',
         'edgebar_drawer_open',
         'edgebar_view_mode',
@@ -671,10 +699,18 @@
         }
         updateModeUI();
 
-        // Default dock position is bottom (null). Clear any stale dockTop.
-        chrome.storage.local.remove('edgebar_dock_top');
-        dockTop = null;
-        applyDockPosition(null);
+        // Restore independent open and closed vertical positions
+        if (result.edgebar_open_top !== undefined && result.edgebar_open_top !== null) {
+          openTop = result.edgebar_open_top;
+        } else {
+          openTop = null;
+        }
+
+        if (result.edgebar_closed_top !== undefined && result.edgebar_closed_top !== null) {
+          closedTop = result.edgebar_closed_top;
+        } else {
+          closedTop = null;
+        }
 
         if (result.edgebar_height_mode) {
           heightMode = result.edgebar_height_mode;
@@ -762,14 +798,7 @@
     drawer.classList.remove('eb-strip-only');
     drawer.classList.add('eb-open');
     drawer.style.width = `${drawerWidth}px`;
-    if (heightMode === 'custom') {
-      drawer.style.height = `${drawerHeight}px`;
-      applyDockPosition(dockTop);
-    } else {
-      drawer.style.height = '';
-      drawer.style.top = '';
-      drawer.style.bottom = '';
-    }
+    applyOpenPosition(openTop);
     toggleBtn.innerHTML = ICONS.sidebarOpen;
     toggleBtn.title = 'Paneli Daralt (Esc)';
 
@@ -799,11 +828,7 @@
       triggerPill.classList.remove('eb-hidden');
     }
 
-    // Always ensure closed dock is firmly anchored to bottom-left
-    drawer.style.setProperty('top', 'auto', 'important');
-    drawer.style.setProperty('bottom', '24px', 'important');
-    triggerPill.style.setProperty('top', 'auto', 'important');
-    triggerPill.style.setProperty('bottom', '24px', 'important');
+    applyClosedPosition(closedTop);
 
     // Disable draggable on shortcuts so clicking them is 100% normal and instant
     itemsList.querySelectorAll('.eb-item-btn').forEach((b) => {
@@ -835,11 +860,21 @@
 
   closeBtn.addEventListener('click', closeDrawer);
 
-  // Dragging Listeners for Custom Height Header
+  // Dragging Listeners
+  if (dockDragHandle) {
+    dockDragHandle.addEventListener('mousedown', startDockDrag);
+  }
+  triggerPill.addEventListener('mousedown', startDockDrag);
   drawerHeader.addEventListener('mousedown', (e) => {
-    if (heightMode === 'custom') {
-      startDockDrag(e);
+    if (e.target.closest('.eb-header-actions') || e.target.closest('.eb-view-segment')) {
+      return;
     }
+    if (heightMode === 'full') {
+      drawerHeight = Math.max(400, window.innerHeight - 100);
+      applyHeightMode('custom');
+      chrome.storage.local.set({ edgebar_height_mode: 'custom', edgebar_drawer_height: drawerHeight });
+    }
+    startDockDrag(e);
   });
 
   // Header Actions
@@ -906,7 +941,11 @@
 
       if (dockHasMoved) {
         const newTop = dockStartTop + deltaY;
-        applyDockPosition(newTop);
+        if (drawer.classList.contains('eb-open')) {
+          applyOpenPosition(newTop);
+        } else {
+          applyClosedPosition(newTop);
+        }
       }
       return;
     }
@@ -940,7 +979,11 @@
         setTimeout(() => {
           preventNextClick = false;
         }, 100);
-        chrome.storage.local.set({ edgebar_dock_top: dockTop });
+        if (drawer.classList.contains('eb-open')) {
+          chrome.storage.local.set({ edgebar_open_top: openTop });
+        } else {
+          chrome.storage.local.set({ edgebar_closed_top: closedTop });
+        }
       }
     }
 
@@ -962,8 +1005,10 @@
   });
 
   window.addEventListener('resize', () => {
-    if (dockTop !== null) {
-      applyDockPosition(dockTop);
+    if (drawer.classList.contains('eb-open')) {
+      if (openTop !== null) applyOpenPosition(openTop);
+    } else {
+      if (closedTop !== null) applyClosedPosition(closedTop);
     }
   });
 

@@ -145,6 +145,38 @@
   cursor: default !important;
 }
 
+.eb-dock-drag-handle {
+  width: 100%;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab !important;
+  user-select: none !important;
+  -webkit-user-drag: none;
+  padding: 3px 0;
+  margin-bottom: 2px;
+  flex-shrink: 0;
+}
+
+.eb-dock-drag-handle .eb-drag-grip-line {
+  width: 18px;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.28);
+  border-radius: 2px;
+  transition: all 0.16s ease;
+  pointer-events: none;
+}
+
+.eb-dock-drag-handle:hover .eb-drag-grip-line {
+  width: 22px;
+  background: rgba(255, 255, 255, 0.75);
+}
+
+.eb-dock-drag-handle:active {
+  cursor: grabbing !important;
+}
+
 .eb-drawer.eb-strip-only .eb-dock-top {
   display: none !important;
 }
