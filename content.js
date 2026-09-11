@@ -504,9 +504,9 @@
       position: fixed !important;
       bottom: auto !important;
       left: 0 !important;
-      width: 46px !important;
-      min-width: 46px !important;
-      max-width: 46px !important;
+      width: var(--eb-rail-w, 46px) !important;
+      min-width: var(--eb-rail-w, 46px) !important;
+      max-width: var(--eb-rail-w, 46px) !important;
       height: auto !important;
       min-height: auto !important;
       max-height: calc(100vh - 32px) !important;

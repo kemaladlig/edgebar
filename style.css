@@ -216,14 +216,15 @@
 }
 .eb-drawer.eb-density-compact .eb-dock-top {
   gap: 2px !important;
-  padding: 2px 2px 0 2px !important;
+  padding: 2px 0 0 0 !important;
 }
 .eb-drawer.eb-density-compact .eb-dock-bottom {
   gap: 2px !important;
+  padding: 0 0 2px 0 !important;
 }
 .eb-drawer.eb-density-compact .eb-items-list {
   gap: 2px !important;
-  padding: 0 2px !important;
+  padding: 0 !important;
 }
 
 .eb-drawer.eb-density-normal .eb-dock-rail {
@@ -232,14 +233,15 @@
 }
 .eb-drawer.eb-density-normal .eb-dock-top {
   gap: 4px;
-  padding: 4px 4px 0 4px;
+  padding: 4px 0 0 0;
 }
 .eb-drawer.eb-density-normal .eb-dock-bottom {
   gap: 4px;
+  padding: 0 0 4px 0;
 }
 .eb-drawer.eb-density-normal .eb-items-list {
   gap: 4px;
-  padding: 0 4px;
+  padding: 0 !important;
 }
 
 .eb-drawer.eb-density-spacious .eb-dock-rail {
@@ -248,14 +250,15 @@
 }
 .eb-drawer.eb-density-spacious .eb-dock-top {
   gap: 8px !important;
-  padding: 6px 6px 0 6px !important;
+  padding: 6px 0 0 0 !important;
 }
 .eb-drawer.eb-density-spacious .eb-dock-bottom {
   gap: 8px !important;
+  padding: 0 0 6px 0 !important;
 }
 .eb-drawer.eb-density-spacious .eb-items-list {
   gap: 8px !important;
-  padding: 0 6px !important;
+  padding: 0 !important;
 }
 
 /* Corner Style Presets */
@@ -325,21 +328,26 @@
 }
 
 .eb-drawer.eb-strip-only .eb-dock-rail {
-  width: var(--eb-rail-w, 46px);
+  width: 100% !important;
   height: auto;
   border-right: none;
   padding: 4px 0 8px 0;
   gap: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: flex-start;
+  box-sizing: border-box;
 }
 
 .eb-drawer.eb-strip-only .eb-dock-top {
-  padding: 4px 4px 0 4px;
+  padding: 4px 0 0 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 4px;
   width: 100%;
+  box-sizing: border-box;
 }
 
 .eb-drawer.eb-strip-only .eb-settings-btn,
@@ -347,6 +355,7 @@
   width: var(--eb-btn-size, 34px);
   height: calc(var(--eb-btn-size, 34px) - 6px);
   min-height: 22px;
+  margin: 0 auto;
 }
 
 .eb-drawer.eb-strip-only .eb-dock-bottom {
@@ -355,6 +364,8 @@
   align-items: center;
   gap: 4px !important;
   width: 100%;
+  padding: 0 0 4px 0;
+  box-sizing: border-box;
 }
 
 .eb-drawer.eb-strip-only .eb-items-list {
@@ -362,9 +373,14 @@
   flex-direction: column !important;
   max-height: calc(100vh - 160px) !important;
   gap: 4px !important;
-  padding: 0 4px !important;
+  padding: 0 !important;
   width: 100% !important;
   align-items: center;
+  box-sizing: border-box;
+}
+
+.eb-drawer.eb-strip-only .eb-item-btn {
+  margin: 0 auto;
 }
 
 .eb-drawer.eb-strip-only .eb-panel-main,
