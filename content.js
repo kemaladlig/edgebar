@@ -168,6 +168,13 @@
                       <button type="button" class="eb-segmented-btn eb-size-large" data-size="large">Büyük (L)</button>
                     </div>
                   </div>
+                  <div class="eb-setting-item">
+                    <div class="eb-setting-info">
+                      <span class="eb-setting-name">Dikey Konum</span>
+                      <span class="eb-setting-desc">Dock'u ekranın dikey merkezine (%50) sıfırla</span>
+                    </div>
+                    <button type="button" class="eb-btn-secondary eb-center-dock-btn">Merkeze Al</button>
+                  </div>
                 </div>
               </div>
 
@@ -220,6 +227,7 @@
     getContextMenuHtml: () => `
       <div class="eb-context-item eb-ctx-open">Yeni Sekmede Aç</div>
       <div class="eb-context-item eb-ctx-copy">URL'yi Kopyala</div>
+      <div class="eb-context-item eb-ctx-center">Dikey Konumu Ortala</div>
       <div class="eb-context-item eb-danger eb-ctx-delete">Kısayolu Kaldır</div>
     `
   };
@@ -359,10 +367,20 @@
 
     quickAddBtn.addEventListener('click', handleSaveCustomShortcut);
     quickAddInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleSaveCustomShortcut(); });
+    const centerDockBtn = settingsView.querySelector('.eb-center-dock-btn');
+    if (centerDockBtn && options.onResetPosition) {
+      centerDockBtn.addEventListener('click', () => {
+        options.onResetPosition();
+        centerDockBtn.textContent = 'Ortalandı ✓';
+        setTimeout(() => { centerDockBtn.textContent = 'Merkeze Al'; }, 1200);
+      });
+    }
+
     resetDefaultsBtn.addEventListener('click', () => {
       setShortcuts([...defaultShortcuts]);
       setCollapsedStyle('strip');
       setIconSize('medium');
+      if (options.onResetPosition) options.onResetPosition();
       syncUI();
       if (onOpenShortcut) onOpenShortcut(defaultShortcuts[0]);
     });
@@ -427,6 +445,7 @@
     .eb-container { opacity: 0 !important; pointer-events: none !important; }
     .eb-container.eb-ready { opacity: 1 !important; pointer-events: auto !important; }
     .eb-preload, .eb-preload * { transition: none !important; animation: none !important; }
+    .eb-container.eb-fullscreen-hidden, .eb-fullscreen-hidden { display: none !important; opacity: 0 !important; pointer-events: none !important; visibility: hidden !important; }
   `;
   shadow.appendChild(inlineCriticalStyle);
 
@@ -538,6 +557,10 @@
   contextMenu.querySelector('.eb-ctx-copy').addEventListener('click', () => {
     if (contextTargetShortcut) { navigator.clipboard.writeText(contextTargetShortcut.url); hideContextMenu(); }
   });
+  contextMenu.querySelector('.eb-ctx-center').addEventListener('click', () => {
+    resetDockPosition();
+    hideContextMenu();
+  });
   contextMenu.querySelector('.eb-ctx-delete').addEventListener('click', () => {
     if (contextTargetShortcut) { deleteShortcut(contextTargetShortcut.id); hideContextMenu(); }
   });
@@ -571,13 +594,14 @@
       });
     },
     getHeightMode: () => heightMode,
-    setHeightMode: (mode) => { applyHeightMode(mode); chrome.storage.local.set({ edgebar_height_mode: mode }); },
+    setHeightMode: (mode) => applyHeightMode(mode, true),
     getIconSize: () => iconSize,
-    setIconSize: (size) => applyIconSize(size),
+    setIconSize: (size) => applyIconSize(size, true),
     getCollapsedStyle: () => collapsedStyle,
-    setCollapsedStyle: (style) => { applyCollapsedStyle(style); chrome.storage.local.set({ edgebar_collapsed_style: style }); },
+    setCollapsedStyle: (style) => applyCollapsedStyle(style, true),
     getClickOutsideClose: () => clickOutsideClose,
     setClickOutsideClose: (val) => { clickOutsideClose = val; chrome.storage.local.set({ edgebar_click_outside_close: val }); },
+    onResetPosition: resetDockPosition,
     onOpenShortcut: (sc) => {
       closeSettingsView(false);
       openDrawer(sc);
@@ -701,7 +725,7 @@
   // ==========================================================================
   // HEIGHT MODE & COLLAPSED STYLE
   // ==========================================================================
-  function applyHeightMode(mode) {
+  function applyHeightMode(mode, save = false) {
     heightMode = mode;
     drawer.classList.remove('eb-height-full', 'eb-height-floating', 'eb-height-custom');
     drawer.classList.add(`eb-height-${mode}`);
@@ -713,19 +737,20 @@
       }
       applyPosition();
     }
+    if (save) chrome.storage.local.set({ edgebar_height_mode: mode });
     settingsView.syncUI();
   }
 
-  function applyCollapsedStyle(style) {
+  function applyCollapsedStyle(style, save = false) {
     collapsedStyle = style;
-    chrome.storage.local.set({ edgebar_collapsed_style: style });
+    if (save) chrome.storage.local.set({ edgebar_collapsed_style: style });
     if (!drawer.classList.contains('eb-open')) {
       closeDrawer(false);
     }
     settingsView.syncUI();
   }
 
-  function applyIconSize(size) {
+  function applyIconSize(size, save = false) {
     iconSize = size || 'medium';
     drawer.classList.remove('eb-size-small', 'eb-size-medium', 'eb-size-large');
     drawer.classList.add(`eb-size-${iconSize}`);
@@ -733,7 +758,7 @@
       const railWidths = { small: 38, medium: 46, large: 54 };
       drawer.style.width = `${railWidths[iconSize] || 46}px`;
     }
-    chrome.storage.local.set({ edgebar_icon_size: iconSize });
+    if (save) chrome.storage.local.set({ edgebar_icon_size: iconSize });
     settingsView.syncUI();
   }
 
@@ -809,11 +834,11 @@
 
   function resetDockPosition() {
     panelY = null;
-    chrome.storage.local.remove(['edgebar_panel_y_v4', 'edgebar_panel_y', 'edgebar_panel_bottom', 'edgebar_center_v2']);
+    chrome.storage.local.remove(['edgebar_custom_y', 'edgebar_panel_y_v4', 'edgebar_panel_y', 'edgebar_panel_bottom', 'edgebar_center_v2']);
     applyPosition();
   }
 
-  // Attach drag to: drag handle, trigger pill, drawer header, and compact dock
+  // Attach drag to designated drag handles only (dock drag handle, trigger pill, drawer header)
   if (dockDragHandle) {
     dockDragHandle.addEventListener('mousedown', onDragStart);
     dockDragHandle.addEventListener('dblclick', (e) => {
@@ -823,17 +848,6 @@
   }
   triggerPill.addEventListener('mousedown', onDragStart);
   drawerHeader.addEventListener('mousedown', onDragStart);
-  drawer.addEventListener('mousedown', (e) => {
-    if (!drawer.classList.contains('eb-open')) {
-      onDragStart(e);
-    }
-  });
-  drawer.addEventListener('dblclick', (e) => {
-    if (!drawer.classList.contains('eb-open')) {
-      e.stopPropagation();
-      resetDockPosition();
-    }
-  });
 
   // ==========================================================================
   // SHORTCUTS & DRAG-AND-DROP REORDERING
@@ -1101,7 +1115,7 @@
   function loadState() {
     chrome.storage.local.get([
       'edgebar_shortcuts', 'edgebar_drawer_width', 'edgebar_drawer_height',
-      'edgebar_height_mode', 'edgebar_collapsed_style', 'edgebar_panel_y_v4',
+      'edgebar_height_mode', 'edgebar_collapsed_style', 'edgebar_custom_y',
       'edgebar_last_active', 'edgebar_drawer_open', 'edgebar_view_mode', 'edgebar_zoom',
       'edgebar_click_outside_close', 'edgebar_icon_size'
     ], (result) => {
@@ -1129,13 +1143,13 @@
       }
       if (result.edgebar_view_mode) viewMode = result.edgebar_view_mode;
 
-      // Position: purge legacy stored positions so dock ALWAYS starts in pristine vertical center
-      chrome.storage.local.remove(['edgebar_panel_y', 'edgebar_panel_bottom', 'edgebar_center_v2']);
+      // Position: purge legacy stored positions so dock ALWAYS starts in pristine vertical center (top: 50%, translateY: -50%)
+      chrome.storage.local.remove(['edgebar_panel_y_v4', 'edgebar_panel_y', 'edgebar_panel_bottom', 'edgebar_center_v2']);
 
-      if (result.edgebar_panel_y_v4 !== undefined && result.edgebar_panel_y_v4 !== null && !isNaN(result.edgebar_panel_y_v4)) {
-        panelY = Math.max(8, result.edgebar_panel_y_v4);
+      if (result.edgebar_custom_y !== undefined && result.edgebar_custom_y !== null && !isNaN(result.edgebar_custom_y)) {
+        panelY = Math.max(8, result.edgebar_custom_y);
       } else {
-        panelY = null; // Default: clean vertical center
+        panelY = null; // Clean default: perfectly vertically centered
       }
 
       // Height mode
@@ -1635,7 +1649,7 @@
     // --- Position drag ---
     if (isDragging) {
       const dy = e.clientY - dragStartMouseY;
-      if (!dragMoved && Math.abs(dy) > 3) {
+      if (!dragMoved && Math.abs(dy) > 8) {
         dragMoved = true;
         dragOverlay.classList.add('eb-active');
         dragOverlay.style.cursor = 'grabbing';
@@ -1679,7 +1693,7 @@
       if (dragMoved) {
         preventNextClick = true;
         setTimeout(() => { preventNextClick = false; }, 120);
-        chrome.storage.local.set({ edgebar_panel_y_v4: panelY });
+        chrome.storage.local.set({ edgebar_custom_y: panelY });
       }
     }
     if (isResizingHeight) {
@@ -1718,6 +1732,10 @@
 
   chrome.runtime.onMessage.addListener((message) => {
     if (message.type === 'TOGGLE_DRAWER') {
+      if (container.classList.contains('eb-fullscreen-hidden') || host.style.display === 'none') {
+        host.style.removeProperty('display');
+        container.classList.remove('eb-fullscreen-hidden');
+      }
       drawer.classList.contains('eb-open') ? closeDrawer() : openDrawer(shortcuts.find((s) => s.id === activeShortcutId) || shortcuts[0]);
     }
   });
@@ -1730,6 +1748,182 @@
     if (host.contains(e.target) || e.target === host) return;
     closeDrawer();
   }, true);
+
+  // ==========================================================================
+  // FULLSCREEN & VIDEO DETECTION (AUTO HIDE DOCK DURING FULLSCREEN / VIDEO)
+  // ==========================================================================
+  function checkIsFullscreen() {
+    // 1. Native Fullscreen API on Document
+    const fsElem = document.fullscreenElement || document.webkitFullscreenElement;
+    if (fsElem) {
+      if (!host.contains(fsElem)) return true;
+    }
+
+    // 2. Display mode fullscreen (F11 / Window Fullscreen)
+    const isDisplayFullscreen = window.matchMedia && window.matchMedia('(display-mode: fullscreen)').matches;
+    const isScreenFullscreen = window.innerHeight >= screen.height - 4 && window.innerWidth >= screen.width - 4;
+
+    // 3. Any active / playing video covering the viewport (Web fullscreen / Pseudo-fullscreen / Custom player)
+    const videos = document.querySelectorAll('video');
+    for (let i = 0; i < videos.length; i++) {
+      const v = videos[i];
+      if (v.offsetWidth > 0 && v.offsetHeight > 0) {
+        const rect = v.getBoundingClientRect();
+        const coversViewport = (
+          rect.left <= 8 &&
+          rect.top <= 8 &&
+          rect.width >= window.innerWidth - 16 &&
+          rect.height >= window.innerHeight - 16
+        );
+        if (coversViewport) return true;
+      }
+    }
+
+    // If browser is in F11/display fullscreen and a video is currently playing
+    if ((isDisplayFullscreen || isScreenFullscreen) && videos.length > 0) {
+      for (let i = 0; i < videos.length; i++) {
+        if (!videos[i].paused && videos[i].offsetWidth > 0) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  let fsDebounce = null;
+  function handleFullscreenChange() {
+    if (fsDebounce) cancelAnimationFrame(fsDebounce);
+    fsDebounce = requestAnimationFrame(() => {
+      fsDebounce = null;
+      const isFs = checkIsFullscreen();
+      if (isFs) {
+        host.style.setProperty('display', 'none', 'important');
+        container.classList.add('eb-fullscreen-hidden');
+      } else {
+        host.style.removeProperty('display');
+        container.classList.remove('eb-fullscreen-hidden');
+      }
+    });
+  }
+
+  document.addEventListener('fullscreenchange', handleFullscreenChange, true);
+  document.addEventListener('webkitfullscreenchange', handleFullscreenChange, true);
+  window.addEventListener('resize', handleFullscreenChange);
+  document.addEventListener('play', handleFullscreenChange, true);
+  document.addEventListener('pause', handleFullscreenChange, true);
+  document.addEventListener('ended', handleFullscreenChange, true);
+
+  const fsObserver = new MutationObserver(() => {
+    handleFullscreenChange();
+  });
+  if (document.documentElement) {
+    fsObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'style'] });
+  }
+  if (document.body) {
+    fsObserver.observe(document.body, { attributes: true, attributeFilter: ['class', 'style'] });
+  }
+
+  handleFullscreenChange();
+
+  // ==========================================================================
+  // CROSS-TAB SETTINGS SYNCHRONIZATION
+  // Automatically sync settings changes made in one tab across all other tabs
+  // ==========================================================================
+  chrome.storage.onChanged.addListener((changes, areaName) => {
+    if (areaName !== 'local') return;
+
+    // 1. Shortcuts update
+    if (changes.edgebar_shortcuts && Array.isArray(changes.edgebar_shortcuts.newValue)) {
+      shortcuts = changes.edgebar_shortcuts.newValue;
+      renderShortcuts();
+      settingsView.syncUI();
+      if (activeShortcutId && !shortcuts.some((s) => s.id === activeShortcutId)) {
+        if (shortcuts.length > 0) {
+          if (drawer.classList.contains('eb-open') && !activeTabId && !isSettingsViewActive) {
+            openDrawer(shortcuts[0]);
+          }
+        } else {
+          closeDrawer(false);
+        }
+      }
+    }
+
+    // 2. Height Mode
+    if (changes.edgebar_height_mode && changes.edgebar_height_mode.newValue) {
+      if (changes.edgebar_height_mode.newValue !== heightMode) {
+        applyHeightMode(changes.edgebar_height_mode.newValue, false);
+      }
+    }
+
+    // 3. Collapsed Style (strip / pill / minimal)
+    if (changes.edgebar_collapsed_style && changes.edgebar_collapsed_style.newValue) {
+      if (changes.edgebar_collapsed_style.newValue !== collapsedStyle) {
+        applyCollapsedStyle(changes.edgebar_collapsed_style.newValue, false);
+      }
+    }
+
+    // 4. Icon Size (small / medium / large)
+    if (changes.edgebar_icon_size && changes.edgebar_icon_size.newValue) {
+      if (changes.edgebar_icon_size.newValue !== iconSize) {
+        applyIconSize(changes.edgebar_icon_size.newValue, false);
+      }
+    }
+
+    // 5. Click Outside Close
+    if (changes.edgebar_click_outside_close) {
+      clickOutsideClose = changes.edgebar_click_outside_close.newValue === true;
+      settingsView.syncUI();
+    }
+
+    // 6. View Mode (desktop / mobile)
+    if (changes.edgebar_view_mode && changes.edgebar_view_mode.newValue) {
+      const newMode = changes.edgebar_view_mode.newValue;
+      if (newMode !== viewMode) {
+        viewMode = newMode;
+        iframePool.forEach((f) => {
+          try { f.src = f.src; } catch (_) {}
+        });
+        settingsView.syncUI();
+      }
+    }
+
+    // 7. Zoom Level
+    if (changes.edgebar_zoom && changes.edgebar_zoom.newValue !== undefined) {
+      const newZoom = changes.edgebar_zoom.newValue;
+      if (newZoom !== zoomLevel) {
+        zoomLevel = newZoom;
+        iframePool.forEach((frame) => { frame.style.zoom = `${zoomLevel}`; });
+        zoomLabel.textContent = `${Math.round(zoomLevel * 100)}%`;
+      }
+    }
+
+    // 8. Drawer Dimensions
+    if (changes.edgebar_drawer_width && changes.edgebar_drawer_width.newValue) {
+      drawerWidth = Math.max(360, Math.min(changes.edgebar_drawer_width.newValue, window.innerWidth * 0.85));
+      if (drawer.classList.contains('eb-open')) {
+        drawer.style.width = `${drawerWidth}px`;
+      }
+    }
+
+    if (changes.edgebar_drawer_height && changes.edgebar_drawer_height.newValue) {
+      drawerHeight = Math.max(300, Math.min(changes.edgebar_drawer_height.newValue, window.innerHeight - 20));
+      if (drawer.classList.contains('eb-open') && heightMode === 'custom') {
+        drawer.style.height = `${drawerHeight}px`;
+      }
+    }
+
+    // 9. Panel Vertical Position (panelY or reset to center)
+    if ('edgebar_custom_y' in changes || 'edgebar_panel_y_v4' in changes) {
+      const newY = changes.edgebar_custom_y ? changes.edgebar_custom_y.newValue : (changes.edgebar_panel_y_v4 ? changes.edgebar_panel_y_v4.newValue : null);
+      if (newY !== undefined && newY !== null && !isNaN(newY)) {
+        panelY = Math.max(8, newY);
+      } else {
+        panelY = null;
+      }
+      applyPosition();
+    }
+  });
 
   loadState();
 })();

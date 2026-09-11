@@ -57,6 +57,14 @@
   display: none !important;
 }
 
+.eb-container.eb-fullscreen-hidden,
+.eb-fullscreen-hidden {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
 /* ==========================================================================
    2. TRIGGER PILL (COLLAPSED FLOATING BUTTON)
    ========================================================================== */
@@ -1724,4 +1732,26 @@
 
 .eb-btn-link:hover {
   color: #d4d4d8;
+}
+
+.eb-btn-secondary {
+  padding: 6px 14px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  color: #e4e4e7;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+
+.eb-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+.eb-btn-secondary:active {
+  transform: scale(0.97);
 }
