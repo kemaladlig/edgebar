@@ -163,11 +163,49 @@
                       <span class="eb-setting-desc">Dock üzerindeki butonların ölçeği</span>
                     </div>
                     <div class="eb-segmented-control eb-size-segmented">
-                      <button type="button" class="eb-segmented-btn eb-size-small" data-size="small">Küçük (S)</button>
-                      <button type="button" class="eb-segmented-btn eb-size-medium" data-size="medium">Normal (M)</button>
-                      <button type="button" class="eb-segmented-btn eb-size-large" data-size="large">Büyük (L)</button>
+                      <button type="button" class="eb-segmented-btn eb-size-xs" data-size="xs">XS</button>
+                      <button type="button" class="eb-segmented-btn eb-size-small" data-size="small">S</button>
+                      <button type="button" class="eb-segmented-btn eb-size-medium" data-size="medium">M</button>
+                      <button type="button" class="eb-segmented-btn eb-size-large" data-size="large">L</button>
+                      <button type="button" class="eb-segmented-btn eb-size-xl" data-size="xl">XL</button>
                     </div>
                   </div>
+
+                  <div class="eb-setting-item">
+                    <div class="eb-setting-info">
+                      <span class="eb-setting-name">Panel Kompaktlığı</span>
+                      <span class="eb-setting-desc">Butonlar arası boşluk ve dock yoğunluğu</span>
+                    </div>
+                    <div class="eb-segmented-control eb-density-segmented">
+                      <button type="button" class="eb-segmented-btn eb-density-compact" data-density="compact">Sıkışık</button>
+                      <button type="button" class="eb-segmented-btn eb-density-normal" data-density="normal">Standart</button>
+                      <button type="button" class="eb-segmented-btn eb-density-spacious" data-density="spacious">Ferah</button>
+                    </div>
+                  </div>
+
+                  <div class="eb-setting-item">
+                    <div class="eb-setting-info">
+                      <span class="eb-setting-name">Buton Köşeleri</span>
+                      <span class="eb-setting-desc">Simge butonlarının yuvarlaklık tarzı</span>
+                    </div>
+                    <div class="eb-segmented-control eb-corner-segmented">
+                      <button type="button" class="eb-segmented-btn eb-corner-rounded" data-corner="rounded">Modern</button>
+                      <button type="button" class="eb-segmented-btn eb-corner-sharp" data-corner="sharp">Keskin</button>
+                      <button type="button" class="eb-segmented-btn eb-corner-pill" data-corner="pill">Dairesel</button>
+                    </div>
+                  </div>
+
+                  <div class="eb-setting-item">
+                    <div class="eb-setting-info">
+                      <span class="eb-setting-name">Görsel Tema</span>
+                      <span class="eb-setting-desc">Arka plan opaklığı ve buzlu cam efekti</span>
+                    </div>
+                    <div class="eb-segmented-control eb-glass-segmented">
+                      <button type="button" class="eb-segmented-btn eb-glass-off" data-glass="false">Opak</button>
+                      <button type="button" class="eb-segmented-btn eb-glass-on" data-glass="true">Buzlu Cam</button>
+                    </div>
+                  </div>
+
                   <div class="eb-setting-item">
                     <div class="eb-setting-info">
                       <span class="eb-setting-name">Dikey Konum</span>
@@ -244,6 +282,9 @@
       getHeightMode, setHeightMode,
       getCollapsedStyle, setCollapsedStyle,
       getClickOutsideClose, setClickOutsideClose,
+      getDockDensity, setDockDensity,
+      getCornerStyle, setCornerStyle,
+      getGlassEffect, setGlassEffect,
       onOpenShortcut
     } = options;
 
@@ -256,6 +297,9 @@
     const segDesktop = settingsView.querySelector('.eb-segment-desktop');
     const collapsedBtns = settingsView.querySelectorAll('.eb-collapsed-segmented .eb-segmented-btn');
     const sizeBtns = settingsView.querySelectorAll('.eb-size-segmented .eb-segmented-btn');
+    const densityBtns = settingsView.querySelectorAll('.eb-density-segmented .eb-segmented-btn');
+    const cornerBtns = settingsView.querySelectorAll('.eb-corner-segmented .eb-segmented-btn');
+    const glassBtns = settingsView.querySelectorAll('.eb-glass-segmented .eb-segmented-btn');
     const heightBtns = settingsView.querySelectorAll('.eb-height-segmented .eb-segmented-btn');
     const clickoutBtns = settingsView.querySelectorAll('.eb-clickout-segmented .eb-segmented-btn');
 
@@ -265,6 +309,9 @@
       segDesktop.classList.toggle('eb-active-segment', currentMode === 'desktop');
       collapsedBtns.forEach((btn) => btn.classList.toggle('eb-active-segment', btn.dataset.collapsed === getCollapsedStyle()));
       sizeBtns.forEach((btn) => btn.classList.toggle('eb-active-segment', btn.dataset.size === getIconSize()));
+      densityBtns.forEach((btn) => btn.classList.toggle('eb-active-segment', btn.dataset.density === getDockDensity()));
+      cornerBtns.forEach((btn) => btn.classList.toggle('eb-active-segment', btn.dataset.corner === getCornerStyle()));
+      glassBtns.forEach((btn) => btn.classList.toggle('eb-active-segment', btn.dataset.glass === String(getGlassEffect())));
       heightBtns.forEach((btn) => btn.classList.toggle('eb-active-segment', btn.dataset.height === getHeightMode()));
       const coVal = String(getClickOutsideClose());
       clickoutBtns.forEach((btn) => btn.classList.toggle('eb-active-segment', btn.dataset.clickout === coVal));
@@ -340,6 +387,9 @@
     });
     collapsedBtns.forEach((btn) => btn.addEventListener('click', () => { setCollapsedStyle(btn.dataset.collapsed); syncUI(); }));
     sizeBtns.forEach((btn) => btn.addEventListener('click', () => { setIconSize(btn.dataset.size); syncUI(); }));
+    densityBtns.forEach((btn) => btn.addEventListener('click', () => { setDockDensity(btn.dataset.density); syncUI(); }));
+    cornerBtns.forEach((btn) => btn.addEventListener('click', () => { setCornerStyle(btn.dataset.corner); syncUI(); }));
+    glassBtns.forEach((btn) => btn.addEventListener('click', () => { setGlassEffect(btn.dataset.glass === 'true'); syncUI(); }));
     heightBtns.forEach((btn) => btn.addEventListener('click', () => { setHeightMode(btn.dataset.height); syncUI(); }));
     clickoutBtns.forEach((btn) => btn.addEventListener('click', () => { setClickOutsideClose(btn.dataset.clickout === 'true'); syncUI(); }));
 
@@ -404,6 +454,9 @@
   let collapsedStyle = 'strip';
   let clickOutsideClose = false;
   let iconSize = 'medium';
+  let dockDensity = 'normal';
+  let cornerStyle = 'rounded';
+  let glassEffect = false;
   let zoomLevel = 1.0;
 
   // --- Drag State (Decoupled: dockY for collapsed dock, drawerCustomY for open custom drawer) ---
@@ -640,6 +693,12 @@
     setCollapsedStyle: (style) => applyCollapsedStyle(style, true),
     getClickOutsideClose: () => clickOutsideClose,
     setClickOutsideClose: (val) => { clickOutsideClose = val; chrome.storage.local.set({ edgebar_click_outside_close: val }); },
+    getDockDensity: () => dockDensity,
+    setDockDensity: (d) => applyDockDensity(d, true),
+    getCornerStyle: () => cornerStyle,
+    setCornerStyle: (c) => applyCornerStyle(c, true),
+    getGlassEffect: () => glassEffect,
+    setGlassEffect: (g) => applyGlassEffect(g, true),
     onResetPosition: resetDockPosition,
     onOpenShortcut: (sc) => {
       closeSettingsView(false);
@@ -791,13 +850,37 @@
 
   function applyIconSize(size, save = false) {
     iconSize = size || 'medium';
-    drawer.classList.remove('eb-size-small', 'eb-size-medium', 'eb-size-large');
+    drawer.classList.remove('eb-size-xs', 'eb-size-small', 'eb-size-medium', 'eb-size-large', 'eb-size-xl');
     drawer.classList.add(`eb-size-${iconSize}`);
     if (!drawer.classList.contains('eb-open') && (collapsedStyle === 'strip' || collapsedStyle === 'minimal')) {
-      const railWidths = { small: 38, medium: 46, large: 54 };
+      const railWidths = { xs: 32, small: 38, medium: 46, large: 54, xl: 62 };
       drawer.style.width = `${railWidths[iconSize] || 46}px`;
     }
     if (save) chrome.storage.local.set({ edgebar_icon_size: iconSize });
+    settingsView.syncUI();
+  }
+
+  function applyDockDensity(density, save = false) {
+    dockDensity = density || 'normal';
+    drawer.classList.remove('eb-density-compact', 'eb-density-normal', 'eb-density-spacious');
+    drawer.classList.add(`eb-density-${dockDensity}`);
+    if (save) chrome.storage.local.set({ edgebar_dock_density: dockDensity });
+    settingsView.syncUI();
+  }
+
+  function applyCornerStyle(corner, save = false) {
+    cornerStyle = corner || 'rounded';
+    drawer.classList.remove('eb-corner-rounded', 'eb-corner-sharp', 'eb-corner-pill');
+    drawer.classList.add(`eb-corner-${cornerStyle}`);
+    if (save) chrome.storage.local.set({ edgebar_corner_style: cornerStyle });
+    settingsView.syncUI();
+  }
+
+  function applyGlassEffect(glass, save = false) {
+    glassEffect = glass === true;
+    drawer.classList.toggle('eb-glassmorphism', glassEffect);
+    triggerPill.classList.toggle('eb-glassmorphism', glassEffect);
+    if (save) chrome.storage.local.set({ edgebar_glass_effect: glassEffect });
     settingsView.syncUI();
   }
 
@@ -1192,7 +1275,8 @@
       'edgebar_shortcuts', 'edgebar_drawer_width', 'edgebar_drawer_height',
       'edgebar_height_mode', 'edgebar_collapsed_style', 'edgebar_dock_y', 'edgebar_drawer_custom_y',
       'edgebar_last_active', 'edgebar_drawer_open', 'edgebar_view_mode', 'edgebar_zoom',
-      'edgebar_click_outside_close', 'edgebar_icon_size'
+      'edgebar_click_outside_close', 'edgebar_icon_size', 'edgebar_dock_density',
+      'edgebar_corner_style', 'edgebar_glass_effect'
     ], (result) => {
       // Shortcuts
       const isOldDefault = result.edgebar_shortcuts && Array.isArray(result.edgebar_shortcuts) &&
@@ -1240,11 +1324,20 @@
       if (result.edgebar_height_mode) heightMode = result.edgebar_height_mode;
       applyHeightMode(heightMode);
 
-      // Collapsed style & Icon size
+      // Collapsed style & Icon size & Density & Corner & Glass
       collapsedStyle = result.edgebar_collapsed_style || 'strip';
       clickOutsideClose = result.edgebar_click_outside_close === true;
       iconSize = result.edgebar_icon_size || 'medium';
       applyIconSize(iconSize);
+
+      dockDensity = result.edgebar_dock_density || 'normal';
+      applyDockDensity(dockDensity);
+
+      cornerStyle = result.edgebar_corner_style || 'rounded';
+      applyCornerStyle(cornerStyle);
+
+      glassEffect = result.edgebar_glass_effect === true;
+      applyGlassEffect(glassEffect);
 
       renderShortcuts();
       renderOpenTabs();
@@ -1360,7 +1453,7 @@
     if (collapsedStyle === 'strip' || collapsedStyle === 'minimal') {
       drawer.classList.add('eb-strip-only');
       drawer.classList.toggle('eb-strip-minimal', collapsedStyle === 'minimal');
-      const railWidths = { small: 38, medium: 46, large: 54 };
+      const railWidths = { xs: 32, small: 38, medium: 46, large: 54, xl: 62 };
       drawer.style.width = `${railWidths[iconSize] || 46}px`;
       triggerPill.classList.add('eb-hidden');
     } else {
@@ -2031,6 +2124,28 @@
         drawerCustomY = null;
       }
       applyPosition();
+    }
+
+    // 11. Dock Density
+    if (changes.edgebar_dock_density && changes.edgebar_dock_density.newValue) {
+      if (changes.edgebar_dock_density.newValue !== dockDensity) {
+        applyDockDensity(changes.edgebar_dock_density.newValue, false);
+      }
+    }
+
+    // 12. Corner Style
+    if (changes.edgebar_corner_style && changes.edgebar_corner_style.newValue) {
+      if (changes.edgebar_corner_style.newValue !== cornerStyle) {
+        applyCornerStyle(changes.edgebar_corner_style.newValue, false);
+      }
+    }
+
+    // 13. Glass Effect
+    if (changes.edgebar_glass_effect && changes.edgebar_glass_effect.newValue !== undefined) {
+      const newGlass = changes.edgebar_glass_effect.newValue === true;
+      if (newGlass !== glassEffect) {
+        applyGlassEffect(newGlass, false);
+      }
     }
   });
 

@@ -168,7 +168,15 @@
   pointer-events: auto;
 }
 
-/* Size Presets */
+/* Size Presets (XS, S, M, L, XL) */
+.eb-drawer.eb-size-xs {
+  --eb-rail-w: 32px;
+  --eb-btn-size: 24px;
+  --eb-icon-size: 14px;
+  --eb-icon-font: 9px;
+  --eb-btn-radius: 5px;
+}
+
 .eb-drawer.eb-size-small {
   --eb-rail-w: 38px;
   --eb-btn-size: 28px;
@@ -191,6 +199,95 @@
   --eb-icon-size: 24px;
   --eb-icon-font: 13px;
   --eb-btn-radius: 10px;
+}
+
+.eb-drawer.eb-size-xl {
+  --eb-rail-w: 62px;
+  --eb-btn-size: 50px;
+  --eb-icon-size: 28px;
+  --eb-icon-font: 15px;
+  --eb-btn-radius: 12px;
+}
+
+/* Dock Density / Compactness Presets */
+.eb-drawer.eb-density-compact .eb-dock-rail {
+  padding: 3px 0 4px 0 !important;
+  gap: 2px !important;
+}
+.eb-drawer.eb-density-compact .eb-dock-top {
+  gap: 2px !important;
+  padding: 2px 2px 0 2px !important;
+}
+.eb-drawer.eb-density-compact .eb-dock-bottom {
+  gap: 2px !important;
+}
+.eb-drawer.eb-density-compact .eb-items-list {
+  gap: 2px !important;
+  padding: 0 2px !important;
+}
+
+.eb-drawer.eb-density-normal .eb-dock-rail {
+  padding: 4px 0 8px 0;
+  gap: 4px;
+}
+.eb-drawer.eb-density-normal .eb-dock-top {
+  gap: 4px;
+  padding: 4px 4px 0 4px;
+}
+.eb-drawer.eb-density-normal .eb-dock-bottom {
+  gap: 4px;
+}
+.eb-drawer.eb-density-normal .eb-items-list {
+  gap: 4px;
+  padding: 0 4px;
+}
+
+.eb-drawer.eb-density-spacious .eb-dock-rail {
+  padding: 8px 0 12px 0 !important;
+  gap: 8px !important;
+}
+.eb-drawer.eb-density-spacious .eb-dock-top {
+  gap: 8px !important;
+  padding: 6px 6px 0 6px !important;
+}
+.eb-drawer.eb-density-spacious .eb-dock-bottom {
+  gap: 8px !important;
+}
+.eb-drawer.eb-density-spacious .eb-items-list {
+  gap: 8px !important;
+  padding: 0 6px !important;
+}
+
+/* Corner Style Presets */
+.eb-drawer.eb-corner-sharp .eb-item-btn,
+.eb-drawer.eb-corner-sharp .eb-settings-btn,
+.eb-drawer.eb-corner-sharp .eb-dock-new-tab-btn,
+.eb-drawer.eb-corner-sharp .eb-tab-btn {
+  border-radius: 4px !important;
+}
+
+.eb-drawer.eb-corner-pill .eb-item-btn,
+.eb-drawer.eb-corner-pill .eb-settings-btn,
+.eb-drawer.eb-corner-pill .eb-dock-new-tab-btn,
+.eb-drawer.eb-corner-pill .eb-tab-btn {
+  border-radius: 999px !important;
+}
+
+/* Glassmorphism / Backdrop Blur */
+.eb-drawer.eb-glassmorphism {
+  background: rgba(17, 18, 22, 0.82) !important;
+  backdrop-filter: blur(24px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
+}
+.eb-drawer.eb-glassmorphism .eb-dock-rail {
+  background: rgba(14, 15, 18, 0.65) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+}
+.eb-trigger-pill.eb-glassmorphism {
+  background: rgba(17, 18, 22, 0.82) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
 }
 
 /* Strip-Only Mode (Drawer closed, compact dock visible on edge) */
@@ -1535,6 +1632,11 @@
   font-weight: 600;
   border-color: rgba(255, 255, 255, 0.12);
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+.eb-size-segmented .eb-segmented-btn {
+  padding: 5px 8px;
+  font-size: 11px;
 }
 
 /* Keyboard badge */
