@@ -447,8 +447,41 @@
     .eb-container { opacity: 0 !important; pointer-events: none !important; }
     .eb-container.eb-ready { opacity: 1 !important; pointer-events: auto !important; }
     .eb-preload, .eb-preload * { transition: none !important; animation: none !important; }
-    .eb-drawer.eb-strip-only { position: fixed !important; top: 50% !important; transform: translateY(-50%) !important; left: 0 !important; }
-    .eb-trigger-pill { position: fixed !important; top: 50% !important; transform: translateY(-50%) !important; left: 0 !important; }
+    .eb-drawer.eb-strip-only {
+      position: fixed !important;
+      bottom: auto !important;
+      left: 0 !important;
+      width: 46px !important;
+      min-width: 46px !important;
+      max-width: 46px !important;
+      height: auto !important;
+      min-height: auto !important;
+      max-height: calc(100vh - 32px) !important;
+    }
+    .eb-drawer.eb-strip-only:not(.eb-custom-positioned) {
+      top: 50% !important;
+      transform: translateY(-50%) !important;
+    }
+    .eb-drawer.eb-strip-only.eb-custom-positioned {
+      transform: none !important;
+    }
+    .eb-trigger-pill {
+      position: fixed !important;
+      bottom: auto !important;
+      left: 0 !important;
+    }
+    .eb-trigger-pill:not(.eb-custom-positioned) {
+      top: 50% !important;
+      transform: translateY(-50%) !important;
+    }
+    .eb-trigger-pill.eb-custom-positioned {
+      transform: none !important;
+    }
+    .eb-drawer.eb-strip-only .eb-panel-main,
+    .eb-drawer.eb-strip-only .eb-resizer,
+    .eb-drawer.eb-strip-only .eb-resizer-top {
+      display: none !important;
+    }
     .eb-container.eb-fullscreen-hidden, .eb-fullscreen-hidden { display: none !important; opacity: 0 !important; pointer-events: none !important; visibility: hidden !important; }
   `;
   shadow.appendChild(inlineCriticalStyle);
@@ -470,8 +503,10 @@
     if (!isCssReady || !isStateReady) return;
     requestAnimationFrame(() => {
       container.classList.add('eb-ready');
+      applyPosition();
       setTimeout(() => {
         container.classList.remove('eb-preload');
+        applyPosition();
       }, 50);
     });
   }
@@ -776,9 +811,11 @@
     drawer.style.removeProperty('top');
     drawer.style.removeProperty('bottom');
     drawer.style.removeProperty('transform');
+    drawer.classList.remove('eb-custom-positioned');
     triggerPill.style.removeProperty('top');
     triggerPill.style.removeProperty('bottom');
     triggerPill.style.removeProperty('transform');
+    triggerPill.classList.remove('eb-custom-positioned');
 
     const isOpen = drawer.classList.contains('eb-open');
 
@@ -790,14 +827,15 @@
       }
       if (heightMode === 'custom') {
         drawer.style.height = `${drawerHeight}px`;
-        if (drawerCustomY === null || drawerCustomY < 40) {
-          // Centered via CSS rules: top: 50% !important; transform: translateY(-50%) !important;
+        if (drawerCustomY === null || drawerCustomY < 20) {
           drawer.style.removeProperty('top');
           drawer.style.removeProperty('bottom');
           drawer.style.removeProperty('transform');
+          drawer.classList.remove('eb-custom-positioned');
         } else {
           const maxTop = Math.max(20, window.innerHeight - drawerHeight - 20);
           const y = Math.max(20, Math.min(drawerCustomY, maxTop));
+          drawer.classList.add('eb-custom-positioned');
           drawer.style.setProperty('top', `${y}px`, 'important');
           drawer.style.setProperty('bottom', 'auto', 'important');
           drawer.style.setProperty('transform', 'none', 'important');
@@ -811,19 +849,23 @@
     let el = (collapsedStyle === 'pill') ? triggerPill : drawer;
 
     // Default position: vertically centered via CSS rules (top: 50%, translateY(-50%))
-    // Sanity check: dockY must be >= 60 to avoid any accidental top-clamp leaks
-    if (dockY === null || dockY < 60) {
+    if (dockY === null || typeof dockY !== 'number' || isNaN(dockY) || dockY < 20) {
+      el.classList.remove('eb-custom-positioned');
       el.style.removeProperty('top');
       el.style.removeProperty('bottom');
       el.style.removeProperty('transform');
       return;
     }
 
-    // Custom dragged position (with safe viewport boundaries)
-    const elHeight = el.offsetHeight || 120;
-    const maxTop = Math.max(60, window.innerHeight - elHeight - 16);
-    const y = Math.max(60, Math.min(dockY, maxTop));
+    // Custom dragged position (calculated against true dock rail dimensions)
+    const rail = drawer.querySelector('.eb-dock-rail');
+    const dockHeight = (collapsedStyle === 'pill')
+      ? (triggerPill.offsetHeight || 40)
+      : ((rail && rail.offsetHeight > 0) ? rail.offsetHeight : 220);
+    const maxTop = Math.max(20, window.innerHeight - dockHeight - 20);
+    const y = Math.max(20, Math.min(dockY, maxTop));
 
+    el.classList.add('eb-custom-positioned');
     el.style.setProperty('top', `${y}px`, 'important');
     el.style.setProperty('bottom', 'auto', 'important');
     el.style.setProperty('transform', 'none', 'important');
@@ -853,10 +895,12 @@
     dragMoved = false;
     dragStartMouseY = e.clientY;
 
-    const el = (!isOpen && collapsedStyle === 'pill') ? triggerPill : drawer;
-    const rect = el.getBoundingClientRect();
+    const targetEl = (!isOpen && collapsedStyle === 'pill')
+      ? triggerPill
+      : (isOpen ? drawer : (drawer.querySelector('.eb-dock-rail') || drawer));
+    const rect = targetEl.getBoundingClientRect();
     dragStartElTop = rect.top;
-    dragElHeight = rect.height || 60;
+    dragElHeight = rect.height || 180;
   }
 
   function resetDockPosition() {
@@ -1180,7 +1224,7 @@
         'edgebar_panel_bottom', 'edgebar_center_v2'
       ]);
 
-      if (result.edgebar_dock_y !== undefined && result.edgebar_dock_y !== null && !isNaN(result.edgebar_dock_y) && result.edgebar_dock_y >= 60) {
+      if (result.edgebar_dock_y !== undefined && result.edgebar_dock_y !== null && !isNaN(result.edgebar_dock_y) && result.edgebar_dock_y >= 20) {
         dockY = result.edgebar_dock_y;
       } else {
         dockY = null; // Clean default: perfectly vertically centered (top: 50%, translateY: -50%)
@@ -1695,10 +1739,11 @@
       if (dragMoved) {
         if (isDraggingDock) {
           const rawTop = dragStartElTop + dy;
-          const maxTop = Math.max(60, window.innerHeight - dragElHeight - 16);
-          dockY = Math.max(60, Math.min(rawTop, maxTop));
+          const maxTop = Math.max(20, window.innerHeight - dragElHeight - 20);
+          dockY = Math.max(20, Math.min(rawTop, maxTop));
 
           const el = (collapsedStyle === 'pill') ? triggerPill : drawer;
+          el.classList.add('eb-custom-positioned');
           el.style.setProperty('top', `${dockY}px`, 'important');
           el.style.setProperty('bottom', 'auto', 'important');
           el.style.setProperty('transform', 'none', 'important');
@@ -1707,6 +1752,7 @@
           const maxTop = Math.max(20, window.innerHeight - drawerHeight - 20);
           drawerCustomY = Math.max(20, Math.min(rawTop, maxTop));
 
+          drawer.classList.add('eb-custom-positioned');
           drawer.style.setProperty('top', `${drawerCustomY}px`, 'important');
           drawer.style.setProperty('bottom', 'auto', 'important');
           drawer.style.setProperty('transform', 'none', 'important');
@@ -1741,7 +1787,7 @@
       if (dragMoved) {
         preventNextClick = true;
         setTimeout(() => { preventNextClick = false; }, 120);
-        if (wasDraggingDock && dockY !== null && dockY >= 60) {
+        if (wasDraggingDock && dockY !== null && dockY >= 20) {
           chrome.storage.local.set({ edgebar_dock_y: dockY });
         } else if (wasDraggingDrawer && drawerCustomY !== null) {
           chrome.storage.local.set({ edgebar_drawer_custom_y: drawerCustomY });
@@ -1968,7 +2014,7 @@
     // 9. Dock Vertical Position (edgebar_dock_y or reset to center)
     if ('edgebar_dock_y' in changes) {
       const newY = changes.edgebar_dock_y ? changes.edgebar_dock_y.newValue : null;
-      if (typeof newY === 'number' && !isNaN(newY) && newY >= 60) {
+      if (typeof newY === 'number' && !isNaN(newY) && newY >= 20) {
         dockY = newY;
       } else {
         dockY = null;
