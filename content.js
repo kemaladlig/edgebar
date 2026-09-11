@@ -406,9 +406,11 @@
   let iconSize = 'medium';
   let zoomLevel = 1.0;
 
-  // --- Drag State (top-relative Y positioning) ---
-  let panelY = null;        // null = CSS default (vertical center: top 50%), number = custom Y in px
-  let isDragging = false;
+  // --- Drag State (Decoupled: dockY for collapsed dock, drawerCustomY for open custom drawer) ---
+  let dockY = null;         // null = pure CSS vertical center (top: 50%, translateY: -50%), number = custom Y in px
+  let drawerCustomY = null; // null = centered custom drawer, number = custom drawer top in px
+  let isDraggingDock = false;
+  let isDraggingDrawer = false;
   let dragStartMouseY = 0;
   let dragStartElTop = 0;
   let dragMoved = false;
@@ -438,13 +440,15 @@
   host.id = 'v-edgebar-host';
   const shadow = host.attachShadow({ mode: 'open' });
 
-  // Critical inline CSS: Prevents any FOUC (flash of unstyled content) or transition flicker
+  // Critical inline CSS: Locks pristine vertical centering even before external CSS finishes loading
   const inlineCriticalStyle = document.createElement('style');
   inlineCriticalStyle.textContent = `
     :host { all: initial; }
     .eb-container { opacity: 0 !important; pointer-events: none !important; }
     .eb-container.eb-ready { opacity: 1 !important; pointer-events: auto !important; }
     .eb-preload, .eb-preload * { transition: none !important; animation: none !important; }
+    .eb-drawer.eb-strip-only { position: fixed !important; top: 50% !important; transform: translateY(-50%) !important; left: 0 !important; }
+    .eb-trigger-pill { position: fixed !important; top: 50% !important; transform: translateY(-50%) !important; left: 0 !important; }
     .eb-container.eb-fullscreen-hidden, .eb-fullscreen-hidden { display: none !important; opacity: 0 !important; pointer-events: none !important; visibility: hidden !important; }
   `;
   shadow.appendChild(inlineCriticalStyle);
@@ -765,8 +769,8 @@
   // ==========================================================================
   // POSITION SYSTEM (TOP-ANCHORED / VERTICALLY CENTERED BY DEFAULT)
   //
-  // panelY = null  → CSS handles perfect vertical centering (top: 50%, translateY(-50%))
-  // panelY = <num> → custom distance in px from viewport top (when user drags)
+  // dockY = null  → CSS handles perfect vertical centering (top: 50%, translateY(-50%))
+  // dockY = <num> → custom distance in px from viewport top (when user drags dock)
   // ==========================================================================
   function applyPosition() {
     drawer.style.removeProperty('top');
@@ -778,30 +782,47 @@
 
     const isOpen = drawer.classList.contains('eb-open');
 
-    // In full-height or floating open mode, panel fills viewport according to CSS
-    if (isOpen && (heightMode === 'full' || heightMode === 'floating')) {
-      drawer.style.removeProperty('height');
+    // 1. OPEN DRAWER POSITIONING
+    if (isOpen) {
+      if (heightMode === 'full' || heightMode === 'floating') {
+        drawer.style.removeProperty('height');
+        return;
+      }
+      if (heightMode === 'custom') {
+        drawer.style.height = `${drawerHeight}px`;
+        if (drawerCustomY === null || drawerCustomY < 40) {
+          // Centered via CSS rules: top: 50% !important; transform: translateY(-50%) !important;
+          drawer.style.removeProperty('top');
+          drawer.style.removeProperty('bottom');
+          drawer.style.removeProperty('transform');
+        } else {
+          const maxTop = Math.max(20, window.innerHeight - drawerHeight - 20);
+          const y = Math.max(20, Math.min(drawerCustomY, maxTop));
+          drawer.style.setProperty('top', `${y}px`, 'important');
+          drawer.style.setProperty('bottom', 'auto', 'important');
+          drawer.style.setProperty('transform', 'none', 'important');
+        }
+      }
       return;
     }
 
-    if (!(isOpen && heightMode === 'custom')) {
-      drawer.style.removeProperty('height');
-    }
-
-    let el = (!isOpen && collapsedStyle === 'pill') ? triggerPill : drawer;
+    // 2. COLLAPSED DOCK POSITIONING
+    drawer.style.removeProperty('height');
+    let el = (collapsedStyle === 'pill') ? triggerPill : drawer;
 
     // Default position: vertically centered via CSS rules (top: 50%, translateY(-50%))
-    if (panelY === null) {
+    // Sanity check: dockY must be >= 60 to avoid any accidental top-clamp leaks
+    if (dockY === null || dockY < 60) {
       el.style.removeProperty('top');
       el.style.removeProperty('bottom');
       el.style.removeProperty('transform');
       return;
     }
 
-    // Clamp custom position within viewport
-    const elHeight = el.offsetHeight || 60;
-    const maxTop = Math.max(8, window.innerHeight - elHeight - 8);
-    const y = Math.max(8, Math.min(panelY, maxTop));
+    // Custom dragged position (with safe viewport boundaries)
+    const elHeight = el.offsetHeight || 120;
+    const maxTop = Math.max(60, window.innerHeight - elHeight - 16);
+    const y = Math.max(60, Math.min(dockY, maxTop));
 
     el.style.setProperty('top', `${y}px`, 'important');
     el.style.setProperty('bottom', 'auto', 'important');
@@ -819,10 +840,16 @@
     if (e.target.closest('.eb-action-btn, .eb-zoom-group, .eb-zoom-btn, .eb-item-btn, .eb-settings-btn, .eb-dock-new-tab-btn, .eb-header-new-tab, .eb-url-bar-wrap, .eb-url-input, .eb-drawer-actions')) return;
 
     const isOpen = drawer.classList.contains('eb-open');
-    // In open mode with full or floating height, don't drag
-    if (isOpen && (heightMode === 'full' || heightMode === 'floating')) return;
+    if (isOpen) {
+      // In open mode, only allow moving drawer if custom height mode is active
+      if (heightMode !== 'custom') return;
+      isDraggingDrawer = true;
+      isDraggingDock = false;
+    } else {
+      isDraggingDock = true;
+      isDraggingDrawer = false;
+    }
 
-    isDragging = true;
     dragMoved = false;
     dragStartMouseY = e.clientY;
 
@@ -833,8 +860,12 @@
   }
 
   function resetDockPosition() {
-    panelY = null;
-    chrome.storage.local.remove(['edgebar_custom_y', 'edgebar_panel_y_v4', 'edgebar_panel_y', 'edgebar_panel_bottom', 'edgebar_center_v2']);
+    dockY = null;
+    drawerCustomY = null;
+    chrome.storage.local.remove([
+      'edgebar_dock_y', 'edgebar_drawer_custom_y', 'edgebar_custom_y',
+      'edgebar_panel_y_v4', 'edgebar_panel_y', 'edgebar_panel_bottom', 'edgebar_center_v2'
+    ]);
     applyPosition();
   }
 
@@ -1115,7 +1146,7 @@
   function loadState() {
     chrome.storage.local.get([
       'edgebar_shortcuts', 'edgebar_drawer_width', 'edgebar_drawer_height',
-      'edgebar_height_mode', 'edgebar_collapsed_style', 'edgebar_custom_y',
+      'edgebar_height_mode', 'edgebar_collapsed_style', 'edgebar_dock_y', 'edgebar_drawer_custom_y',
       'edgebar_last_active', 'edgebar_drawer_open', 'edgebar_view_mode', 'edgebar_zoom',
       'edgebar_click_outside_close', 'edgebar_icon_size'
     ], (result) => {
@@ -1143,13 +1174,22 @@
       }
       if (result.edgebar_view_mode) viewMode = result.edgebar_view_mode;
 
-      // Position: purge legacy stored positions so dock ALWAYS starts in pristine vertical center (top: 50%, translateY: -50%)
-      chrome.storage.local.remove(['edgebar_panel_y_v4', 'edgebar_panel_y', 'edgebar_panel_bottom', 'edgebar_center_v2']);
+      // Position: completely purge legacy / faulty keys so dock ALWAYS starts in pristine vertical center
+      chrome.storage.local.remove([
+        'edgebar_custom_y', 'edgebar_panel_y_v4', 'edgebar_panel_y',
+        'edgebar_panel_bottom', 'edgebar_center_v2'
+      ]);
 
-      if (result.edgebar_custom_y !== undefined && result.edgebar_custom_y !== null && !isNaN(result.edgebar_custom_y)) {
-        panelY = Math.max(8, result.edgebar_custom_y);
+      if (result.edgebar_dock_y !== undefined && result.edgebar_dock_y !== null && !isNaN(result.edgebar_dock_y) && result.edgebar_dock_y >= 60) {
+        dockY = result.edgebar_dock_y;
       } else {
-        panelY = null; // Clean default: perfectly vertically centered
+        dockY = null; // Clean default: perfectly vertically centered (top: 50%, translateY: -50%)
+      }
+
+      if (result.edgebar_drawer_custom_y !== undefined && result.edgebar_drawer_custom_y !== null && !isNaN(result.edgebar_drawer_custom_y) && result.edgebar_drawer_custom_y >= 20) {
+        drawerCustomY = result.edgebar_drawer_custom_y;
+      } else {
+        drawerCustomY = null;
       }
 
       // Height mode
@@ -1166,12 +1206,8 @@
       renderOpenTabs();
       settingsView.syncUI();
 
-      // Restore open/closed state (default to closed / strip mode on fresh page load)
-      if (result.edgebar_drawer_open === true) {
-        openDrawer(shortcuts.find((s) => s.id === result.edgebar_last_active) || shortcuts[0]);
-      } else {
-        closeDrawer(false);
-      }
+      // On fresh page load / refresh: always start in clean, collapsed dock state
+      closeDrawer(false);
 
       isStateReady = true;
       markReadyIfComplete();
@@ -1646,10 +1682,10 @@
   // GLOBAL MOUSE HANDLERS (drag, resize)
   // ==========================================================================
   window.addEventListener('mousemove', (e) => {
-    // --- Position drag ---
-    if (isDragging) {
+    // --- Position drag (Decoupled Dock vs Custom-Height Drawer) ---
+    if (isDraggingDock || isDraggingDrawer) {
       const dy = e.clientY - dragStartMouseY;
-      if (!dragMoved && Math.abs(dy) > 8) {
+      if (!dragMoved && Math.abs(dy) > 10) {
         dragMoved = true;
         dragOverlay.classList.add('eb-active');
         dragOverlay.style.cursor = 'grabbing';
@@ -1657,15 +1693,24 @@
         triggerPill.classList.add('eb-dragging');
       }
       if (dragMoved) {
-        const rawTop = dragStartElTop + dy;
-        const maxTop = Math.max(8, window.innerHeight - dragElHeight - 8);
-        panelY = Math.max(8, Math.min(rawTop, maxTop));
+        if (isDraggingDock) {
+          const rawTop = dragStartElTop + dy;
+          const maxTop = Math.max(60, window.innerHeight - dragElHeight - 16);
+          dockY = Math.max(60, Math.min(rawTop, maxTop));
 
-        const isOpen = drawer.classList.contains('eb-open');
-        let el = (!isOpen && collapsedStyle === 'pill') ? triggerPill : drawer;
-        el.style.setProperty('top', `${panelY}px`, 'important');
-        el.style.setProperty('bottom', 'auto', 'important');
-        el.style.setProperty('transform', 'none', 'important');
+          const el = (collapsedStyle === 'pill') ? triggerPill : drawer;
+          el.style.setProperty('top', `${dockY}px`, 'important');
+          el.style.setProperty('bottom', 'auto', 'important');
+          el.style.setProperty('transform', 'none', 'important');
+        } else if (isDraggingDrawer) {
+          const rawTop = dragStartElTop + dy;
+          const maxTop = Math.max(20, window.innerHeight - drawerHeight - 20);
+          drawerCustomY = Math.max(20, Math.min(rawTop, maxTop));
+
+          drawer.style.setProperty('top', `${drawerCustomY}px`, 'important');
+          drawer.style.setProperty('bottom', 'auto', 'important');
+          drawer.style.setProperty('transform', 'none', 'important');
+        }
       }
       return;
     }
@@ -1684,8 +1729,11 @@
   });
 
   window.addEventListener('mouseup', () => {
-    if (isDragging) {
-      isDragging = false;
+    if (isDraggingDock || isDraggingDrawer) {
+      const wasDraggingDock = isDraggingDock;
+      const wasDraggingDrawer = isDraggingDrawer;
+      isDraggingDock = false;
+      isDraggingDrawer = false;
       dragOverlay.classList.remove('eb-active');
       dragOverlay.style.cursor = '';
       drawer.classList.remove('eb-dragging');
@@ -1693,7 +1741,11 @@
       if (dragMoved) {
         preventNextClick = true;
         setTimeout(() => { preventNextClick = false; }, 120);
-        chrome.storage.local.set({ edgebar_custom_y: panelY });
+        if (wasDraggingDock && dockY !== null && dockY >= 60) {
+          chrome.storage.local.set({ edgebar_dock_y: dockY });
+        } else if (wasDraggingDrawer && drawerCustomY !== null) {
+          chrome.storage.local.set({ edgebar_drawer_custom_y: drawerCustomY });
+        }
       }
     }
     if (isResizingHeight) {
@@ -1913,13 +1965,24 @@
       }
     }
 
-    // 9. Panel Vertical Position (panelY or reset to center)
-    if ('edgebar_custom_y' in changes || 'edgebar_panel_y_v4' in changes) {
-      const newY = changes.edgebar_custom_y ? changes.edgebar_custom_y.newValue : (changes.edgebar_panel_y_v4 ? changes.edgebar_panel_y_v4.newValue : null);
-      if (newY !== undefined && newY !== null && !isNaN(newY)) {
-        panelY = Math.max(8, newY);
+    // 9. Dock Vertical Position (edgebar_dock_y or reset to center)
+    if ('edgebar_dock_y' in changes) {
+      const newY = changes.edgebar_dock_y ? changes.edgebar_dock_y.newValue : null;
+      if (typeof newY === 'number' && !isNaN(newY) && newY >= 60) {
+        dockY = newY;
       } else {
-        panelY = null;
+        dockY = null;
+      }
+      applyPosition();
+    }
+
+    // 10. Drawer Custom Height Position
+    if ('edgebar_drawer_custom_y' in changes) {
+      const newY = changes.edgebar_drawer_custom_y ? changes.edgebar_drawer_custom_y.newValue : null;
+      if (typeof newY === 'number' && !isNaN(newY)) {
+        drawerCustomY = newY;
+      } else {
+        drawerCustomY = null;
       }
       applyPosition();
     }
