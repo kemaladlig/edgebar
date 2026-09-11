@@ -276,21 +276,70 @@
   border-radius: 999px !important;
 }
 
-/* Glassmorphism / Backdrop Blur */
+/* Glassmorphism / Full Panel Backdrop Blur */
 .eb-drawer.eb-glassmorphism {
-  background: rgba(17, 18, 22, 0.82) !important;
-  backdrop-filter: blur(24px) saturate(160%) !important;
-  -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
+  background: rgba(15, 16, 20, 0.72) !important;
+  backdrop-filter: blur(28px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
 }
+
 .eb-drawer.eb-glassmorphism .eb-dock-rail {
-  background: rgba(14, 15, 18, 0.65) !important;
+  background: rgba(12, 13, 16, 0.45) !important;
   backdrop-filter: blur(20px) !important;
   -webkit-backdrop-filter: blur(20px) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
+
+.eb-drawer.eb-glassmorphism .eb-panel-main {
+  background: transparent !important;
+}
+
+.eb-drawer.eb-glassmorphism .eb-drawer-header {
+  background: rgba(15, 16, 20, 0.45) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.eb-drawer.eb-glassmorphism .eb-drawer-body {
+  background: transparent !important;
+}
+
+.eb-drawer.eb-glassmorphism .eb-blank-page {
+  background: transparent !important;
+}
+
+.eb-drawer.eb-glassmorphism .eb-settings-view {
+  background: transparent !important;
+}
+
+.eb-drawer.eb-glassmorphism .eb-settings-card {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+}
+
+.eb-drawer.eb-glassmorphism .eb-url-bar-wrap {
+  background: rgba(0, 0, 0, 0.35) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+
+.eb-drawer.eb-glassmorphism .eb-url-bar-wrap:hover {
+  background: rgba(0, 0, 0, 0.5) !important;
+  border-color: rgba(255, 255, 255, 0.22) !important;
+}
+
+.eb-drawer.eb-glassmorphism .eb-url-bar-wrap:focus-within {
+  background: rgba(0, 0, 0, 0.6) !important;
+  border-color: rgba(255, 255, 255, 0.35) !important;
+}
+
 .eb-trigger-pill.eb-glassmorphism {
-  background: rgba(17, 18, 22, 0.82) !important;
-  backdrop-filter: blur(20px) !important;
-  -webkit-backdrop-filter: blur(20px) !important;
+  background: rgba(15, 16, 20, 0.72) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
 }
 
 /* Strip-Only Mode (Drawer closed, compact dock visible on edge) */
